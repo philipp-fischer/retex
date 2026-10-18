@@ -1,0 +1,12 @@
+{
+  "directory_survives_file_removal": true,
+  "first_a": "A\n",
+  "first_b": "B\n",
+  "after_rename_a_exists": false,
+  "renamed_bytes_sha256": "1a692c229c57392677a859449d7a89d9f1360c75deecca17da3001a965be25b0",
+  "reader_a_remaining_sha256": "7a5c24617a5b8f8ffcc1b4eaf605fa681c2f10c0a35eaa427db8800a2a736fbc",
+  "reader_b_remaining": "Tail B\n",
+  "final_files": {
+    "b": "Replacement\n"
+  }
+}

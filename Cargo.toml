@@ -1,0 +1,69 @@
+[package]
+name = "retex-rs2"
+version = "0.1.0"
+description = "Interactive TeX typesetting for the browser and native hosts"
+license = "GPL-2.0-or-later"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+default-run = "retex-rs2"
+
+[[example]]
+name = "regex-wasm-probe"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "file-effects-wasm-probe"
+crate-type = ["cdylib"]
+
+[lib]
+name = "retex_rs2"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
+
+[features]
+latency-diagnostics = []
+# Selection control only, without stage clocks or operation instrumentation.
+output-replay-control = []
+
+[dependencies]
+num-bigint = { version = "0.4", features = ["serde"] }
+num-traits = "0.2"
+serde = { version = "1", features = ["derive", "rc"] }
+serde_json = { version = "1", features = ["raw_value"] }
+smallvec = { version = "=1.16.3", features = ["serde", "union"] }
+regex = "1"
+sha2 = "0.10"
+md-5 = "0.10"
+rustybuzz = "0.20.1"
+unicode-segmentation = "=1.12.0"
+fancy-regex = "0.16.2"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+retex-native-regex = { path = "native-regex" }
+png = "0.18.1"
+crc32fast = "1"
+bincode = "1.3.3"
+cff-parser = "0.2.0"
+lopdf = { version = "0.38.0", default-features = false }
+
+stacker = "0.1.25"
+jpeg-decoder = { version = "0.3.2", default-features = false, features = ["platform_independent"] }
+tar = { version = "0.4", default-features = false }
+lzma-rust2 = { version = "0.23.0", default-features = false, features = ["std", "xz"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+flate2 = { version = "1", default-features = false, features = ["zlib"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+# lopdf uses host entropy for imported-document processing. Keep it separate
+# from TeX's seeded random-number state and use Web Crypto in browser workers.
+getrandom = { version = "0.3", features = ["wasm_js"] }
+wasm-bindgen = "=0.2.129"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,2332 @@
+% \iffalse meta-comment
+%
+%% File: l3text-case.dtx
+%
+% Copyright (C) 2020-2025 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full,kernel]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3text-case} module\\ Text processing (case changing)^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2025-01-18}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3text-case} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=text>
+%    \end{macrocode}
+%
+% \subsection{Case changing}
+%
+% \begin{variable}{\l_text_titlecase_check_letter_bool}
+%   Needed to determine the route used in titlecasing.
+%    \begin{macrocode}
+\bool_new:N \l_text_titlecase_check_letter_bool
+\bool_set_true:N \l_text_titlecase_check_letter_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}[EXP]
+%   {
+%     \text_lowercase:n,
+%     \text_uppercase:n,
+%     \text_titlecase_all:n,
+%     \text_titlecase_first:n
+%   }
+% \begin{macro}[EXP]
+%   {
+%     \text_lowercase:nn,
+%     \text_uppercase:nn,
+%     \text_titlecase_all:nn,
+%     \text_titlecase_first:nn
+%   }
+% \begin{macro}[EXP]{\@@_change_case:nnn}
+%   The user level functions here are all wrappers around the internal
+%   functions for case changing.
+%    \begin{macrocode}
+\cs_new:Npn \text_lowercase:n #1
+  { \@@_change_case:nnn { lower } { } {#1} }
+\cs_new:Npn \text_uppercase:n #1
+  { \@@_change_case:nnn { upper } { } {#1} }
+\cs_new:Npn \text_titlecase_all:n #1
+  { \@@_change_case:nnn { title } { } {#1} }
+\cs_new:Npn \text_titlecase_first:n #1
+  { \@@_change_case:nnnn { title } { break } { } {#1} }
+\cs_new:Npn \text_lowercase:nn #1#2
+  { \@@_change_case:nnn { lower } {#1} {#2} }
+\cs_new:Npn \text_uppercase:nn #1#2
+  { \@@_change_case:nnn { upper } {#1} {#2} }
+\cs_new:Npn \text_titlecase_all:nn #1#2
+  { \@@_change_case:nnn { title } {#1} {#2} }
+\cs_new:Npn \text_titlecase_first:nn #1#2
+  { \@@_change_case:nnnn { title } { break } {#1} {#2} }
+\cs_new:Npn \@@_change_case:nnn #1#2#3
+  { \@@_change_case:nnnn {#1} {#1} {#2} {#3} }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case:nnnn       ,
+%     \@@_change_case_auxi:nnnn  ,
+%     \@@_change_case_auxii:nnnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_BCP:nnnn}
+% \begin{macro}[EXP]{\@@_change_case_BCP:nnnw}
+% \begin{macro}[EXP]{\@@_change_case_BCP:nnnnnw}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_store:n, \@@_change_case_store:o,
+%     \@@_change_case_store:V, \@@_change_case_store:v,
+%     \@@_change_case_store:e
+%   }
+% \begin{macro}[EXP]{\@@_change_case_store:nw}
+% \begin{macro}[EXP]{\@@_change_case_result:n} 
+% \begin{macro}[EXP]{\@@_change_case_end:w}
+% \begin{macro}[EXP]{\@@_change_case_loop:nnnw}
+% \begin{macro}[EXP]{\@@_change_case_break:w, \@@_change_case_break_aux:w}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_group_lower:nnnn ,
+%     \@@_change_case_group_upper:nnnn ,
+%     \@@_change_case_group_title:nnnn
+%   }
+% \begin{macro}[EXP]
+%   {\@@_change_case_space:nnnw, \@@_change_case_space_break:nnnw}
+% \begin{macro}[EXP]
+%   {\@@_change_case_N_type:nnnN, \@@_change_case_N_type_aux:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_N_type:nnnnN}
+% \begin{macro}[EXP]{\@@_change_case_math_search:nnnNNN}
+% \begin{macro}[EXP]{\@@_change_case_math_loop:nnnNw}
+% \begin{macro}[EXP]{\@@_change_case_math_N_type:nnnNN}
+% \begin{macro}[EXP]{\@@_change_case_math_group:nnnNn}
+% \begin{macro}[EXP]{\@@_change_case_math_space:nnnNw}
+% \begin{macro}[EXP]{\@@_change_case_cs_check:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_exclude:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_exclude:nnnnN}
+% \begin{macro}[EXP]{\@@_change_case_exclude:nnnNN}
+% \begin{macro}[EXP]{\@@_change_case_exclude:nnnNw}
+% \begin{macro}[EXP]{\@@_change_case_exclude:nnnNnn}
+% \begin{macro}[EXP]{\@@_change_case_replace:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_replace:nnnn, \@@_change_case_replace:vnnn}
+% \begin{macro}[EXP]{\@@_change_case_switch:nnnN}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_switch_lower:nnnNnnnn ,
+%     \@@_change_case_switch_upper:nnnNnnnn ,
+%     \@@_change_case_switch_title:nnnNnnnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_skip:nnw}
+% \begin{macro}[EXP]{\@@_change_case_skip_N_type:nnN}
+% \begin{macro}[EXP]{\@@_change_case_skip_group:nnn}
+% \begin{macro}[EXP]{\@@_change_case_skip_space:nnw}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_letterlike_lower:nnnN ,
+%     \@@_change_case_letterlike_upper:nnnN ,
+%     \@@_change_case_letterlike_title:nnnN
+%   }
+% \begin{macro}[EXP]{\@@_change_case_letterlike:nnnnnN}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_custom_lower:nnnn ,
+%     \@@_change_case_custom_title:nnnn ,
+%     \@@_change_case_custom_upper:nnnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_custom:nnnnn}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_codepoint_lower:nnnn ,
+%     \@@_change_case_codepoint_upper:nnnn ,
+%     \@@_change_case_codepoint_title:nnnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_lower_sigma:nnnnn}
+% \begin{macro}[EXP]{\@@_change_case_lower_sigma:nnnnw}
+% \begin{macro}[EXP]{\@@_change_case_lower_sigma:nnnnN}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_codepoint_title_auxi:nnnn ,
+%     \@@_change_case_codepoint_title_auxii:nnnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_codepoint_title:nnn}
+% \begin{macro}[EXP]{\@@_change_case_codepoint:nnnnn}
+% \begin{macro}[EXP]{\@@_change_case_codepoint:nn}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_codepoint:nnn ,
+%     \@@_change_case_codepoint:fnn ,
+%     \@@_change_case_codepoint_aux:nnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_codepoint_aux:nnn}
+% \begin{macro}[EXP]{\@@_change_case_codepoint_aux:nn}
+% \begin{macro}[EXP]{\@@_change_case_catcode:nn}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_next_lower:nnn ,
+%     \@@_change_case_next_upper:nnn ,
+%     \@@_change_case_next_title:nnn ,
+%     \@@_change_case_next_end:nnn
+%   }
+%   As for the expansion code, the business end of case changing is the
+%   handling of \texttt{N}-type tokens. First, we expand the input fully
+%   (so the loops here don't need to worry about awkward look-aheads and the
+%   like). Then we split into the different paths.
+%
+%   The code here needs to be \texttt{f}-type expandable to deal with the
+%   situation where case changing is applied in running text. There, we
+%   might have case changing as a document command and the text containing
+%   other non-expandable document commands.
+%   \begin{verbatim}
+%     \cs_set_eq:NN \MakeLowercase \text_lowercase
+%     ...
+%     \MakeLowercase{\enquote*{A} text}
+%   \end{verbatim}
+%   If we use an \texttt{e}-type expansion and wrap each token in
+%   \cs{exp_not:n}, that would explode: the document command grabs
+%   \cs{exp_not:n} as an argument, and things go badly wrong. So we have to
+%   wrap the entire result in exactly one \cs{exp_not:n}, or rather in the
+%   kernel version.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case:nnnn #1#2#3#4
+  {
+    \__kernel_exp_not:w \exp_after:wN
+      {
+        \exp:w
+        \exp_args:Ne \@@_change_case_auxi:nnnn
+          { \text_expand:n {#4} }
+          {#1} {#2} {#3}
+      }
+  }
+\cs_new:Npn \@@_change_case_auxi:nnnn #1#2#3#4
+  {
+    \exp_args:No \@@_change_case_BCP:nnnn
+      { \tl_to_str:n {#4} } {#1} {#2} {#3}
+  }
+\cs_new:Npe \@@_change_case_BCP:nnnn #1#2#3#4
+  {
+    \exp_not:N \@@_change_case_BCP:nnnw
+      {#2} {#3} {#4} #1 \tl_to_str:n { -x- -x- } \exp_not:N \q_@@_stop
+  }
+\use:e
+  {
+    \cs_new:Npn \exp_not:N \@@_change_case_BCP:nnnw
+      #1#2#3#4 \tl_to_str:n { -x- } #5 \tl_to_str:n { -x- } #6
+      \exp_not:N \q_@@_stop
+  }
+  { \@@_change_case_BCP:nnnnnw {#1} {#2} {#3} {#5} {#4} #4 - \q_@@_stop }
+\cs_new:Npn \@@_change_case_BCP:nnnnnw #1#2#3#4#5#6 - #7 \q_@@_stop
+  {
+    \bool_lazy_or:nnTF
+      { \cs_if_exist_p:c { @@_change_case_ #2 _ #6 -x- #4 :nnnnn } }
+      { \tl_if_exist_p:c { l_@@_ #2 case_special_ #6 -x- #4 _tl } }
+      { \@@_change_case_auxii:nnnn {#1} {#2} {#3} { #6 -x- #4 } }
+      {
+        \cs_if_exist:cTF { @@_change_case_ #2 _ #6 :nnnnn }
+          { \@@_change_case_auxii:nnnn {#1} {#2} {#3} {#6} }
+          { \@@_change_case_auxii:nnnn {#1} {#2} {#3} {#5} }
+      }
+  }
+\cs_new:Npn \@@_change_case_auxii:nnnn #1#2#3#4
+  {
+    \group_align_safe_begin:
+    \cs_if_exist_use:c { @@_change_case_boundary_ #2 _ #4 :Nnnnw }
+    \@@_change_case_loop:nnnw {#2} {#3} {#4} #1
+      \q_@@_recursion_tail \q_@@_recursion_stop
+    \@@_change_case_result:n { }
+  }
+%    \end{macrocode}
+%   As for expansion, collect up the tokens for future use.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_store:n #1
+  { \@@_change_case_store:nw {#1} }
+\cs_generate_variant:Nn \@@_change_case_store:n { o , e , V , v }
+\cs_new:Npn \@@_change_case_store:nw #1#2 \@@_change_case_result:n #3
+  { #2 \@@_change_case_result:n { #3 #1 } }
+\cs_new:Npn \@@_change_case_end:w #1 \@@_change_case_result:n #2
+  {
+    \group_align_safe_end:
+    \exp_end:
+    #2
+  }
+%    \end{macrocode}
+%   The main loop is the standard \texttt{tl action} type.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_loop:nnnw #1#2#3#4 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#4}
+      { \@@_change_case_N_type:nnnN }
+      {
+        \tl_if_head_is_group:nTF {#4}
+          { \use:c { @@_change_case_group_ #1 :nnnn } }
+          { \@@_change_case_space:nnnw }
+      }
+    {#1} {#2} {#3} #4 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_break:w
+  { \@@_change_case_break_aux:w \prg_do_nothing: }
+\cs_new:Npn \@@_change_case_break_aux:w
+  #1 \q_@@_recursion_tail \q_@@_recursion_stop
+  {
+    \@@_change_case_store:o {#1}
+    \@@_change_case_end:w
+  }
+%    \end{macrocode}
+%   For a group, we \emph{could} worry about whether this contains a character
+%   or not. However, that would make life very complex for little gain: exactly
+%   what a first character is is rather weakly-defined anyway. So if there is
+%   a group, we simply assume that a character has been seen, and for title
+%   case we switch to the \enquote{rest of the tokens} situation. To avoid
+%   having too much testing, we use a two-step process here to allow the
+%   titlecase functions to be separate.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_group_lower:nnnn #1#2#3#4
+  {
+    \@@_change_case_store:o
+      {
+        \exp_after:wN
+          {
+            \exp:w
+            \@@_change_case_auxii:nnnn {#4} {#1} {#2} {#3}
+          }
+      }
+    \@@_change_case_loop:nnnw {#1} {#2} {#3}
+  }
+\cs_new_eq:NN \@@_change_case_group_upper:nnnn
+  \@@_change_case_group_lower:nnnn
+\cs_new:Npn \@@_change_case_group_title:nnnn #1#2#3#4
+  {
+    \@@_change_case_store:o
+      {
+        \exp_after:wN
+          {
+            \exp:w
+            \@@_change_case_auxii:nnnn {#4} {#1} {#2} {#3}
+          }
+      }
+    \@@_change_case_skip:nnw {#2} {#3}
+  }
+\use:e
+  {
+    \cs_new:Npn \exp_not:N \@@_change_case_space:nnnw #1#2#3 \c_space_tl
+  }
+  {
+    \@@_change_case_store:n { ~ }
+    \cs_if_exist_use:cF { @@_change_case_space_ #2 :nnn }
+      {
+        \cs_if_exist_use:c { @@_change_case_boundary_ #1 _ #3 :Nnnnw }
+        \@@_change_case_loop:nnnw
+      }
+        {#2} {#2} {#3}
+  }
+\cs_new:Npn \@@_change_case_space_break:nnn #1#2#3
+  { \@@_change_case_break:w }
+%    \end{macrocode}
+%   The first step of handling \texttt{N}-type tokens is to filter out the
+%   end-of-loop. That has to be done separately from the first real step
+%   as otherwise we pick up the wrong delimiter. The loop here is the same
+%   as the \texttt{expand} one, just passing the additional data long. If no
+%   close-math token is found then the final clean-up is forced
+%   (i.e.~there is no assumption of \enquote{well-behaved} input in terms of
+%   math mode).
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_N_type:nnnN #1#2#3#4
+  {
+    \@@_if_q_recursion_tail_stop_do:Nn #4
+      { \@@_change_case_end:w }
+    \@@_change_case_N_type_aux:nnnN {#1} {#2} {#3} #4
+  }
+\cs_new:Npn \@@_change_case_N_type_aux:nnnN #1#2#3#4
+  {
+    \exp_args:NV \@@_change_case_N_type:nnnnN
+      \l_text_math_delims_tl {#1} {#2} {#3} #4
+  }
+\cs_new:Npn \@@_change_case_N_type:nnnnN #1#2#3#4#5
+  {
+    \@@_change_case_math_search:nnnNNN {#2} {#3} {#4} #5 #1
+      \q_@@_recursion_tail \q_@@_recursion_tail
+      \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_math_search:nnnNNN #1#2#3#4#5#6
+  {
+    \@@_if_q_recursion_tail_stop_do:Nn #5
+      { \@@_change_case_cs_check:nnnN {#1} {#2} {#3} #4 }
+    \token_if_eq_meaning:NNTF #4 #5
+      {
+        \@@_use_i_delimit_by_q_recursion_stop:nw
+          {
+            \@@_change_case_store:n {#4}
+            \@@_change_case_math_loop:nnnNw {#1} {#2} {#3} #6
+          }
+      }
+      { \@@_change_case_math_search:nnnNNN {#1} {#2} {#3} #4 }
+  }
+\cs_new:Npn \@@_change_case_math_loop:nnnNw #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_math_N_type:nnnNN }
+      {
+        \tl_if_head_is_group:nTF {#5}
+          { \@@_change_case_math_group:nnnNn }
+          { \@@_change_case_math_space:nnnNw }
+      }
+    {#1} {#2} {#3} #4 #5 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_math_N_type:nnnNN #1#2#3#4#5
+  {
+    \@@_if_q_recursion_tail_stop_do:Nn #5
+      { \@@_change_case_end:w }
+    \@@_change_case_store:n {#5}
+    \token_if_eq_meaning:NNTF #5 #4
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} }
+      { \@@_change_case_math_loop:nnnNw {#1} {#2} {#3} #4 }
+  }
+\cs_new:Npn \@@_change_case_math_group:nnnNn #1#2#3#4#5
+  {
+    \@@_change_case_store:n { {#5} }
+    \@@_change_case_math_loop:nnnNw {#1} {#2} {#3} #4
+  }
+\use:e
+  {
+    \cs_new:Npn \exp_not:N \@@_change_case_math_space:nnnNw #1#2#3#4
+      \c_space_tl
+  }
+  {
+    \@@_change_case_store:n { ~ }
+    \@@_change_case_math_loop:nnnNw {#1} {#2} {#3} #4
+  }
+%    \end{macrocode}
+%   Once potential math-mode cases are filtered out the next stage is to
+%   test if the token grabbed is a control sequence: the two routes the code
+%   may take are then very different.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_cs_check:nnnN #1#2#3#4
+  {
+    \token_if_cs:NTF #4
+      { \@@_change_case_exclude:nnnN {#1} {#2} {#3} }
+      {
+        \@@_codepoint_process:nN
+          { \use:c { @@_change_case_custom_ #1 :nnnn } {#1} {#2} {#3} }
+      }
+        #4
+  }
+%    \end{macrocode}
+%   To deal with a control sequence there is first a need to test if it is
+%   on the list which indicate that case changing should be skipped. That's
+%   done using a loop as for the other special cases. If a hit is found then
+%   the argument is grabbed and passed through as-is.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_exclude:nnnN #1#2#3#4
+  {
+    \exp_args:Ne \@@_change_case_exclude:nnnnN
+      {
+        \exp_not:V \l_text_math_arg_tl
+        \exp_not:V \l_text_case_exclude_arg_tl
+      }
+      {#1} {#2} {#3} #4
+  }
+\cs_new:Npn \@@_change_case_exclude:nnnnN #1#2#3#4#5
+  {
+    \@@_change_case_exclude:nnnNN {#2} {#3} {#4} #5 #1 
+      \q_@@_recursion_tail \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_exclude:nnnNN #1#2#3#4#5
+  {
+    \@@_if_q_recursion_tail_stop_do:Nn #5
+      { \@@_change_case_replace:nnnN {#1} {#2} {#3} #4 }
+    \str_if_eq:nnTF {#4} {#5}
+      {
+        \@@_use_i_delimit_by_q_recursion_stop:nw
+          { \@@_change_case_exclude:nnnNw {#1} {#2} {#3} #4 }
+      }
+      { \@@_change_case_exclude:nnnNN {#1} {#2} {#3} #4 }
+  }
+\cs_new:Npn \@@_change_case_exclude:nnnNw #1#2#3#4#5#
+  { \@@_change_case_exclude:nnnNnn {#1} {#2} {#3} {#4} {#5} }
+\cs_new:Npn \@@_change_case_exclude:nnnNnn #1#2#3#4#5#6
+  {
+    \tl_if_blank:nTF {#5}
+      { \@@_change_case_store:n { #4 {#6} } }
+      {
+        \@@_change_case_store:o
+          {
+            \exp_after:wN #4
+              \exp:w \@@_change_case_auxii:nnnn {#5} {#1} {#2} {#3}
+              {#6}
+          }
+      }
+    \@@_change_case_loop:nnnw {#1} {#2} {#3}
+  }
+%    \end{macrocode}
+%   Deal with any specialist replacement for case changing.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_replace:nnnN #1#2#3#4
+  {
+    \cs_if_exist:cTF { l_@@_case_ \token_to_str:N #4 _tl }
+      {
+        \@@_change_case_replace:vnnn
+          { l_@@_case_ \token_to_str:N #4 _tl } {#1} {#2} {#3}
+      }
+      { \@@_change_case_switch:nnnN {#1} {#2} {#3} #4 }
+  }
+\cs_new:Npn \@@_change_case_replace:nnnn #1#2#3#4
+  { \@@_change_case_loop:nnnw {#2} {#3} {#4} #1 }
+\cs_generate_variant:Nn \@@_change_case_replace:nnnn { v }
+%    \end{macrocode}
+%   Allow for manually-controlled case switching.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_switch:nnnN #1#2#3#4
+  {
+    \cs_if_eq:NNTF #4 \text_case_switch:nnnn
+      { \use:c { @@_change_case_switch_ #1 :nnnNnnnn  } }
+      { \use:c { @@_change_case_letterlike_ #1 :nnnN } }
+        {#1} {#2} {#3} #4
+  }
+\cs_new:Npn \@@_change_case_switch_lower:nnnNnnnn #1#2#3#4#5#6#7#8
+  {
+    \@@_change_case_store:n {#7}
+    \@@_change_case_loop:nnnw {#1} {#2} {#3}
+  }
+\cs_new:Npn \@@_change_case_switch_upper:nnnNnnnn #1#2#3#4#5#6#7#8
+  {
+    \@@_change_case_store:n {#6}
+    \@@_change_case_loop:nnnw {#1} {#2} {#3}
+  }
+\cs_new:Npn \@@_change_case_switch_title:nnnNnnnn #1#2#3#4#5#6#7#8
+  {
+    \@@_change_case_store:n {#8}
+    \@@_change_case_skip:nnw {#2} {#3}
+  }
+%    \end{macrocode}
+%   Skip over material quickly after titlecase-first-only initials
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_skip:nnw #1#2#3 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#3}
+      { \@@_change_case_skip_N_type:nnN }
+      {
+        \tl_if_head_is_group:nTF {#3}
+          { \@@_change_case_skip_group:nnn }
+          { \@@_change_case_skip_space:nnw }
+      }
+        {#1} {#2} #3 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_skip_N_type:nnN #1#2#3
+  {
+    \@@_if_q_recursion_tail_stop_do:Nn #3
+      { \@@_change_case_end:w }
+    \@@_change_case_store:n {#3}
+    \@@_change_case_skip:nnw {#1} {#2}
+  }
+\cs_new:Npn \@@_change_case_skip_group:nnn #1#2#3
+  {
+    \@@_change_case_store:n { {#3} }
+    \@@_change_case_skip:nnw {#1} {#2}
+  }
+\cs_new:Npn \@@_change_case_skip_space:nnw #1#2
+  { \@@_change_case_space:nnnw {#1} {#1} {#2} }
+%    \end{macrocode}
+%  Letter-like commands may still be present: they are set up using a simple
+%  lookup approach, so can easily be handled with no loop. If there is no
+%  hit, we are at the end of the process: we loop around. Letter-like chars
+%  are all available only in upper- and lowercase, so titlecasing maps to the
+%  uppercase version.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_letterlike_lower:nnnN #1#2#3#4
+  { \@@_change_case_letterlike:nnnnnN {#1} {#1} {#1} {#2} {#3} #4 }
+\cs_new_eq:NN \@@_change_case_letterlike_upper:nnnN
+  \@@_change_case_letterlike_lower:nnnN
+\cs_new:Npn \@@_change_case_letterlike_title:nnnN #1#2#3#4
+  { \@@_change_case_letterlike:nnnnnN { upper } { end } {#1} {#2} {#3} #4 }
+\cs_new:Npn \@@_change_case_letterlike:nnnnnN #1#2#3#4#5#6
+  {
+    \cs_if_exist:cTF { c_@@_ #1 case_ \token_to_str:N #6 _tl }
+      {
+        \@@_change_case_store:v
+          { c_@@_ #1 case_ \token_to_str:N #6 _tl }
+        \use:c { @@_change_case_next_ #2 :nnn } {#2} {#4} {#5}
+      }
+      {
+        \@@_change_case_store:n {#6}
+        \cs_if_exist:cTF
+          {
+            c_@@_
+            \str_if_eq:nnTF {#1} { lower } { upper } { lower }
+            case_ \token_to_str:N #6 _tl
+          }
+          { \use:c { @@_change_case_next_ #2 :nnn } {#2} {#4} {#5} }
+          { \@@_change_case_loop:nnnw {#3} {#4} {#5} }
+      }
+  }
+%    \end{macrocode}
+%  Check for a customised codepoint result.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_custom_lower:nnnn #1#2#3#4
+  {
+    \@@_change_case_custom:nnnnnn {#1} {#1} {#2} {#3} {#4}
+      { \use:c { @@_change_case_codepoint_ #1 :nnnn } {#1} {#2} {#3} {#4} }
+  }
+\cs_new_eq:NN \@@_change_case_custom_upper:nnnn
+  \@@_change_case_custom_lower:nnnn
+\cs_new:Npn \@@_change_case_custom_title:nnnn #1#2#3#4
+  {
+    \@@_change_case_custom:nnnnnn { title } {#1} {#2} {#3} {#4}
+      {
+        \@@_change_case_custom:nnnnnn { upper } {#1} {#2} {#3} {#4}
+          { \use:c { @@_change_case_codepoint_ #1 :nnnn } {#1} {#2} {#3} {#4} }
+      }
+  }
+\cs_new:Npn \@@_change_case_custom:nnnnnn #1#2#3#4#5#6
+  {
+    \tl_if_exist:cTF { l_@@_ #1 case _ \tl_to_str:n {#5} _ #4 _tl }
+      {
+        \@@_change_case_replace:vnnn
+          { l_@@_ #1 case _ \tl_to_str:n {#5} _ #4 _tl } {#2} {#3} {#4}
+      }
+      {
+        \tl_if_exist:cTF { l_@@_ #1 case _ \tl_to_str:n {#5} _tl }
+          {
+            \@@_change_case_replace:vnnn
+              { l_@@_ #1 case _ \tl_to_str:n {#5} _tl } {#2} {#3} {#4}
+          }
+          {#6}
+      }
+  }
+%    \end{macrocode}
+%   For upper- and lowercase changes, once we get to this stage there are only
+%   a couple of questions remaining: is there a language-specific mapping and
+%   is there the special case of a terminal sigma. If not, then we pass to
+%   a simple codepoint mapping.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_codepoint_lower:nnnn #1#2#3#4
+  {
+    \cs_if_exist_use:cF { @@_change_case_lower_ #3 :nnnnn }
+      { \@@_change_case_lower_sigma:nnnnn }
+        {#1} {#1} {#2} {#3} {#4}
+  }
+\cs_new:Npn \@@_change_case_codepoint_upper:nnnn #1#2#3#4
+  {
+    \cs_if_exist_use:cF { @@_change_case_upper_ #3 :nnnnn }
+      { \@@_change_case_codepoint:nnnnn }
+        {#1} {#1} {#2} {#3} {#4}
+  }
+%    \end{macrocode}
+%   If the current character is an uppercase sigma, the a check is made on the
+%   next item in the input.  If it is \texttt{N}-type and not a control sequence
+%   then there is a look-ahead phase: the logic here is simply based on letters
+%   or actives (to cover $8$-bit engines).
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_lower_sigma:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "03A3 }
+      { \@@_change_case_lower_sigma:nnnnw {#2} }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} }
+        {#3} {#4} {#5}
+  }
+\cs_new:Npn \@@_change_case_lower_sigma:nnnnw #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_lower_sigma:nnnnN {#4} }
+      {
+        \@@_change_case_store:e
+          { \codepoint_generate:nn { "03C2 } { \@@_char_catcode:N #4 } }
+        \@@_change_case_loop:nnnw
+      }
+        {#1} {#2} {#3} #5 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_lower_sigma:nnnnN #1#2#3#4#5
+  {
+    \@@_change_case_store:e
+      {
+        \bool_lazy_or:nnTF
+          { \token_if_letter_p:N #5 }
+          {
+            \bool_lazy_and_p:nn
+              { \token_if_active_p:N #5 }
+              { \int_compare_p:nNn {`#5} > { "80 } }
+          }
+          { \codepoint_generate:nn { "03C3 } { \@@_char_catcode:N #1 } }
+          { \codepoint_generate:nn { "03C2 } { \@@_char_catcode:N #1 } }
+      }
+    \@@_change_case_loop:nnnw {#2} {#3} {#4} #5
+  }
+%    \end{macrocode}
+%   For titlecasing, we need to obtain the general category of the current
+%   codepoint.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_codepoint_title:nnnn #1#2#3#4
+  {
+    \bool_if:NTF \l_text_titlecase_check_letter_bool
+      {
+        \exp_args:Ne \@@_change_case_codepoint_title_auxi:nnnn
+          {
+            \codepoint_to_category:n
+              { \@@_codepoint_from_chars:Nw #4 }
+          }
+      }
+      { \@@_change_case_codepoint_title:nnn }
+        {#2} {#3} {#4}
+  }
+\cs_new:Npn \@@_change_case_codepoint_title_auxi:nnnn #1#2#3#4
+  {
+    \tl_if_head_eq_charcode:nNTF {#1} { L }
+      { \@@_change_case_codepoint_title:nnn }
+      { \@@_change_case_codepoint_title_auxii:nnnn { title } }
+        {#2} {#3} {#4}
+  }
+\cs_new:Npn \@@_change_case_codepoint_title:nnn #1#2#3
+  { \@@_change_case_codepoint_title_auxii:nnnn { end } {#1} {#2} {#3} }
+\cs_new:Npn \@@_change_case_codepoint_title_auxii:nnnn #1#2#3#4
+  {
+    \cs_if_exist_use:cF { @@_change_case_title_ #3 :nnnnn }
+      {
+        \cs_if_exist_use:cF { @@_change_case_upper_ #3 :nnnnn }
+          { \@@_change_case_codepoint:nnnnn }
+      }
+        { title } {#1} {#2} {#3} {#4}
+  }
+\cs_new:Npn \@@_change_case_codepoint:nnnnn #1#2#3#4#5
+  {
+    \bool_lazy_and:nnTF
+      { \tl_if_single_p:n {#5} }
+      { \token_if_active_p:N #5 }
+      { \@@_change_case_store:n {#5} }
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn {#1} {#5} }
+      }
+    \use:c { @@_change_case_next_ #2 :nnn } {#2} {#3} {#4}
+  }
+\cs_new:Npn \@@_change_case_codepoint:nn #1#2
+  {
+    \@@_change_case_codepoint:fnn
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #2 } } {#1} {#2}
+  }
+\cs_new:Npn \@@_change_case_codepoint:nnn #1#2#3
+  {
+    \exp_args:Ne \@@_change_case_codepoint_aux:nn
+      { \__kernel_codepoint_case:nn { #2 case } {#1} } {#3}
+  }
+\cs_generate_variant:Nn \@@_change_case_codepoint:nnn { f }
+%    \end{macrocode}
+%   Avoid high chars with p\TeX{}.
+%    \begin{macrocode}
+\sys_if_engine_ptex:T
+  {
+    \cs_new_eq:NN \@@_change_case_codepoint_aux:nnn
+      \@@_change_case_codepoint:nnn
+    \cs_gset:Npn \@@_change_case_codepoint:nnn #1#2#3
+      {
+        \int_compare:nNnTF {#1} = { -1 }
+          { \exp_not:n {#3} }
+          { \@@_change_case_codepoint_aux:nnn {#1} {#2} {#3} }
+      }
+  }
+\cs_new:Npn \@@_change_case_codepoint_aux:nn #1#2
+  {
+    \use:e { \@@_change_case_codepoint_aux:nnnn #1 {#2} }
+  }
+\cs_new:Npn \@@_change_case_codepoint_aux:nnnn #1#2#3#4
+  {
+    \@@_codepoint_compare:nNnTF {#4} = {#1}
+      { \exp_not:n {#4} }
+      {
+        \codepoint_generate:nn {#1}
+          { \@@_change_case_catcode:nn {#4} {#1} }
+        \tl_if_blank:nF {#2}
+          {
+            \codepoint_generate:nn {#2}
+              { \char_value_catcode:n {#2} }
+            \tl_if_blank:nF {#3}
+              {
+                \codepoint_generate:nn {#3}
+                  { \char_value_catcode:n {#3} }
+              }
+          }
+      }
+  }
+%    \end{macrocode}
+%   We need to ensure that only valid catcode-extraction is attempted. That's
+%   fine with Unicode engines but needs a bit of work with 8-bit ones. The
+%   logic is that if the original codepoint was in the ASCII range, we keep
+%   the catcode. Otherwise, if the target is in the ASCII range, we use
+%   the standard catcode. If neither are true, we set as 13 on the grounds that
+%   this will be what is used anyway!
+%    \begin{macrocode}
+\sys_if_engine_opentype:TF
+  {
+    \cs_new:Npn \@@_change_case_catcode:nn #1#2
+      { \@@_char_catcode:N #1 }
+  }
+  {
+    \cs_new:Npn \@@_change_case_catcode:nn #1#2
+      {
+        \@@_codepoint_compare:nNnTF {#1} < { "80 }
+          { \@@_char_catcode:N #1 }
+          {
+            \int_compare:nNnTF {#2} < { "80 }
+              { \char_value_catcode:n {#2} }
+              { 13 }
+          }
+      }
+  }
+\cs_new:Npn \@@_change_case_next_lower:nnn #1#2#3
+  { \@@_change_case_loop:nnnw {#1} {#2} {#3} }
+\cs_new_eq:NN \@@_change_case_next_upper:nnn
+  \@@_change_case_next_lower:nnn
+\cs_new_eq:NN \@@_change_case_next_title:nnn
+  \@@_change_case_next_lower:nnn
+\cs_new:Npn \@@_change_case_next_end:nnn #1#2#3
+  { \@@_change_case_skip:nnw {#2} {#3} }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\text_declare_case_equivalent:Nn}
+%  Create equivalents to allow replacement.
+%    \begin{macrocode}
+\cs_new_protected:Npn \text_declare_case_equivalent:Nn #1#2
+  {
+    \tl_clear_new:c { l_@@_case_ \token_to_str:N #1 _tl }
+    \tl_set:cn { l_@@_case_ \token_to_str:N #1 _tl } {#2}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \text_declare_lowercase_mapping:nn ,
+%     \text_declare_titlecase_mapping:nn ,
+%     \text_declare_uppercase_mapping:nn
+%   }
+% \begin{macro}
+%   {\@@_declare_case_mapping:nnn, \@@_declare_case_mapping_aux:nnn}
+% \begin{macro}
+%   {
+%     \text_declare_lowercase_mapping:nnn ,
+%     \text_declare_titlecase_mapping:nnn ,
+%     \text_declare_uppercase_mapping:nnn
+%   }
+% \begin{macro}
+%   {\@@_declare_case_mapping:nnnn, \@@_declare_case_mapping_aux:nnnn}
+%   Codepoint customisation.
+%    \begin{macrocode}
+\cs_new_protected:Npn \text_declare_lowercase_mapping:nn #1#2
+  { \@@_declare_case_mapping:nnn { lower } {#1} {#2} }
+\cs_new_protected:Npn \text_declare_titlecase_mapping:nn #1#2
+  { \@@_declare_case_mapping:nnn { title } {#1} {#2} }
+\cs_new_protected:Npn \text_declare_uppercase_mapping:nn #1#2
+  { \@@_declare_case_mapping:nnn { upper } {#1} {#2} }
+\cs_new_protected:Npn \@@_declare_case_mapping:nnn #1#2#3
+  {
+    \exp_args:Ne \@@_declare_case_mapping_aux:nnn
+      { \codepoint_str_generate:n {#2} } {#1} {#3}
+  }
+\cs_new_protected:Npn \@@_declare_case_mapping_aux:nnn #1#2#3
+  {
+    \tl_clear_new:c { l_@@_ #2 case _ #1 _tl }
+    \tl_set:cn { l_@@_ #2 case _ #1 _ tl } {#3}
+  }
+\cs_new_protected:Npn \text_declare_lowercase_mapping:nnn #1#2#3
+  { \@@_declare_case_mapping:nnnn { lower } {#1} {#2} {#3} }
+\cs_new_protected:Npn \text_declare_titlecase_mapping:nnn #1#2#3
+  { \@@_declare_case_mapping:nnnn { title } {#1} {#2} {#3} }
+\cs_new_protected:Npn \text_declare_uppercase_mapping:nnn #1#2#3
+  { \@@_declare_case_mapping:nnnn { upper } {#1} {#2} {#3} }
+\cs_new_protected:Npn \@@_declare_case_mapping:nnnn #1#2#3#4
+  {
+    \exp_args:Ne \@@_declare_case_mapping_aux:nnnn
+      { \codepoint_str_generate:n {#3} } {#1} {#2} {#4}
+  }
+\cs_new_protected:Npn \@@_declare_case_mapping_aux:nnnn #1#2#3#4
+  {
+    \tl_clear_new:c { l_@@_ #2 case _ #1 _ #3 _tl }
+    \tl_set:cn { l_@@_ #2 case _ #1 _ #3 _ tl } {#4}
+    \tl_clear_new:c { l_@@_ #2 case_special_ #3 _tl }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\text_case_switch:nnnn}
+% \begin{macro}{\@@_case_switch_marker:}
+%   Set up the mechanism for manual case switching.
+%    \begin{macrocode}
+\cs_new:Npn \text_case_switch:nnnn #1#2#3#4
+  {
+    \@@_case_switch_marker:
+    #1
+  }
+\cs_new:Npn \@@_case_switch_marker: { }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]{\@@_change_case_generate:n}
+%   A utility.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_generate:n #1
+  { \codepoint_generate:nn {#1} { \char_value_catcode:n {#1} } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%      \@@_change_case_upper_de-x-eszett:nnnnn,
+%      \@@_change_case_upper_de-alt:nnnnn
+%   }
+%   A simple alternative version for German.
+%    \begin{macrocode}
+\cs_new:cpn { @@_change_case_upper_de-x-eszett:nnnnn } #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "00DF }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "1E9E }
+              { \@@_change_case_catcode:nn {#5} { "1E9E } }
+          }
+        \use:c { @@_change_case_next_ #2 :nnn }
+          {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+\cs_new_eq:cc { @@_change_case_upper_de-alt:nnnnn }
+  { @@_change_case_upper_de-x-eszett:nnnnn }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_upper_el:nnnnn        ,
+%     \@@_change_case_upper_el-x-iota:nnnnn ,
+%     \@@_change_case_upper_el_aux:nnnnn
+%   }
+% \begin{macro}[EXP]{\@@_change_case_upper_el:nnnn}
+% \begin{macro}[EXP]{\@@_change_case_upper_el:nnnnw}
+% \begin{macro}[EXP]
+%   {\@@_change_case_upper_el:nnnnN, \@@_change_case_upper_el_aux:nnnnN}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_ypogegrammeni:nnnnnnw}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_ypogegrammeni:nnnnnnN}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_ypogegrammeni:nnnnnnn}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_dialytika:nnnn}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_dialytika:n}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_hiatus:nnnnw}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_hiatus:nnnnN}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_hiatus:nnnnn}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_upper_el_ypogegrammeni:n        ,
+%     \@@_change_case_upper_el-x-iota_ypogegrammeni:n
+%   }
+% \begin{macro}[EXP]{\@@_change_case_upper_el_stress:nn}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_gobble:nnnw}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_gobble:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_upper_el_gobble:nnnn}
+% \begin{macro}[EXP,noTF]
+%   {
+%     \@@_change_case_if_greek:n                   ,
+%     \@@_change_case_if_greek_spacing_diacritic:n ,
+%     \@@_change_case_if_greek_accent:n            ,
+%     \@@_change_case_if_greek_breathing:n         ,
+%     \@@_change_case_if_greek_stress:n            ,
+%     \@@_change_case_if_takes_dialytika:n         ,
+%     \@@_change_case_if_takes_ypogegrammeni:n
+%   }
+%   For Greek uppercasing, we need to know if characters \emph{in the Greek
+%   range} have accents. That means doing a \textsc{nfd} conversion first, then
+%   starting a search. As described by the Unicode \textsc{cldr}, Greek accents
+%   need to be found \emph{after} any U+0308 (diaeresis) and are done in two
+%   groups to allow for the canonical ordering. The implementation here follows
+%   the data and examples from \textsc{icu}
+%   (\url{https://icu.unicode.org/design/case/greek-upper}),
+%   although necessarily the implementation is somewhat different. The
+%   \emph{ypogegrammeni} is filtered out here as it is not actually in the
+%   Greek range, so gets lost if we leave until later. The one Greek codepoint
+%   we skip is the numeral sign and question mark: the first has an awkward NFD
+%   for \pdfTeX{} so is best left unchanged, and the latter has issues concerning
+%   how \texttt{LGR} outputs the input and output (differently!).
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el:nnnnn #1#2#3#4#5
+  {
+    \bool_lazy_and:nnTF
+      { \@@_change_case_if_greek_p:n {#5} }
+      {
+        ! \bool_lazy_or_p:nn
+          { \@@_codepoint_compare_p:nNn {#5} = { "0374 } }
+          { \@@_codepoint_compare_p:nNn {#5} = { "037E } }
+      }
+      {
+        \@@_change_case_if_greek_spacing_diacritic:nTF {#5}
+          {
+            \@@_change_case_store:n {#5}
+            \@@_change_case_loop:nnnw
+          }
+          {
+            \exp_args:Ne \@@_change_case_upper_el:nnnn
+              {
+                \codepoint_to_nfd:n
+                  { \@@_codepoint_from_chars:Nw #5 }
+              }
+          }
+            {#2} {#3} {#4}
+      }
+      {
+        \@@_codepoint_compare:nNnTF {#5} = { "0345 }
+          {
+            \@@_change_case_store:e
+              {
+                \codepoint_generate:nn { "0399 }
+                  { \char_value_catcode:n { "0399 } }
+              }
+            \@@_change_case_loop:nnnw {#2} {#3} {#4}
+          }
+          { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+      }
+  }
+\cs_new_eq:cN { @@_change_case_upper_el-x-iota:nnnnn }
+  \@@_change_case_upper_el:nnnnn
+\cs_new:Npn \@@_change_case_upper_el:nnnn #1#2#3#4
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_upper_el:nnnnw {#2} {#3} {#4} } #1
+  }
+%    \end{macrocode}
+%   At this stage we have the first NFD codepoint as |#3|. What we need to know
+%   is whether after that we have another character, either from the NFD or
+%   directly in the input. If not, we store the changed character at this stage.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el:nnnnw #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_upper_el:nnnnN {#4} }
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn { upper } {#4} }
+        \@@_change_case_loop:nnnw
+      }
+        {#1} {#2} {#3} #5 \q_@@_recursion_stop
+  }
+%    \end{macrocode}
+%   Now, we check the detail of the next codepoint: again we filter out the
+%   not-a-char cases, before checking if it's an dialytika, accent or diacritic.
+%   (The latter do not have the same hiatus behavior as accents.) There is
+%   additional work if the codepoint can take a ypogegrammeni: there, we need
+%   to move any ypogegrammeni to after accents (in case the input is not
+%   normalised). The ypogegrammeni itself is handled separately.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el:nnnnN #1#2#3#4#5
+  {
+    \token_if_cs:NTF #5
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn { upper } {#1} }
+        \@@_change_case_loop:nnnw {#2} {#3} {#4} #5
+      }
+      {
+        \@@_change_case_if_takes_ypogegrammeni:nTF {#1}
+          {
+            \@@_change_case_upper_el_ypogegrammeni:nnnnnnw
+              {#1} {#2} {#3} {#4} { } { } #5
+          }
+          { \@@_change_case_upper_el_aux:nnnnN {#1} {#2} {#3} {#4} #5 }
+      }
+  }
+\cs_new:Npn \@@_change_case_upper_el_ypogegrammeni:nnnnnnw
+  #1#2#3#4#5#6#7 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#7}
+      {
+        \@@_change_case_upper_el_ypogegrammeni:nnnnnnN
+          {#1} {#2} {#3} {#4} {#5} {#6}
+      }
+      { \@@_change_case_upper_el_aux:nnnnN {#1} {#2} {#3} {#4} #5#6 }
+        #7 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_upper_el_ypogegrammeni:nnnnnnN #1#2#3#4#5#6#7
+  {
+    \token_if_cs:NTF #7
+      { \@@_change_case_upper_el_aux:nnnnN {#1} {#2} {#3} {#4} #5#6 }
+      {
+        \@@_codepoint_process:nN
+          {
+            \@@_change_case_upper_el_ypogegrammeni:nnnnnnn
+              {#1} {#2} {#3} {#4} {#5} {#6}
+          }
+      }
+        #7
+  }
+\cs_new:Npn \@@_change_case_upper_el_ypogegrammeni:nnnnnnn #1#2#3#4#5#6#7
+  {
+    \@@_codepoint_compare:nNnTF {#7} = { "0345 }
+      {
+        \@@_change_case_upper_el_ypogegrammeni:nnnnnnw
+          {#1} {#2} {#3} {#4} {#5} {#7}
+      }
+      {
+        \bool_lazy_or:nnTF
+          { \@@_change_case_if_greek_accent_p:n {#7} }
+          { \@@_change_case_if_greek_breathing_p:n {#7} }
+          {
+            \@@_change_case_upper_el_ypogegrammeni:nnnnnnw
+              {#1} {#2} {#3} {#4} {#5#7} {#6}
+          }
+          { \@@_change_case_upper_el_aux:nnnnN {#1} {#2} {#3} {#4} #5#6 #7 }
+      }
+  }
+\cs_new:Npn \@@_change_case_upper_el_aux:nnnnN #1#2#3#4#5
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_upper_el_aux:nnnnn {#1} {#2} {#3} {#4} } #5
+  }
+\cs_new:Npn \@@_change_case_upper_el_aux:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0308 }
+      { \@@_change_case_upper_el_dialytika:nnnn {#2} {#3} {#4} {#1} }
+      {
+        \@@_change_case_if_greek_accent:nTF {#5}
+          { \@@_change_case_upper_el_hiatus:nnnnw {#2} {#3} {#4} {#1} }
+          {
+            \@@_change_case_if_greek_breathing:nTF {#5}
+              { \@@_change_case_upper_el:nnnn {#1} {#2} {#3} {#4} }
+              {
+                \@@_codepoint_compare:nNnTF {#5} = { "0345 }
+                  {
+                    \@@_change_case_store:e
+                      { \use:c { @@_change_case_upper_ #4 _ypogegrammeni:n } {#1} }
+                    \@@_change_case_loop:nnnw {#2} {#3} {#4}
+                  }
+                  {
+                    \@@_change_case_if_greek_stress:nTF {#5}
+                      {
+                        \@@_change_case_store:e
+                          { \@@_change_case_upper_el_stress:nn {#1} {#5} }
+                        \@@_change_case_loop:nnnw {#2} {#3} {#4}
+
+                      }
+                      {
+                        \@@_change_case_store:e
+                          { \@@_change_case_codepoint:nn { upper } {#1} }
+                        \@@_change_case_loop:nnnw {#2} {#3} {#4} #5
+                      }
+                  }
+              }
+          }
+      }
+  }
+%    \end{macrocode}
+%   We handle \emph{dialytika} in parts as it's also needed for the hiatus.
+%   We know only two letters take it, so we can shortcut here on the second
+%   part of the tests.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el_dialytika:nnnn #1#2#3#4
+  {
+    \@@_change_case_if_takes_dialytika:nTF {#4}
+      { \@@_change_case_upper_el_dialytika:n {#4} }
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn { upper } {#4} }
+      }
+    \@@_change_case_upper_el_gobble:nnnw {#1} {#2} {#3}
+  }
+\cs_new:Npn \@@_change_case_upper_el_dialytika:n #1
+  {
+    \@@_change_case_store:e
+      {
+        \bool_lazy_or:nnTF
+          { \@@_codepoint_compare_p:nNn {#1} = { "0399 } }
+          { \@@_codepoint_compare_p:nNn {#1} = { "03B9 } }
+          {
+            \codepoint_generate:nn { "03AA }
+              { \@@_change_case_catcode:nn {#1} { "03AA } }
+          }
+          {
+            \codepoint_generate:nn { "03AB }
+              { \@@_change_case_catcode:nn {#1} { "03AB } }
+          }
+      }
+  }
+%    \end{macrocode}
+%   Adding a hiatus needs some of the same ideas, but if there is not one we
+%   skip this code point, hence needing a separate function.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el_hiatus:nnnnw
+  #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_upper_el_hiatus:nnnnN {#4} }
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn { upper } {#4} }
+        \@@_change_case_loop:nnnw
+      }
+        {#1} {#2} {#3} #5 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_upper_el_hiatus:nnnnN #1#2#3#4#5
+  {
+    \token_if_cs:NTF #5
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn { upper } {#1} }
+        \@@_change_case_loop:nnnw {#2} {#3} {#4} #5 
+      }
+      {
+        \@@_codepoint_process:nN
+          { \@@_change_case_upper_el_hiatus:nnnnn {#1} {#2} {#3} {#4} } #5
+      }
+  }
+\cs_new:Npn \@@_change_case_upper_el_hiatus:nnnnn #1#2#3#4#5
+  {
+    \@@_change_case_if_takes_dialytika:nTF {#5}
+      {
+        \@@_change_case_store:e
+          { \@@_change_case_codepoint:nn { upper } {#1} }
+        \@@_change_case_upper_el_dialytika:n {#5}
+        \@@_change_case_upper_el_gobble:nnnw {#2} {#3} {#4}
+      }
+      { \@@_change_case_upper_el:nnnn {#1} {#2} {#3} {#4} #5 }
+  }
+%    \end{macrocode}
+%   Handling the \emph{ypogegrammeni} output depends on the selected approach
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el_ypogegrammeni:n #1
+  {
+    \exp_args:Ne \@@_change_case_generate:n
+      {
+        \int_case:nn
+          { \@@_codepoint_from_chars:Nw #1 }
+          {
+            { "0391 } { "1FBC }
+            { "03B1 } { "1FBC }
+            { "0397 } { "1FCC }
+            { "03B7 } { "1FCC }
+            { "03A9 } { "1FFC }
+            { "03C9 } { "1FFC }
+          }
+      }
+  }
+\cs_new:cpn { @@_change_case_upper_el-x-iota_ypogegrammeni:n } #1
+  {
+    \@@_change_case_codepoint:nn { upper } {#1}
+    \codepoint_generate:nn { "0399 }
+      { \char_value_catcode:n { "0399 } }
+  }
+%    \end{macrocode}
+%   We choose to retain stress diacritics, but we also need to recombine
+%   them for pdf\TeX{}. That is handled here.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el_stress:nn #1#2
+  {
+    \exp_args:Ne \@@_change_case_generate:n
+      {
+        \int_case:nn
+          { \@@_codepoint_from_chars:Nw #2 }
+          {
+            { "0304 }
+              {
+                \int_case:nn { \@@_codepoint_from_chars:Nw #1 }
+                  {
+                    { "0391 } { "1FB9 }
+                    { "03B1 } { "1FB9 }
+                    { "0399 } { "1FD9 }
+                    { "03B9 } { "1FD9 }
+                    { "03A5 } { "1FE9 }
+                    { "03C5 } { "1FE9 }
+                  }
+              }
+            { "0306 }
+              {
+                \int_case:nn { \@@_codepoint_from_chars:Nw #1 }
+                  {
+                    { "0391 } { "1FB8 }
+                    { "03B1 } { "1FB8 }
+                    { "0399 } { "1FD8 }
+                    { "03B9 } { "1FD8 }
+                    { "03A5 } { "1FE8 }
+                    { "03C5 } { "1FE8 }
+                  }
+              }
+          }
+      }
+  }
+%    \end{macrocode}
+%   For clearing out trailing combining marks after we have dealt with
+%   the first one.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_el_gobble:nnnw
+  #1#2#3#4 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#4}
+      { \@@_change_case_upper_el_gobble:nnnN }
+      { \@@_change_case_loop:nnnw }
+        {#1} {#2} {#3} #4 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_upper_el_gobble:nnnN #1#2#3#4
+  {
+    \token_if_cs:NTF #4
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} }
+      {
+        \@@_codepoint_process:nN
+          { \@@_change_case_upper_el_gobble:nnnn {#1} {#2} {#3} }
+      }
+        #4
+  }
+\cs_new:Npn \@@_change_case_upper_el_gobble:nnnn #1#2#3#4
+  {
+    \bool_lazy_or:nnTF
+      { \@@_change_case_if_greek_accent_p:n {#4} }
+      { \@@_change_case_if_greek_breathing_p:n {#4} }
+      { \@@_change_case_upper_el_gobble:nnnw {#1} {#2} {#3} }
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} #4 }
+  }
+%    \end{macrocode}
+%   Luckily the Greek range is limited and clear.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \@@_change_case_if_greek:n #1 { p , TF }
+  {
+    \exp_args:Nf \@@_change_case_if_greek:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_greek:n #1
+  {
+    \if_int_compare:w #1 < "0370 \exp_stop_f:
+      \prg_return_false:
+    \else:
+      \if_int_compare:w #1 > "03FF \exp_stop_f:
+        \if_int_compare:w #1 < "1F00 \exp_stop_f:
+          \prg_return_false:
+        \else:
+          \if_int_compare:w #1 > "1FFF \exp_stop_f:
+            \if_int_compare:w #1 = "2126 \exp_stop_f:
+              \prg_return_true:
+            \else:
+              \prg_return_false:
+            \fi:
+          \else:
+            \prg_return_true:
+          \fi:
+        \fi:
+      \else:
+        \prg_return_true:
+      \fi:
+    \fi:
+  }
+%    \end{macrocode}
+%   We follow ICU in adding a few extras to the accent list here.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \@@_change_case_if_greek_accent:n #1 { TF , p }
+  {
+    \exp_args:Nf \@@_change_case_if_greek_accent:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_greek_accent:n #1
+  {
+    \if_int_compare:w #1 = "0300 \exp_stop_f:
+      \prg_return_true:
+    \else:
+      \if_int_compare:w #1 = "0301 \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \if_int_compare:w #1 = "0342 \exp_stop_f:
+          \prg_return_true:
+        \else:
+          \if_int_compare:w #1 = "0302 \exp_stop_f:
+            \prg_return_true:
+          \else:
+            \if_int_compare:w #1 = "0303 \exp_stop_f:
+              \prg_return_true:
+            \else:
+              \if_int_compare:w #1 = "0311 \exp_stop_f:
+                \prg_return_true:
+              \else:
+                \prg_return_false:
+              \fi:
+            \fi:
+          \fi:
+        \fi:
+      \fi:
+    \fi:
+  }
+\prg_new_conditional:Npnn \@@_change_case_if_greek_spacing_diacritic:n
+  #1 { TF }
+  {
+    \exp_args:Nf \@@_change_case_if_greek_spacing_diacritic:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_greek_spacing_diacritic:n #1
+  {
+    \if_int_compare:w #1 < "1FBD \exp_stop_f:
+      \if_int_compare:w #1 = "037A \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \prg_return_false:
+      \fi:
+    \else:
+      \if_int_compare:w #1 = "1FBD \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \if_int_compare:w #1 = "1FBF \exp_stop_f:
+          \prg_return_true:
+        \else:
+          \if_int_compare:w #1 = "1FC0 \exp_stop_f:
+            \prg_return_true:
+          \else:
+            \if_int_compare:w #1 = "1FC1 \exp_stop_f:
+              \prg_return_true:
+            \else:
+              \if_int_compare:w #1 = "1FCD \exp_stop_f:
+                \prg_return_true:
+              \else:
+                \if_int_compare:w #1 = "1FCE \exp_stop_f:
+                  \prg_return_true:
+                \else:
+                  \if_int_compare:w #1 = "1FCF \exp_stop_f:
+                    \prg_return_true:
+                  \else:
+                    \if_int_compare:w #1 = "1FDD \exp_stop_f:
+                      \prg_return_true:
+                    \else:
+                      \if_int_compare:w #1 = "1FDE \exp_stop_f:
+                        \prg_return_true:
+                      \else:
+                        \if_int_compare:w #1 = "1FDF \exp_stop_f:
+                          \prg_return_true:
+                        \else:
+                          \if_int_compare:w #1 = "1FED \exp_stop_f:
+                            \prg_return_true:
+                          \else:
+                            \if_int_compare:w #1 = "1FEE \exp_stop_f:
+                              \prg_return_true:
+                            \else:
+                              \if_int_compare:w #1 = "1FEF \exp_stop_f:
+                                \prg_return_true:
+                              \else:
+                                \if_int_compare:w #1 = "1FFD \exp_stop_f:
+                                  \prg_return_true:
+                                \else:
+                                  \if_int_compare:w #1 = "1FFE \exp_stop_f:
+                                    \prg_return_true:
+                                  \else:
+                                    \prg_return_false:
+                                  \fi:
+                                \fi:
+                              \fi:
+                            \fi:
+                          \fi:
+                        \fi:
+                      \fi:
+                    \fi:
+                  \fi:
+                \fi:
+              \fi:
+            \fi:
+          \fi:
+        \fi:
+      \fi:
+    \fi:
+  }
+\prg_new_conditional:Npnn \@@_change_case_if_greek_breathing:n
+  #1 { TF , p }
+  {
+    \exp_args:Nf \@@_change_case_if_greek_breathing:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_greek_breathing:n #1
+  {
+    \if_int_compare:w #1 = "0313 \exp_stop_f:
+      \prg_return_true:
+    \else:
+      \if_int_compare:w #1 = "0314 \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \prg_return_false:
+      \fi:
+    \fi:
+  }
+\prg_new_conditional:Npnn \@@_change_case_if_greek_stress:n
+  #1 { TF , p }
+  {
+    \exp_args:Nf \@@_change_case_if_greek_stress:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_greek_stress:n #1
+  {
+    \if_int_compare:w #1 = "0304 \exp_stop_f:
+      \prg_return_true:
+    \else:
+      \if_int_compare:w #1 = "0306 \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \prg_return_false:
+      \fi:
+    \fi:
+  }
+\prg_new_conditional:Npnn \@@_change_case_if_takes_dialytika:n #1 { TF }
+  {
+    \exp_args:Nf \@@_change_case_if_takes_dialytika:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_takes_dialytika:n #1
+  {
+    \if_int_compare:w #1 = "0399 \exp_stop_f:
+      \prg_return_true:
+    \else:
+      \if_int_compare:w #1 = "03B9 \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \if_int_compare:w #1 = "03A5 \exp_stop_f:
+          \prg_return_true:
+        \else:
+          \if_int_compare:w #1 = "03C5 \exp_stop_f:
+            \prg_return_true:
+          \else:
+            \prg_return_false:
+          \fi:
+        \fi:
+      \fi:
+    \fi:
+  }
+\prg_new_conditional:Npnn \@@_change_case_if_takes_ypogegrammeni:n #1 { TF }
+  {
+    \exp_args:Nf \@@_change_case_if_takes_ypogegrammeni:n
+      { \int_eval:n { \@@_codepoint_from_chars:Nw #1 } }
+  }
+\cs_new:Npn \@@_change_case_if_takes_ypogegrammeni:n #1
+  {
+    \if_int_compare:w #1 = "03B1 \exp_stop_f:
+      \prg_return_true:
+    \else:
+      \if_int_compare:w #1 = "03B7 \exp_stop_f:
+        \prg_return_true:
+      \else:
+        \if_int_compare:w #1 = "03C9 \exp_stop_f:
+          \prg_return_true:
+        \else:
+          \prg_return_false:
+        \fi:
+      \fi:
+    \fi:
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_boundary_upper_el:Nnnnw,
+%     \@@_change_case_boundary_upper_el-x-iota:Nnnnw
+%   }
+% \begin{macro}[EXP]{\@@_change_case_boundary_upper_el:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_boundary_upper_el:nnnn}
+% \begin{macro}[EXP]{\@@_change_case_boundary_upper_el:nnnnw}
+%   There is one things that need special treatment at the start of
+%   words in Greek. For an isolated accent \emph{eta},
+%   which is handled by seeing if we have exactly one of the affected
+%   codepoints followed by a space or brace group.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_boundary_upper_el:Nnnnw
+  #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_boundary_upper_el:nnnN }
+      { \@@_change_case_loop:nnnw }
+        {#2} {#3} {#4} #5 \q_@@_recursion_stop
+  }
+\cs_new_eq:cN { @@_change_case_boundary_upper_el-x-iota:Nnnnw }
+  \@@_change_case_boundary_upper_el:Nnnnw
+\cs_new:Npn \@@_change_case_boundary_upper_el:nnnN #1#2#3#4
+  {
+    \token_if_cs:NTF #4
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} }
+      {
+        \@@_codepoint_process:nN
+          { \@@_change_case_boundary_upper_el:nnnn {#1} {#2} {#3} }
+      }
+        #4
+  }
+\cs_new:Npn \@@_change_case_boundary_upper_el:nnnn #1#2#3#4
+  {
+    \bool_lazy_any:nTF
+      {
+        { \@@_codepoint_compare_p:nNn {#4} = { "0389 } }
+        { \@@_codepoint_compare_p:nNn {#4} = { "03AE } }
+        { \@@_codepoint_compare_p:nNn {#4} = { "1F22 } }
+        { \@@_codepoint_compare_p:nNn {#4} = { "1F2A } }
+      }
+      { \@@_change_case_boundary_upper_el:nnnnw {#1} {#2} {#3} {#4} }
+      { \@@_change_case_breathing:nnnn {#1} {#2} {#3} {#4} }
+  }
+\cs_new:Npn \@@_change_case_boundary_upper_el:nnnnw
+  #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} #4 }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0389 }
+              { \@@_change_case_catcode:nn {#4} { "0389 } }
+          }
+        \@@_change_case_loop:nnnw {#1} {#2} {#3}
+      }
+        #5 \q_@@_recursion_stop
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}[EXP]{\@@_change_case_breathing:nnnn}
+% \begin{macro}[EXP]{\@@_change_case_breathing:nnnnn}
+% \begin{macro}[EXP]{\@@_change_case_breathing:nnnnnw}
+% \begin{macro}[EXP]{\@@_change_case_breathing:nnnnnnw}
+% \begin{macro}[EXP]{\@@_change_case_breathing_aux:nnnnnn}
+% \begin{macro}[EXP]{\@@_change_case_breathing_aux:nnnnw}
+% \begin{macro}[EXP]{\@@_change_case_breathing_aux:nnnN}
+% \begin{macro}[EXP]{\@@_change_case_breathing_dialytika:nnnn}
+%   In Greek, breathing diacritics are normally dropped when uppercasing:
+%   see the code for the general case. However, for the first character
+%   of a word, if there is a breather \emph{and} the next character takes
+%   a \emph{dialytika}, it needs to be added. We start by checking if
+%   the current codepoint is in the Greek range, then decomposing.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_breathing:nnnn #1#2#3#4
+  {
+    \@@_change_case_if_greek:nTF {#4}
+      {
+        \exp_args:Ne \@@_change_case_breathing:nnnnn
+          {
+            \codepoint_to_nfd:n
+              { \@@_codepoint_from_chars:Nw #4 }
+          }
+            {#1} {#2} {#3} {#4}
+      }
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} #4 }
+  }
+\cs_new:Npn \@@_change_case_breathing:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_breathing:nnnnnw {#2} {#3} {#4} {#5} }
+        #1 \q_mark
+  }
+%    \end{macrocode}
+%   Normal form decomposition will always give between one and three
+%   codepoints. Luckily, the two breathing marks (\emph{psili} and
+%   \emph{dasia}) will be in a predictable position: last. So we can
+%   quickly establish first that there was a change on decomposition,
+%   and second if the final resulting codepoint is one of the two we
+%   care about.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_breathing:nnnnnw #1#2#3#4#5#6 \q_mark
+  {
+    \tl_if_blank:nTF {#6}
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} #4 }
+      {
+        \@@_codepoint_process:nN
+          { \@@_change_case_breathing:nnnnnnw {#1} {#2} {#3} {#4} {#5} }
+            #6 \q_mark
+      }
+  }
+\cs_new:Npn \@@_change_case_breathing:nnnnnnw #1#2#3#4#5#6#7 \q_mark
+  {
+    \tl_if_blank:nTF {#7}
+      {
+        \@@_change_case_breathing_aux:nnnnnn
+          {#1} {#2} {#3} {#4} {#5} {#6}
+      }
+      {
+        \@@_codepoint_process:nN
+          { \@@_change_case_breathing:nnnnnnw {#1} {#2} {#3} {#4} {#5} }
+          #7 \q_mark
+      }
+  }
+\cs_new:Npn \@@_change_case_breathing_aux:nnnnnn #1#2#3#4#5#6
+  {
+    \bool_lazy_or:nnTF
+      { \@@_codepoint_compare_p:nNn {#6} = { "0313 } }
+      { \@@_codepoint_compare_p:nNn {#6} = { "0314 } }
+      { \@@_change_case_breathing_aux:nnnnw {#1} {#2} {#3} {#5} }
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} #4 }
+  }
+%    \end{macrocode}
+%   Now the lookahead can be fired: check the next codepoint and assess
+%   whether it takes a \emph{dialytika}. Drop the 
+%    breathing mark or generate the \emph{dialytika}: the
+%   latter is code shared with the general mechanism.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_breathing_aux:nnnnw #1#2#3#4#5
+  \q_@@_recursion_stop
+  {
+    \@@_change_case_store:e
+      { \@@_change_case_codepoint:nn { upper } {#4} }
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_breathing_aux:nnnN }
+      { \@@_change_case_loop:nnnw }
+        {#1} {#2} {#3} #5 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_breathing_aux:nnnN #1#2#3#4
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_breathing_dialytika:nnnn {#1} {#2} {#3} } #4
+  }
+\cs_new:Npn \@@_change_case_breathing_dialytika:nnnn #1#2#3#4
+  {
+    \@@_change_case_if_takes_dialytika:nTF {#4}
+      {
+        \@@_change_case_upper_el_dialytika:n {#4}
+        \@@_change_case_loop:nnnw {#1} {#2} {#3}
+      }
+      { \@@_change_case_loop:nnnw {#1} {#2} {#3} #4 }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}[EXP]{\@@_change_case_title_el:nnnnn}
+%   Titlecasing retains accents, but to prevent the uppercasing code
+%   from kicking in, there has to be an explicit function here.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_title_el:nnnnn #1#2#3#4#5
+  { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_case_upper_hy:nnnnn        ,
+%     \@@_change_case_title_hy:nnnnn        ,
+%     \@@_change_case_upper_hy-x-yiwn:nnnnn ,
+%     \@@_change_case_title_hy-x-yiwn:nnnnn
+%   }
+%     See \url{https://www.unicode.org/L2/L2020/20143-armenian-ech-yiwn.pdf}.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_hy:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0587 }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0535 }
+              { \@@_change_case_catcode:nn {#5} { "0535 } }
+            \codepoint_generate:nn { "054E }
+              { \@@_change_case_catcode:nn {#5} { "054E } }
+          }
+        \use:c { @@_change_case_next_ #2 :nnn }
+          {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+\cs_new:Npn \@@_change_case_title_hy:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0587 }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0535 }
+              { \@@_change_case_catcode:nn {#5} { "0535 } }
+            \codepoint_generate:nn { "057E }
+              { \@@_change_case_catcode:nn {#5} { "057E } }
+          }
+        \use:c { @@_change_case_next_ #2 :nnn }
+          {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+\cs_new:cpn { @@_change_case_upper_hy-x-yiwn:nnnnn } #1#2#3#4#5
+  { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+\cs_new_eq:cc { @@_change_case_title_hy-x-yiwn:nnnnn }
+  { @@_change_case_upper_hy-x-yiwn:nnnnn }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]{\@@_change_case_lower_la-x-medieval:nnnnn}
+% \begin{macro}[EXP]{\@@_change_case_upper_la-x-medieval:nnnnn}
+%   Simply swaps of characters.
+%    \begin{macrocode}
+\cs_new:cpn { @@_change_case_lower_la-x-medieval:nnnnn } #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0056 }
+      {
+        \@@_change_case_store:e
+          { \char_generate:nn { "0075 } { \@@_char_catcode:N #5 } }
+        \use:c { @@_change_case_next_ #2 :nnn }
+          {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+\cs_new:cpn { @@_change_case_upper_la-x-medieval:nnnnn } #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0075 }
+      {
+        \@@_change_case_store:e
+          { \char_generate:nn { "0056 } { \@@_char_catcode:N #5 } }
+        \use:c { @@_change_case_next_ #2 :nnn }
+          {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_cases_lower_lt:nnnnn      ,
+%     \@@_change_cases_lower_lt_auxi:nnnnn ,
+%     \@@_change_cases_lower_lt_auxii:nnnnn
+%   }
+% \begin{macro}[rEXP]{\@@_change_case_lower_lt:nnnw}
+% \begin{macro}[rEXP]{\@@_change_case_lower_lt:nnnN}
+% \begin{macro}[rEXP]{\@@_change_case_lower_lt:nnnn}
+%   For  Lithuanian, the issue to be dealt with is dots over lower case
+%   letters: these should be present if there is another accent. The first step
+%   is a simple match attempt: look for the three uppercase accented letters
+%   which should gain a dot-above char in their lowercase form.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_lower_lt:nnnnn #1#2#3#4#5
+  {
+    \exp_args:Ne \@@_change_case_lower_lt_auxi:nnnnn
+      {
+        \int_case:nn { \@@_codepoint_from_chars:Nw #5 }
+          {
+            { "00CC } { "0300 }
+            { "00CD } { "0301 }
+            { "0128 } { "0303 }
+          }  
+      }
+        {#2} {#3} {#4} {#5}
+  }
+%    \end{macrocode}
+%   If there was a hit, output the result with the dot-above and move on.
+%   Otherwise, look for one of the three letters that can take a combining
+%   accent: I, J, and I-ogonek. 
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_lower_lt_auxi:nnnnn #1#2#3#4#5
+  {
+    \tl_if_blank:nTF {#1}
+      {
+        \exp_args:Ne \@@_change_case_lower_lt_auxii:nnnnn
+          {
+            \int_case:nn { \@@_codepoint_from_chars:Nw #5 }
+              {
+                { "0049 } { "0069 }
+                { "004A } { "006A }
+                { "012E } { "012F }
+              }  
+          }
+            {#2} {#3} {#4} {#5}
+      }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0069 }
+              { \@@_change_case_catcode:nn {#5} { "0069 } }
+            \codepoint_generate:nn { "0307 }
+              { \@@_change_case_catcode:nn {#5} { "0307 } }
+            \codepoint_generate:nn {#1}
+              { \@@_change_case_catcode:nn {#5} {#1} }
+          }
+        \@@_change_case_loop:nnnw {#2} {#3} {#4}
+      }
+  }
+%    \end{macrocode}
+%   Again, branch depending on a hit. If there is one, we output the character
+%   then need to look for a combining accent: as usual, we need to be aware of
+%   the loop situation.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_lower_lt_auxii:nnnnn #1#2#3#4#5
+  {
+    \tl_if_blank:nTF {#1}
+      { \@@_change_case_codepoint:nnnnn {#2} {#2} {#3} {#4} {#5} }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn {#1}
+              { \@@_change_case_catcode:nn {#5} {#1} }
+          }
+        \@@_change_case_lower_lt:nnnw {#2} {#3} {#4}
+      }
+  }
+\cs_new:Npn \@@_change_case_lower_lt:nnnw #1#2#3#4 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#4}
+      { \@@_change_case_lower_lt:nnnN }
+      { \@@_change_case_loop:nnnw }
+        {#1} {#2} {#3} #4 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_lower_lt:nnnN #1#2#3#4
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_lower_lt:nnnn {#1} {#2} {#3} } #4
+  }
+\cs_new:Npn \@@_change_case_lower_lt:nnnn #1#2#3#4
+  {
+    \bool_lazy_and:nnT
+      {
+        \bool_lazy_or_p:nn
+          { ! \tl_if_single_p:n {#4} }
+          { ! \token_if_cs_p:N #4 }
+      }
+      {
+        \bool_lazy_any_p:n
+          {
+            { \@@_codepoint_compare_p:nNn {#4} = { "0300 } }
+            { \@@_codepoint_compare_p:nNn {#4} = { "0301 } }
+            { \@@_codepoint_compare_p:nNn {#4} = { "0303 } }
+          }
+      }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0307 }
+              { \@@_change_case_catcode:nn {#4} { "0307 } }
+          }
+      }
+    \@@_change_case_loop:nnnw {#1} {#2} {#3} #4
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}[EXP]
+%   {
+%     \@@_change_cases_upper_lt:nnnnn     ,
+%     \@@_change_cases_upper_lt_aux:nnnnn
+%   }
+% \begin{macro}[rEXP]{\@@_change_case_upper_lt:nnnw}
+% \begin{macro}[rEXP]{\@@_change_case_upper_lt:nnnN}
+% \begin{macro}[rEXP]{\@@_change_case_upper_lt:nnnn}
+%   The uppercasing version: first find i/j/i-ogonek, then look for the
+%   combining char: drop it if present.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_lt:nnnnn #1#2#3#4#5
+  {
+    \exp_args:Ne \@@_change_case_upper_lt_aux:nnnnn
+      {
+        \int_case:nn { \@@_codepoint_from_chars:Nw #5 }
+          {
+            { "0069 } { "0049 }
+            { "006A } { "004A }
+            { "012F } { "012E }
+          }  
+      }
+      {#2} {#3} {#4} {#5}
+  }
+\cs_new:Npn \@@_change_case_upper_lt_aux:nnnnn #1#2#3#4#5
+  {
+    \tl_if_blank:nTF {#1}
+      { \@@_change_case_codepoint:nnnnn { upper } {#2} {#3} {#4} {#5} }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn {#1}
+              { \@@_change_case_catcode:nn {#5} {#1} }
+          }
+        \@@_change_case_upper_lt:nnnw {#2} {#3} {#4}
+      }
+  }
+\cs_new:Npn \@@_change_case_upper_lt:nnnw #1#2#3#4 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#4}
+      { \@@_change_case_upper_lt:nnnN }
+      { \use:c { @@_change_case_next_ #1 :nnn } }
+        {#1} {#2} {#3} #4 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_upper_lt:nnnN #1#2#3#4
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_upper_lt:nnnn {#1} {#2} {#3} } #4
+  }
+\cs_new:Npn \@@_change_case_upper_lt:nnnn #1#2#3#4
+  {
+    \bool_lazy_and:nnTF
+      {
+        \bool_lazy_or_p:nn
+          { ! \tl_if_single_p:n {#4} }
+          { ! \token_if_cs_p:N #4 }
+      }
+      { \@@_codepoint_compare_p:nNn {#4} = { "0307 } }
+      { \use:c { @@_change_case_next_ #1 :nnn } {#1} {#2} {#3} }
+      { \use:c { @@_change_case_next_ #1 :nnn } {#1} {#2} {#3} #4 }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {\@@_change_case_title_nl:nnnnn, \@@_change_case_title_nl_aux:nnnnn}
+% \begin{macro}[EXP]{\@@_change_case_title_nl:nnnw}
+% \begin{macro}[EXP]{\@@_change_case_title_nl:nnnN}
+%   For Dutch, there is a single look-ahead test for \texttt{ij} when
+%   title casing. If the appropriate letters are found, produce \texttt{IJ}
+%   and gobble the \texttt{j}/\texttt{J}.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_title_nl:nnnnn #1#2#3#4#5
+  {
+    \tl_if_single:nTF {#5}
+      { \@@_change_case_title_nl_aux:nnnnn }
+      { \@@_change_case_codepoint:nnnnn }
+        {#1} {#2} {#3} {#4}  {#5}
+  }
+\cs_new:Npn \@@_change_case_title_nl_aux:nnnnn #1#2#3#4#5
+  {
+    \bool_lazy_or:nnTF
+      { \int_compare_p:nNn {`#5} = { "0049 } }
+      { \int_compare_p:nNn {`#5} = { "0069 } }
+      {
+        \@@_change_case_store:e
+          { \char_generate:nn { "0049 } { \@@_char_catcode:N #5 } }
+        \@@_change_case_title_nl:nnnw {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+\cs_new:Npn \@@_change_case_title_nl:nnnw #1#2#3#4 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#4}
+      { \@@_change_case_title_nl:nnnN }
+      { \use:c { @@_change_case_next_ #1 :nnn } }
+        {#1} {#2} {#3} #4 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_title_nl:nnnN #1#2#3#4
+  {
+    \bool_lazy_and:nnTF
+      { ! \token_if_cs_p:N #4 }
+      {
+        \bool_lazy_or_p:nn
+          { \int_compare_p:nNn {`#4} = { "004A } }
+          { \int_compare_p:nNn {`#4} = { "006A } }
+      }
+      {
+        \@@_change_case_store:e
+          { \char_generate:nn { "004A } { \@@_char_catcode:N #4 } }
+        \use:c { @@_change_case_next_ #1 :nnn } {#1} {#2} {#3}
+      }
+      { \use:c { @@_change_case_next_ #1 :nnn } {#1} {#2} {#3} #4 }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]{\@@_change_case_lower_tr:nnnnn}
+% \begin{macro}[EXP]{\@@_change_case_lower_tr:nnnNw}
+% \begin{macro}[EXP]{\@@_change_case_lower_tr:NnnnN}
+% \begin{macro}[EXP]{\@@_change_case_lower_tr:Nnnnn}
+%   The Turkic languages need special treatment for dotted-i and dotless-i.
+%   The lower casing rule can be expressed in terms of searching first for
+%   either a dotless-I or a dotted-I. In the latter case the mapping is
+%   easy, but in the former there is a second stage search.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_lower_tr:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0049 }
+      { \@@_change_case_lower_tr:nnnNw {#1} {#3} {#4} #5 }
+      {
+        \@@_codepoint_compare:nNnTF {#5} = { "0130 }
+          {
+            \@@_change_case_store:e
+              {
+                \codepoint_generate:nn { "0069 }
+                  { \@@_change_case_catcode:nn {#5} { "0069 } }
+              }
+            \@@_change_case_loop:nnnw {#1} {#3} {#4}
+          }
+          { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+      }
+  }
+%    \end{macrocode}
+%   After a dotless-I there may be a dot-above character. If there is then
+%   a dotted-i should be produced, otherwise output a dotless-i. When the
+%   combination is found both the dotless-I and the dot-above char have to
+%   be removed from the input.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_lower_tr:nnnNw #1#2#3#4#5 \q_@@_recursion_stop
+  {
+    \tl_if_head_is_N_type:nTF {#5}
+      { \@@_change_case_lower_tr:NnnnN  #4 {#1} {#2} {#3} }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0131 }
+              { \@@_change_case_catcode:nn {#4} { "0131 } }
+          }
+        \@@_change_case_loop:nnnw {#1} {#2} {#3}
+      }
+        #5 \q_@@_recursion_stop
+  }
+\cs_new:Npn \@@_change_case_lower_tr:NnnnN #1#2#3#4#5
+  {
+    \@@_codepoint_process:nN
+      { \@@_change_case_lower_tr:Nnnnn #1 {#2} {#3} {#4} } #5
+  }
+\cs_new:Npn \@@_change_case_lower_tr:Nnnnn #1#2#3#4#5
+  {
+    \bool_lazy_or:nnTF
+      {
+        \bool_lazy_and_p:nn
+          { \tl_if_single_p:n {#5} }
+          { \token_if_cs_p:N #5 }
+      }
+      { ! \@@_codepoint_compare_p:nNn {#5} = { "0307 } }
+      {
+        \@@_change_case_store:e 
+          {
+            \codepoint_generate:nn { "0131 }
+              { \@@_change_case_catcode:nn {#1} { "0131 } }
+          }
+        \@@_change_case_loop:nnnw {#2} {#3} {#4} #5
+      }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0069 }
+              { \@@_change_case_catcode:nn {#1} { "0069 } }
+          }
+        \@@_change_case_loop:nnnw {#2} {#3} {#4}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}[EXP]{\@@_change_case_upper_tr:nnnnn}
+%   Uppercasing is easier: just one exception with no context.
+%    \begin{macrocode}
+\cs_new:Npn \@@_change_case_upper_tr:nnnnn #1#2#3#4#5
+  {
+    \@@_codepoint_compare:nNnTF {#5} = { "0069 }
+      {
+        \@@_change_case_store:e
+          {
+            \codepoint_generate:nn { "0130 }
+              { \@@_change_case_catcode:nn {#5} { "0130 } }
+          }
+        \use:c { @@_change_case_next_ #2 :nnn } {#2} {#3} {#4}
+      }
+      { \@@_change_case_codepoint:nnnnn {#1} {#2} {#3} {#4} {#5} }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {\@@_change_case_lower_az:nnnnn, \@@_change_case_upper_az:nnnnn}
+%   Straight copies.
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_change_case_lower_az:nnnnn
+  \@@_change_case_lower_tr:nnnnn
+\cs_new_eq:NN \@@_change_case_upper_az:nnnnn
+  \@@_change_case_upper_tr:nnnnn
+%    \end{macrocode}
+% \end{macro}
+%
+% The (fixed) look-up mappings for letter-like control sequences.
+%    \begin{macrocode}
+\group_begin:
+  \cs_set_protected:Npn \@@_change_case_setup:NN #1#2
+    {
+      \quark_if_recursion_tail_stop:N #1
+      \tl_const:cn { c_@@_lowercase_ \token_to_str:N #1 _tl }
+        { #2 }
+      \tl_const:cn { c_@@_uppercase_ \token_to_str:N #2 _tl }
+        { #1 }
+      \@@_change_case_setup:NN
+    }
+  \@@_change_case_setup:NN
+  \AA \aa
+  \AE \ae
+  \DH \dh
+  \DJ \dj
+  \IJ \ij
+  \L  \l
+  \NG \ng
+  \O  \o
+  \OE \oe
+  \SS \ss
+  \TH \th
+  \q_recursion_tail ?
+  \q_recursion_stop
+  \tl_const:cn { c_@@_uppercase_ \token_to_str:N \i _tl } { I }
+  \tl_const:cn { c_@@_uppercase_ \token_to_str:N \j _tl } { J }
+\group_end:
+%    \end{macrocode}
+%
+% To deal with possible encoding-specific extensions to \tn{@uclclist},
+% we check at the end of the preamble. This will therefore only apply
+% to \LaTeXe{} package mode.
+%    \begin{macrocode}
+\tl_if_exist:NT \@expl@finalise@setup@@@@
+  {
+    \tl_gput_right:Nn \@expl@finalise@setup@@@@
+      {
+        \tl_gput_right:Nn \@kernel@after@begindocument
+          {
+            \group_begin:
+              \cs_set_protected:Npn \@@_change_case_setup:Nn #1#2
+                {
+                  \quark_if_recursion_tail_stop:N #1
+                  \tl_if_single_token:nT {#2}
+                    {
+                      \cs_if_exist:cF
+                        { c_@@_uppercase_ \token_to_str:N #1 _tl }
+                        {
+                          \tl_const:cn
+                            { c_@@_uppercase_ \token_to_str:N #1 _tl }
+                            { #2 }
+                        }
+                      \cs_if_exist:cF
+                        { c_@@_lowercase_ \token_to_str:N #2 _tl }
+                        {
+                          \tl_const:cn
+                            { c_@@_lowercase_ \token_to_str:N #2 _tl }
+                            { #1 }
+                        }
+                    }
+                  \@@_change_case_setup:Nn
+                }
+              \exp_after:wN \@@_change_case_setup:Nn \@uclclist
+              \q_recursion_tail ?
+              \q_recursion_stop
+            \group_end:
+          }
+      }
+  }
+%    \end{macrocode}
+%
+% A few adjustments to case mapping for combining chars: these are not needed
+% for the Unicode engines
+%    \begin{macrocode}
+\sys_if_engine_opentype:F
+  {
+    \text_declare_uppercase_mapping:nn { "01F0 } { \v { J } }
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

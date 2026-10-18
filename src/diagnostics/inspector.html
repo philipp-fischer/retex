@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Rust pdfTeX layout inspector</title>
+<style>
+body{margin:0;font:14px system-ui;background:#eef1f5;color:#172135}header{padding:16px 24px;background:#fff;border-bottom:1px solid #ccd3dd}h1{font-size:20px;margin:0 0 8px}.controls{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:12px}main{display:grid;grid-template-columns:minmax(600px,1fr) 340px;gap:16px;padding:20px}.canvas{overflow:auto;max-height:80vh;background:#dbe2ec;padding:16px}svg{background:white;box-shadow:0 2px 10px #0002;display:block}.box{fill:none;stroke:#3282bb;stroke-width:.5}.glyph{fill:#e28d2220;stroke:#e28d22;stroke-width:.3}.ink{fill:#26944a15;stroke:#26944a;stroke-width:.4}.baseline{stroke:#707a8b;stroke-width:.4;stroke-dasharray:2 2}.rule{fill:#333}.gap{stroke:#b33a77;stroke-width:1}.selected{stroke:#db2020;stroke-width:1.2}aside{background:white;padding:14px;overflow:auto;max-height:80vh}pre{white-space:pre-wrap;font:12px monospace}.hint{color:#566275;font-size:12px}.error{color:#a22}label{white-space:nowrap}
+</style>
+<header><h1>Rust pdfTeX layout inspector</h1><div id="status"></div><div class="hint">Orange rectangles show logical metrics. Green rectangles show measured TrueType glyph ink where available. Glyph labels use a browser font. Glyph origins use explicit PDF matrices. Unknown font advances remain null; their origins are still shown. Box and kern overlays belong to calculated mode. Both views use PDF big points.</div>
+<div class="controls"><label>Page <select id="page"></select></label><label>Positions <select id="stage"><option value="calculated">Calculated layout</option><option value="emitted">Emitted PDF cursor</option></select></label><label>Zoom <input id="zoom" type="range" min="50" max="250" value="100"></label><label><input id="boxes" type="checkbox" checked> Boxes</label><label><input id="glyphs" type="checkbox" checked> Glyph bounds</label><label><input id="ink" type="checkbox" checked> TrueType ink</label><label><input id="baselines" type="checkbox" checked> Baselines</label><label><input id="gaps" type="checkbox" checked> Glue / kerns</label><label><input id="labels" type="checkbox" checked> Glyph labels</label></div></header>
+<main><div class="canvas"><svg id="canvas" xmlns="http://www.w3.org/2000/svg"></svg></div><aside><strong>Selected placement</strong><p class="hint">Click a glyph or box to inspect dimensions, font code, source origins, and emitted advance.</p><pre id="details"></pre><strong>Run limitations</strong><ul id="limitations"></ul></aside></main>
+<script id="layout-data" type="application/json">__LAYOUT_DATA__</script>
+<script>
+const data=JSON.parse(document.getElementById('layout-data').textContent);
+const $=id=>document.getElementById(id), ns='http://www.w3.org/2000/svg';
+$('status').textContent=`Run: ${data.status}; ${data.pages.length} page(s); retained events: ${data.stats.retained_events}; dropped: ${data.stats.dropped_events}`;
+if(data.status!=='complete')$('status').className='error';
+for(const p of data.pages){const o=document.createElement('option');o.value=p.page;o.textContent=p.page;$('page').append(o)}
+for(const text of [...data.limitations,...(data.warnings||[]),...data.errors]){const li=document.createElement('li');li.textContent=text;$('limitations').append(li)}
+function shape(type,attrs,parent=$('canvas')){const e=document.createElementNS(ns,type);for(const [key,value]of Object.entries(attrs))e.setAttribute(key,value);parent.append(e);return e}
+function render(){const svg=$('canvas');svg.replaceChildren();const page=data.pages.find(p=>p.page===Number($('page').value));if(!page)return;
+const bp=sp=>sp*800/(803*65536);
+const width=bp(page.width_sp),height=bp(page.height_sp),scale=Number($('zoom').value)/100;
+svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('width',width*scale);svg.setAttribute('height',height*scale);
+let unknown=0;const actual=$('stage').value==='emitted';$('boxes').disabled=actual;
+for(const line of page.lines){const emitted=new Map(line.emitted.map(g=>[g.placement_id,g]));
+const baselines=new Set(actual?line.emitted.filter(g=>g.code!==null).map(g=>height-g.baseline_y_bp):line.placements.filter(p=>p.kind==='glyph').map(p=>bp(p.baseline_y_sp)));
+if($('baselines').checked)for(const baseline of baselines)shape('line',{x1:65,x2:width-65,y1:baseline,y2:baseline,class:'baseline'});
+for(const item of line.placements){const g=emitted.get(item.placement_id);if(actual&&!g)continue;let x=bp(item.x_sp),y=bp(item.baseline_y_sp),w=bp(item.width_sp);
+if($('stage').value==='emitted'&&['glyph','glue'].includes(item.kind)){if(!g||g.x_bp===null){unknown++;continue}x=g.x_bp;y=height-g.baseline_y_bp;if(g.advance_bp!==null)w=g.advance_bp}
+const group=shape('g',{'data-placement':item.placement_id});
+if(['hbox','vbox'].includes(item.kind)&&$('boxes').checked)shape('rect',{x,y:y-bp(item.height_sp),width:Math.max(.5,w),height:Math.max(.5,bp(item.height_sp+item.depth_sp)),class:'box'},group);
+if(item.kind==='rule')shape('rect',{x,y:y-bp(item.height_sp),width:Math.max(0,w),height:Math.max(0,bp(item.height_sp+item.depth_sp)),class:'rule'},group);
+if(item.kind==='glyph'){
+if($('glyphs').checked)shape('rect',{x,y:y-bp(item.height_sp),width:Math.max(.5,w),height:Math.max(.5,bp(item.height_sp+item.depth_sp)),class:'glyph'},group);
+if($('ink').checked&&item.shaped){const [left,bottom,right,top]=item.shaped.ink_sp;shape('rect',{x:x+bp(left),y:y-bp(top),width:bp(right-left),height:bp(top-bottom),class:'ink'},group)}
+if($('labels').checked){const text=shape('text',{x,y,'font-size':8,fill:'#252a37'},group);text.textContent=item.shaped?.text||item.glyph_name||`#${item.code}`}}
+if(['glue','kern','vglue','vkern'].includes(item.kind)&&$('gaps').checked){const vertical=item.kind.startsWith('v');shape('line',vertical?{x1:x-3,x2:x-3,y1:y,y2:y+w,class:'gap'}:{x1:x,x2:x+w,y1:y+3,y2:y+3,class:'gap'},group);const t=shape('text',{x,y:y+10,'font-size':5,fill:'#b33a77'},group);t.textContent=`${item.kind} ${w.toFixed(2)}`}
+const title=shape('title',{},group);title.textContent=`${item.kind} node ${item.node_id}, placement ${item.placement_id}`;
+group.addEventListener('click',()=>{$('details').textContent=JSON.stringify({calculated:item,emitted:g||null},null,2);for(const e of svg.querySelectorAll('.selected'))e.classList.remove('selected');for(const e of group.children)e.classList.add('selected')});
+}}
+if(unknown){const t=shape('text',{x:20,y:20,'font-size':10,fill:'#a22'});t.textContent=`${unknown} placements have unknown emitted positions`}
+}
+for(const id of ['page','stage','zoom','boxes','glyphs','ink','baselines','gaps','labels'])$(id).addEventListener('input',render);render();
+</script></html>

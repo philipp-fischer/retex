@@ -1,0 +1,39 @@
+{
+  "name": "retex-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "package": "npm run build && node tools/package.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test app/**/*.test.ts",
+    "format": "prettier --write \"app/**/*.{ts,tsx,js}\" \"*.{js,css,html,json,ts}\" \"tools/*.mjs\"",
+    "format:check": "prettier --check \"app/**/*.{ts,tsx,js}\" \"*.{js,css,html,json,ts}\" \"tools/*.mjs\""
+  },
+  "dependencies": {
+    "@codemirror/commands": "6.8.1",
+    "@codemirror/language": "6.11.3",
+    "@codemirror/legacy-modes": "6.5.1",
+    "@codemirror/search": "6.5.11",
+    "@codemirror/state": "6.5.2",
+    "@codemirror/theme-one-dark": "6.1.3",
+    "@codemirror/view": "6.38.6",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-resizable-panels": "3.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.10",
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.9",
+    "prettier": "3.6.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  }
+}

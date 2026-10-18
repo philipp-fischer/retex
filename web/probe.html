@@ -1,0 +1,350 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>TeX worker validation</title>
+<div id="preview"></div>
+<script type="module">
+  import { RetainedRenderer, PreviewBaseError } from "./preview.js";
+  import { transportObservation } from "./preview-transport.js";
+  const renderer = new RetainedRenderer(document.querySelector("#preview"));
+  const worker = new Worker("./engine-worker.js", { type: "module" });
+  const messages = [],
+    waiting = [];
+  worker.onmessage = ({ data }) => {
+    if (data.type === "page") {
+      try {
+        if (renderer.pageRevision?.revision !== data.revision)
+          renderer.beginRevision(data.document, data.revision);
+        renderer.presentPage(
+          data.preview,
+          data.document,
+          data.revision,
+          data.pass,
+          data.page,
+        );
+        const painted = renderer.pages.get(data.page);
+        data.presentation = {
+          page: data.page,
+          glyphs: painted.glyphs,
+          images: painted.imagePaints,
+        };
+      } catch (error) {
+        data.presentation_error = String(error);
+      }
+      worker.postMessage({
+        protocol_version: 2,
+        type: "page_ack",
+        document: data.document,
+        revision: data.revision,
+        pass: data.pass,
+        page: data.page,
+      });
+    }
+    messages.push(data);
+    for (let i = waiting.length - 1; i >= 0; i--) {
+      const item = waiting[i];
+      if (item.predicate(data)) {
+        waiting.splice(i, 1);
+        clearTimeout(item.timer);
+        item.resolve(data);
+      }
+    }
+  };
+  worker.onerror = (event) =>
+    messages.push({ type: "worker-error", message: event.message });
+  function wait(predicate, timeout = 45000, after = 0) {
+    const found = messages.slice(after).find(predicate);
+    if (found) return Promise.resolve(found);
+    return new Promise((resolve, reject) => {
+      const item = {
+        predicate,
+        resolve,
+        timer: setTimeout(() => {
+          const i = waiting.indexOf(item);
+          if (i >= 0) waiting.splice(i, 1);
+          reject(Error("Worker timeout"));
+        }, timeout),
+      };
+      waiting.push(item);
+    });
+  }
+  async function present(result, revision) {
+    result.preview_transport = transportObservation(result.preview);
+    try {
+      result.presentation = renderer.present(result.preview, "probe", revision);
+    } catch (error) {
+      if (!(error instanceof PreviewBaseError)) throw error;
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "preview_resync",
+        document: "probe",
+        revision,
+      });
+      const full = await wait(
+        (m) =>
+          ["preview_full", "failed"].includes(m.type) &&
+          m.revision === revision,
+        45000,
+        after,
+      );
+      if (!full.preview)
+        throw Error(full.message || "Preview resynchronization failed");
+      result.preview_transport.resync = transportObservation(full.preview);
+      result.presentation = renderer.present(full.preview, "probe", revision);
+    }
+    result.preview = renderer.scene;
+    const after = messages.length;
+    worker.postMessage({
+      protocol_version: 2,
+      type: "preview_ack",
+      document: "probe",
+      revision,
+    });
+    result.preview_ack = await wait(
+      (m) => m.type === "preview_acknowledged" && m.revision === revision,
+      45000,
+      after,
+    );
+    if (!result.preview_ack.accepted)
+      throw Error("Presentation was superseded before acknowledgement");
+  }
+  window.probe = {
+    async initialize(config = {}) {
+      worker.postMessage({
+        protocol_version: 2,
+        type: "initialize",
+        config: { progressive_pages: false, ...config },
+      });
+      return await wait(
+        (m) =>
+          m.type === "ready" ||
+          m.type === "failed" ||
+          m.type === "worker-error",
+      );
+    },
+    pageResults(revision) {
+      return messages
+        .filter((m) => m.type === "page" && m.revision === revision)
+        .map((m) => ({
+          pass: m.pass,
+          page: m.page,
+          presentation: m.presentation,
+          error: m.presentation_error,
+        }));
+    },
+    async run(
+      bytes,
+      revision,
+      files = [],
+      paint = false,
+      timeout = 45000,
+      settling = null,
+    ) {
+      const started = performance.now();
+      worker.postMessage({
+        protocol_version: 2,
+        type: "run",
+        document: "probe",
+        revision,
+        preview: paint,
+        settling,
+        bytes: new Uint8Array(bytes),
+        files: files.map((f) => ({
+          ...f,
+          path: new Uint8Array(f.path),
+          bytes: new Uint8Array(f.bytes),
+        })),
+      });
+      const result = await wait(
+        (m) =>
+          (m.type === "complete" ||
+            m.type === "failed" ||
+            m.type === "need_resource") &&
+          m.revision === revision,
+        timeout,
+      );
+      if (paint && result.preview) {
+        try {
+          const begin = performance.now();
+          await present(result, revision);
+          result.presentation.canvas_ms = performance.now() - begin;
+          // Two rAF callbacks are a documented presentation proxy, not a proof
+          // of physical display scanout. Verify the revision after both callbacks.
+          await new Promise((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(resolve)),
+          );
+          if (renderer.revision?.revision !== revision)
+            throw Error("Superseded presentation");
+          result.presentation.accepted_to_double_raf_ms =
+            performance.now() - started;
+          result.presentation.proxy =
+            "two requestAnimationFrame callbacks; headless browser, no scanout measurement";
+        } catch (error) {
+          result.preview_error = String(error);
+        }
+      }
+      return result;
+    },
+    async edit(
+      base_revision,
+      start,
+      end,
+      bytes,
+      revision,
+      paint = true,
+      timeout = 180000,
+      settling = null,
+    ) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "edit",
+        document: "probe",
+        base_revision,
+        start,
+        end,
+        bytes: new Uint8Array(bytes),
+        revision,
+        preview: paint,
+        settling,
+      });
+      const result = await wait(
+        (m) =>
+          (m.type === "complete" ||
+            m.type === "failed" ||
+            m.type === "need_resource") &&
+          m.revision === revision,
+        timeout,
+        after,
+      );
+      if (paint && result.preview) {
+        try {
+          await present(result, revision);
+        } catch (error) {
+          result.preview_error = String(error);
+        }
+      }
+      return result;
+    },
+    async request(data, types, timeout = 45000) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        ...data,
+        document: "probe",
+        ...(data.bytes ? { bytes: new Uint8Array(data.bytes) } : {}),
+      });
+      return await wait(
+        (m) => types.includes(m.type) && m.revision === data.revision,
+        timeout,
+        after,
+      );
+    },
+    async runUntilPass(bytes, revision, pass, settling, timeout = 45000) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "run",
+        document: "probe",
+        revision,
+        bytes: new Uint8Array(bytes),
+        settling,
+      });
+      return await wait(
+        (m) =>
+          m.revision === revision &&
+          ((m.type === "settling" && m.settling.pass === pass) ||
+            m.type === "failed"),
+        timeout,
+        after,
+      );
+    },
+    async resolveResource(
+      revision,
+      request_id,
+      delta,
+      paint = true,
+      timeout = 45000,
+    ) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "resource_reply",
+        document: "probe",
+        revision,
+        request_id,
+        ...(delta ? { delta } : {}),
+      });
+      const result = await wait(
+        (m) =>
+          (m.type === "complete" ||
+            m.type === "failed" ||
+            m.type === "need_resource") &&
+          m.revision === revision,
+        timeout,
+        after,
+      );
+      if (paint && result.preview) {
+        try {
+          await present(result, revision);
+        } catch (error) {
+          result.preview_error = String(error);
+        }
+      }
+      return result;
+    },
+    async export(revision) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "export",
+        document: "probe",
+        revision,
+      });
+      const reply = await wait(
+        (m) =>
+          (m.type === "pdf" || m.type === "failed") && m.revision === revision,
+        45000,
+        after,
+      );
+      return { ...reply, bytes: reply.bytes ? Array.from(reply.bytes) : null };
+    },
+    async read(revision, path) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "read",
+        document: "probe",
+        revision,
+        path,
+      });
+      const reply = await wait(
+        (m) =>
+          (m.type === "output" || m.type === "failed") &&
+          m.revision === revision &&
+          (!m.path || m.path === path),
+        45000,
+        after,
+      );
+      return { ...reply, bytes: reply.bytes ? Array.from(reply.bytes) : null };
+    },
+    async acceptOutputs(revision) {
+      const after = messages.length;
+      worker.postMessage({
+        protocol_version: 2,
+        type: "accept_outputs",
+        document: "probe",
+        revision,
+      });
+      return await wait(
+        (m) =>
+          (m.type === "outputs_accepted" || m.type === "failed") &&
+          m.revision === revision,
+        45000,
+        after,
+      );
+    },
+    messages,
+    renderer,
+  };
+</script>

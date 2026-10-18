@@ -1,0 +1,836 @@
+% \iffalse meta-comment
+%
+%% File: l3pdf.dtx
+%
+% Copyright(C) 2019-2025 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3pdf} module\\ Core PDF support^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2025-01-18}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \section{Objects}
+%
+% \subsection{Named objects}
+%
+% An \meta{object} name should fully expand to tokens suitable for use in a
+% label-like context.
+%
+% \begin{function}[added = 2022-08-23]{\pdf_object_new:n}
+%   \begin{syntax}
+%     \cs{pdf_object_new:n} \Arg{object}
+%   \end{syntax}
+%   Declares \meta{object} as a PDF object. The object may be referenced
+%   from this point on, and written later using \cs{pdf_object_write:nnn}.
+% \end{function}
+%
+% \begin{function}[added = 2022-08-23]
+%   {\pdf_object_write:nnn, \pdf_object_write:nne}
+%   \begin{syntax}
+%     \cs{pdf_object_write:nnn} \Arg{object} \Arg{type} \Arg{content}
+%   \end{syntax}
+%   Writes the \meta{content} as content of the \meta{object}. Depending on the
+%   \meta{type} declared for the object, the format required for
+%   \meta{content} will vary:
+%   \begin{itemize}
+%     \item[\texttt{array}] A space-separated list of values
+%     \item[\texttt{dict}] Key--value pairs in the form
+%       \texttt{/\meta{key} \meta{value}}
+%     \item[\texttt{fstream}] Two brace groups: \meta{file name} and
+%       \meta{file content}
+%     \item[\texttt{stream}] Two brace groups: \meta{attributes (dictionary)}
+%       and \meta{stream contents}
+%   \end{itemize}
+% \end{function}
+%
+% \begin{function}[EXP, added = 2021-02-10]{\pdf_object_ref:n}
+%   \begin{syntax}
+%     \cs{pdf_object_ref:n} \Arg{object}
+%   \end{syntax}
+%   Inserts the appropriate information to reference the \meta{object}
+%   in for example page resource allocation. If the \meta{object} does
+%   not exist then the function expands to a reference to object zero;
+%   no PDF indirect object ever has this number, so this is a marker for
+%   error.
+% \end{function}
+%
+% \begin{function}[EXP, pTF, added = 2020-05-15]{\pdf_object_if_exist:n}
+%   \begin{syntax}
+%    \cs{pdf_object_if_exist_p:n} \Arg{object}
+%    \cs{pdf_object_if_exist:nTF} \Arg{object} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests whether an object with name \Arg{object} has been defined.
+% \end{function}
+%
+% \subsection{Indexed objects}
+%
+% Objects can also be created using a pair of \meta{class} and \emph{index};
+% the \meta{class} argument should expand to character tokens, whilst the
+% \meta{index} is an \meta{int expr} and starts at $1$. For large
+% families of objects, this approach is more efficient than using
+% individual names.
+%
+% \begin{function}[added = 2024-04-01]{\pdf_object_new_indexed:nn}
+%   \begin{syntax}
+%     \cs{pdf_object_new_indexed:nn} \Arg{class} \Arg{index}
+%   \end{syntax}
+%   Declares a PDF object of \meta{class} and \meta{index}. The object may be
+%   referenced from this point on, and written later using
+%   \cs{pdf_object_write_indexed:nnnn}.
+% \end{function}
+%
+% \begin{function}[added = 2024-04-01]
+%   {\pdf_object_write_indexed:nnnn, \pdf_object_write_indexed:nnne}
+%   \begin{syntax}
+%     \cs{pdf_object_write_indexed:nnnn} \Arg{class} \Arg{index} \Arg{type} \Arg{content}
+%   \end{syntax}
+%   Writes the \meta{content} as content of the object of \meta{class} and
+%   \meta{index}. Depending on the
+%   \meta{type} declared for the object, the format required for the
+%   \meta{content} will vary
+%   \begin{itemize}
+%     \item[\texttt{array}] A space-separated list of values
+%     \item[\texttt{dict}] Key--value pairs in the form
+%       \texttt{/\meta{key} \meta{value}}
+%     \item[\texttt{fstream}] Two brace groups: \meta{file name} and
+%       \meta{file content}
+%     \item[\texttt{stream}] Two brace groups: \meta{attributes (dictionary)}
+%       and \meta{stream contents}
+%   \end{itemize}
+% \end{function}
+%
+% \begin{function}[EXP, added = 2024-04-01]{\pdf_object_ref_indexed:nn}
+%   \begin{syntax}
+%     \cs{pdf_object_ref_indexed:nn} \Arg{class} \Arg{index}
+%   \end{syntax}
+%   Inserts the appropriate information to reference the object of \meta{class}
+%   and \meta{index} in for example page resource allocation. If the
+%   \meta{class}/\meta{index} combination does
+%   not exist then the function expands to a reference to object zero;
+%   no PDF indirect object ever has this number, so this is a marker for
+%   error.
+% \end{function}
+%
+% \subsection{General functions}
+%
+% \begin{function}[added = 2021-02-10]
+%   {\pdf_object_unnamed_write:nn, \pdf_object_unnamed_write:ne}
+%   \begin{syntax}
+%     \cs{pdf_object_unnamed_write:nn} \Arg{type} \Arg{content}
+%   \end{syntax}
+%   Writes the \meta{content} as content of an anonymous object. Depending on the
+%   \meta{type}, the format required for \meta{content} will vary:
+%   \begin{itemize}
+%     \item[\texttt{array}] A space-separated list of values
+%     \item[\texttt{dict}] Key--value pairs in the form
+%       \texttt{/\meta{key} \meta{value}}
+%     \item[\texttt{fstream}] Two brace groups: \meta{attributes (dictionary)}
+%       and \meta{file name}
+%     \item[\texttt{stream}] Two brace groups: \meta{attributes (dictionary)}
+%       and \meta{stream contents}
+%   \end{itemize}
+% \end{function}
+%
+% \begin{function}[EXP, added = 2021-02-10]{\pdf_object_ref_last:}
+%   \begin{syntax}
+%     \cs{pdf_object_ref_last:}
+%   \end{syntax}
+%   Inserts the appropriate information to reference the last \meta{object}
+%   created. This is particularly useful for anonymous objects.
+% \end{function}
+%
+% \begin{function}[EXP, added = 2021-02-10, updated = 2024-04-22]
+%   {\pdf_pageobject_ref:n}
+%   \begin{syntax}
+%     \cs{pdf_pageobject_ref:n} \Arg{abspage}
+%   \end{syntax}
+%   Inserts the appropriate information to reference the \meta{abspage};
+%   the latter is expanded fully before further processing.
+% \end{function}
+%
+% \section{Version}
+%
+% \begin{function}[pTF, EXP, added = 2021-02-10]{\pdf_version_compare:Nn}
+%   \begin{syntax}
+%     \cs{pdf_version_compare_p:Nn} \meta{relation} \Arg{version}
+%     \cs{pdf_version_compare:NnTF} \meta{relation} \Arg{version} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Compares the version of the PDF being created with the \meta{version}
+%   string specified, using the \meta{relation}. Either the \meta{true code}
+%   or \meta{false code} will be left in the output stream.
+% \end{function}
+%
+% \begin{function}[added = 2021-02-10]
+%   {\pdf_version_gset:n, \pdf_version_min_gset:n}
+%   \begin{syntax}
+%     \cs{pdf_version_gset:n} \Arg{version}
+%   \end{syntax}
+%   Sets the \meta{version} of the PDF being created. The |min| version will
+%   not alter the output version unless it is currently lower than the
+%   \meta{version} requested.
+%
+%   This function may only be used up to the point where the PDF file is
+%   initialised. With dvips it sets \cs{pdf_version_major:} and \cs{pdf_version_minor:}
+%   and allows to compare the values with \cs{pdf_version_compare:Nn}, but the
+%   PDF version itself still has to be set with the command line option
+%   |-dCompatibilityLevel| of |ps2pdf|.
+% \end{function}
+%
+% \begin{function}[EXP, added = 2021-02-10]
+%   {\pdf_version:, \pdf_version_major:, \pdf_version_minor:}
+%   \begin{syntax}
+%     \cs{pdf_version:}
+%   \end{syntax}
+%   Expands to the currently-active PDF version.
+% \end{function}
+%
+% \section{Page (media) size}
+%
+% \begin{function}[added = 2023-01-14]{\pdf_pagesize_gset:nn}
+%   \begin{syntax}
+%     \cs{pdf_pagesize_gset:nn} \Arg{width} \Arg{height}
+%   \end{syntax}
+%   Sets the page size (mediabox) of the PDF being created to the
+%   \meta{width} and \meta{height}, both of which are \meta{dimexpr}.
+%   The page size can only be set at the start of the output with
+%   \texttt{dvips};  with other backends, this can be adjusted on a
+%   per-page basis.
+% \end{function}
+%
+% \section{Compression}
+%
+% \begin{function}[added = 2021-02-10]{\pdf_uncompress:}
+%   \begin{syntax}
+%     \cs{pdf_uncompress:}
+%   \end{syntax}
+%   Disables any compression of the PDF, where possible.
+%
+%   This function may only be used up to the point where the PDF file is
+%   initialised.
+% \end{function}
+%
+% \section{Destinations}
+%
+% Destinations are the places a link jumped to.
+% Unlike the name may suggest, they don't describe
+% an exact location in the PDF. Instead, a destination contains a reference to
+% a page along with an instruction how to display this page.
+% The normally used \enquote{XYZ \textit{top left zoom}} for example instructs
+% the viewer to show the page with the given \textit{zoom} and
+% the top left corner at the \textit{top left} coordinates---which then gives
+% the impression that there is an anchor at this position.
+%
+% If an instruction takes a coordinate, it is calculated by the following
+% commands relative to the location the command is issued.
+% So to get a specific coordinate one has to move the command to the right place.
+%
+% \begin{function}[added = 2021-01-03]
+%   {\pdf_destination:nn}
+%   \begin{syntax}
+%     \cs{pdf_destination:nn} \Arg{name} \Arg{type or integer}
+%   \end{syntax}
+%   This creates a destination. \Arg{type or integer} can be one of |fit|, |fith|,
+%   |fitv|, |fitb|, |fitbh|, |fitbv|, |fitr|, |xyz|
+%   or an integer representing a  scale factor in percent.
+%   |fitr| here gives only a lightweight version of |/FitR|:
+%   The backend code defines |fitr| so that it will with pdf\LaTeX{} and
+%   Lua\LaTeX{} use the coordinates of the surrounding box,
+%   with \texttt{dvips} and \texttt{dvipdfmx} it falls back to |fit|.
+%   For full control use \cs{pdf_destination:nnnn}.
+%
+%   The keywords match to the PDF names as described in the following tabular.
+%
+%   \medskip
+%   \noindent\begin{tabular}{ll>{\raggedright\arraybackslash}p{6cm}}
+%   \toprule
+%   Keyword & PDF & Remarks \\ \midrule
+%   |fit|  & |/Fit|
+%      & Fits the page to the window\\
+%   |fith| & |/FitH|  \textit{top}
+%      & Fits the width of the page to the window \\
+%   |fitv| & |/FitV|  \textit{left}
+%      & Fits the height of the page to the window \\
+%   |fitb| & |/FitB|
+%      & Fits the page bounding box to the window \\
+%   |fitbh|& |/FitBH| \textit{top}
+%      & Fits the width of the page bounding box to the window. \\
+%   |fitbv|& |/FitBV| \textit{left}
+%      & Fits the height of the page bounding box to the window. \\
+%   |fitr| & |/FitR| \textit{left bottom right top}
+%      & Fits the rectangle specified by the four coordinates to the window
+%        (see above for the restrictions)\\
+%   |xyz|  & |/XYZ|  \textit{left top} null
+%      & Sets a coordinate but doesn't change the zoom.\\
+%   \Arg{integer} & |/XYZ|  \textit{left top zoom}
+%      & Sets a coordinate and a zoom meaning \Arg{integer}\%.
+%    \\\bottomrule
+%   \end{tabular}
+%
+% \end{function}
+%
+% \begin{function}[added = 2021-01-17]
+%   {\pdf_destination:nnnn}
+%   \begin{syntax}
+%     \cs{pdf_destination:nnnn} \Arg{name} \Arg{width} \Arg{height} \Arg{depth}
+%   \end{syntax}
+%   This creates a destination with |/FitR| type with the given dimensions relative
+%   to the current location. The destination is in a box of size zero, but it doesn't
+%   switch to horizontal mode.
+% \end{function}
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3pdf} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=pdf>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*tex>
+%    \end{macrocode}
+%
+% \begin{variable}{\s_@@_stop}
+%   Internal scan marks.
+%    \begin{macrocode}
+\scan_new:N \s_@@_stop
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_init_bool}
+%   A boolean so we have some chance of avoiding setting things we are not
+%   allowed to. As we are potentially early in the format, we have to work
+%   a bit harder than ideal.
+%    \begin{macrocode}
+\bool_new:N \g_@@_init_bool
+\bool_lazy_and:nnT
+  { \str_if_eq_p:Vn \fmtname { LaTeX2e } }
+  { \tl_if_exist_p:N \@expl@finalise@setup@@@@ }
+  {
+    \tl_gput_right:Nn \@expl@finalise@setup@@@@
+      {
+        \tl_gput_right:Nn \@kernel@after@begindocument
+          { \bool_gset_true:N \g_@@_init_bool }
+      }
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Compression}
+%
+% \begin{macro}{\pdf_uncompress:}
+%   Simple to do.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_uncompress:
+  {
+    \bool_if:NF \g_@@_init_bool
+      {
+        \@@_backend_compresslevel:n { 0 }
+        \@@_backend_compress_objects:n { \c_false_bool }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Objects}
+%
+% \begin{variable}{\g_@@_backend_object_int}
+%   For returning object numbers.
+%    \begin{macrocode}
+\int_new:N \g_@@_backend_object_int
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\pdf_object_new:n}
+% \begin{macro}
+%   {\pdf_object_write:nnn, \pdf_object_write:nne, \pdf_object_write:nnx}
+% \begin{macro}{\pdf_object_ref:n}
+% \begin{macro}{\__kernel_pdf_object_id:n}
+%   Simple to do: all objects create a constant |int| so it is not a
+%   backend-specific name.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_object_new:n #1
+  {
+    \@@_backend_object_new:
+    \@@_object_record:nN {#1} \g_@@_backend_object_int
+  }
+\cs_new_protected:Npn \pdf_object_write:nnn #1#2#3
+  {
+    \exp_args:Ne \@@_backend_object_write:nnn
+      { \@@_object_retrieve:n {#1} } {#2} {#3}
+    \bool_gset_true:N \g_@@_init_bool
+  }
+\cs_generate_variant:Nn \pdf_object_write:nnn { nne , nnx }
+\cs_new:Npn \pdf_object_ref:n #1
+  {
+    \exp_args:Ne \@@_backend_object_ref:n
+      { \@@_object_retrieve:n {#1} }
+  }
+\cs_new:Npn \__kernel_pdf_object_id:n #1
+  {
+    \exp_args:Ne \@@_backend_object_id:n
+      { \@@_object_retrieve:n {#1} }
+  }
+%</tex>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}{\@@_object_record:nN}
+% \begin{macro}[EXP]{\@@_object_retrieve:n}
+% \begin{macro}{ltx.pdf.object_id}
+%   Object mappings are tracked in Lua for \LuaTeX{} as this makes retrieving
+%   them much easier; as a result, there is a split in approaches. In Lua we
+%   store values in a table indexed by name. The Lua function here is set up
+%   to deal with both named and indexed objects: fits the Lua idiom well.
+%    \begin{macrocode}
+%<*lua>
+
+local scan_int = token.scan_int
+local scan_string = token.scan_string
+local cprint = tex.cprint
+
+local @@_objects_named = {}
+local @@_objects_indexed = {}
+
+luacmd('@@_object_record:nN', function()
+  local name = scan_string()
+  local n = scan_int()
+  @@_objects_named[name] = n
+end,'protected','global')
+
+local function object_id(name,index)
+  if index then
+    return @@_objects_indexed[name][index] or 0
+  else
+    return @@_objects_named[name] or 0
+  end
+end
+
+luacmd('@@_object_retrieve:n', function()
+  local name = scan_string()
+  return cprint(12,tostring(object_id(name)))
+end,'global')
+
+ltx.pdf = ltx.pdf or {}
+ltx.pdf.object_id = object_id
+
+%</lua>
+%    \end{macrocode}
+%  Whereas in \TeX{} we use integer constants.
+%    \begin{macrocode}
+%<*tex>
+\sys_if_engine_luatex:F
+  {
+    \cs_new_protected:Npn \@@_object_record:nN #1#2
+      {
+        \int_const:cn
+          { c_@@_object_ #1 _int } {#2}
+      }
+    \cs_new:Npn \@@_object_retrieve:n #1
+      {
+        \int_if_exist:cTF { c_@@_object_ #1 _int }
+          {
+            \int_use:c
+              { c_@@_object_ #1 _int }
+          }
+          { 0 }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}[pTF,EXP]{\pdf_object_if_exist:n}
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \pdf_object_if_exist:n #1 { p , T , F , TF }
+  {
+    \int_compare:nNnTF { \@@_object_retrieve:n {#1} } = 0
+      \prg_return_false:
+      \prg_return_true:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pdf_object_new_indexed:nn}
+% \begin{macro}{\pdf_object_write_indexed:nnnn, \pdf_object_write_indexed:nnne}
+% \begin{macro}[EXP]{\pdf_object_ref_indexed:nn}
+% \begin{macro}[EXP]{\__kernel_pdf_object_id_indexed:nn}
+%   Again we split between the common code and the macro- or Lua-based
+%   implementation. To make life easier for the Lua route, all of the
+%   potential expressions are expanded to braced numbers.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_object_new_indexed:nn #1#2
+  {
+    \@@_backend_object_new:
+    \@@_object_record:neN {#1}
+      { \int_eval:n {#2} } \g_@@_backend_object_int
+  }
+\cs_new_protected:Npn \pdf_object_write_indexed:nnnn #1#2#3#4
+  {
+    \exp_args:Ne \@@_backend_object_write:nnn
+      { \@@_object_retrieve:ne {#1} { \int_eval:n {#2} } } {#3} {#4}
+    \bool_gset_true:N \g_@@_init_bool
+  }
+\cs_generate_variant:Nn \pdf_object_write_indexed:nnnn { nnne }
+\cs_new:Npn \pdf_object_ref_indexed:nn #1#2
+  {
+    \exp_args:Ne \@@_backend_object_ref:n
+      { \@@_object_retrieve:ne {#1} { \int_eval:n {#2} } }
+  }
+\cs_new:Npn \__kernel_pdf_object_id_indexed:nn #1#2
+  {
+    \exp_args:Ne \@@_backend_object_id:n
+      { \@@_object_retrieve:ne {#1} { \int_eval:n {#2} } }
+  }
+%</tex>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}{\@@_object_record:nnN, \@@_object_record:neN}
+% \begin{macro}[EXP]{\@@_object_retrieve:nn}
+% \begin{macro}{\@@_object_record:NnN}
+% \begin{macro}[EXP]{\@@_object_retrieve:Nn}
+%   Again we split for Lua: the same idea as above but with nested tables.
+%   As we've arranged above that the \TeX{} code passes a braced number,
+%   we can use |tonumber(scan_string())| rather than |scan_int()|
+%   for the index.
+%    \begin{macrocode}
+%<*lua>
+
+luacmd('@@_object_record:nnN', function()
+  local name = scan_string()
+  local index = tonumber(scan_string())
+  local n = scan_int()
+  @@_objects_indexed[name] = @@_objects_indexed[name] or {}
+  @@_objects_indexed[name][index] = n
+end,'protected','global')
+
+luacmd('@@_object_retrieve:nn', function()
+  local name = scan_string()
+  local index = tonumber(scan_string())
+  return cprint(12,tostring(object_id(name,index)))
+end,'global')
+
+%</lua>
+%    \end{macrocode}
+% The non-Lua approach is to divide the range into blocks, and store in integer
+% arrays that can simulate dynamic assignment.
+%    \begin{macrocode}
+%<*tex>
+\sys_if_engine_luatex:F
+  {
+    \cs_new_protected:Npn \@@_object_record:nnN #1#2#3
+      {
+        \use:e
+          {
+            \@@_object_record:NnN
+               \@@_object_index_split:nn {#1} {#2}
+               \exp_not:N #3
+          }
+      }
+    \cs_new_protected:Npn \@@_object_record:NnN #1#2#3
+      {
+        \intarray_if_exist:NF #1
+          { \intarray_new:Nn #1 \c_@@_object_block_size_int }
+        \intarray_gset:Nnn #1 {#2} #3
+      }
+    \cs_new:Npn \@@_object_retrieve:nn #1#2
+      {
+        \use:e
+          {
+            \exp_not:N \@@_object_retrieve:Nn
+              \@@_object_index_split:nn {#1} {#2}
+          }
+      }
+    \cs_new:Npn \@@_object_retrieve:Nn #1#2
+      { \intarray_item:Nn #1 {#2} }
+%    \end{macrocode}
+%   As we want blocks to start from one, and within the block for the top value
+%   to be \enquote{in} the block, we do a little bit of manipulation. By shifting
+%   down by one, we keep the values \enquote{in} the block, then we adjust the
+%   block/index number to get back on track.
+%    \begin{macrocode}
+    \cs_new:Npn \@@_object_index_split:nn #1#2
+      {
+        \exp_not:c
+          {
+            g_@@_object_ #1 _
+            \int_eval:n
+              {
+                \int_div_truncate:nn { #2 - 1 }
+                  \c_@@_object_block_size_int + 1
+              }
+            _intarray
+          }
+          {
+            \int_eval:n
+              { \int_mod:nn { #2 - 1 } \c_@@_object_block_size_int + 1 }
+          }
+      }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{variable}{\c_@@_object_block_size_int}
+%   Sets the block size used for managing indexed objects.
+%    \begin{macrocode}
+    \int_const:Nn \c_@@_object_block_size_int { 10000 }
+  }
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_object_record:neN}
+% \begin{macro}[EXP]{\@@_object_retrieve:ne}
+%   Common variants.
+%    \begin{macrocode}
+\cs_generate_variant:Nn \@@_object_record:nnN { ne }
+\cs_generate_variant:Nn \@@_object_retrieve:nn { ne }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \pdf_object_unnamed_write:nn, \pdf_object_unnamed_write:ne,
+%     \pdf_object_unnamed_write:nx
+%   }
+%   No tracking needed here.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_object_unnamed_write:nn #1#2
+  {
+    \exp_args:Ne \@@_backend_object_now:nn {#1} {#2}
+    \bool_gset_true:N \g_@@_init_bool
+  }
+\cs_generate_variant:Nn \pdf_object_unnamed_write:nn { ne , nx }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pdf_object_ref_last:}
+%   A one-step wrapper for consistency.
+%    \begin{macrocode}
+\cs_new:Npn \pdf_object_ref_last: { \@@_backend_object_last: }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pdf_pageobject_ref:n}
+%    \begin{macrocode}
+\cs_new:Npn \pdf_pageobject_ref:n #1
+  { \exp_args:Ne \@@_backend_pageobject_ref:n {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Version}
+%
+% \begin{macro}[pTF,EXP]{\pdf_version_compare:Nn}
+% \begin{macro}
+%   {
+%     @@_version_compare_=:w ,
+%     @@_version_compare_<:w ,
+%     @@_version_compare_>:w
+%   }
+%   To compare version, we need to split the given value then deal with both
+%   major and minor version
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \pdf_version_compare:Nn #1#2 { p , T , F , TF }
+  { \use:c { @@_version_compare_ #1 :w } #2 . . \s_@@_stop }
+\cs_new:cpn { @@_version_compare_=:w } #1 . #2 . #3 \s_@@_stop
+  {
+    \bool_lazy_and:nnTF
+      { \int_compare_p:nNn \@@_backend_version_major: = {#1} }
+      { \int_compare_p:nNn \@@_backend_version_minor: = {#2} }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+\cs_new:cpn { @@_version_compare_<:w } #1 . #2 . #3 \s_@@_stop
+  {
+    \bool_lazy_or:nnTF
+      { \int_compare_p:nNn \@@_backend_version_major: < {#1} }
+      {
+        \bool_lazy_and_p:nn
+          { \int_compare_p:nNn \@@_backend_version_major: = {#1} }
+          { \int_compare_p:nNn \@@_backend_version_minor: < {#2} }
+      }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+\cs_new:cpn { @@_version_compare_>:w } #1 . #2 . #3 \s_@@_stop
+  {
+    \bool_lazy_or:nnTF
+      { \int_compare_p:nNn \@@_backend_version_major: > {#1} }
+      {
+        \bool_lazy_and_p:nn
+          { \int_compare_p:nNn \@@_backend_version_major: = {#1} }
+          { \int_compare_p:nNn \@@_backend_version_minor: > {#2} }
+      }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\pdf_version_gset:n, \pdf_version_min_gset:n}
+% \begin{macro}{\@@_version_gset:w}
+%   Split the version and set.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_version_gset:n #1
+  { \@@_version_gset:w  #1 . . \s_@@_stop }
+\cs_new_protected:Npn \pdf_version_min_gset:n #1
+  {
+    \pdf_version_compare:NnT < {#1}
+      { \@@_version_gset:w  #1 . . \s_@@_stop }
+  }
+\cs_new_protected:Npn \@@_version_gset:w  #1 . #2 . #3\s_@@_stop
+  {
+    \bool_if:NF \g_@@_init_bool
+      {
+        \@@_backend_version_major_gset:n {#1}
+        \@@_backend_version_minor_gset:n {#2}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]{\pdf_version:, \pdf_version_major:, \pdf_version_minor:}
+%   Wrappers.
+%    \begin{macrocode}
+\cs_new:Npn \pdf_version:
+  { \@@_backend_version_major: . \@@_backend_version_minor: }
+\cs_new:Npn \pdf_version_major: { \@@_backend_version_major: }
+\cs_new:Npn \pdf_version_minor: { \@@_backend_version_minor: }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Page size}
+%
+% \begin{macro}{\pdf_pagesize_gset:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_pagesize_gset:nn #1#2
+  { \@@_backend_pagesize_gset:nn {#1} {#2} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Destinations}
+%
+% \begin{macro}{\pdf_destination:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_destination:nn #1#2
+  { \@@_backend_destination:nn {#1} {#2} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pdf_destination:nnnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_destination:nnnn #1#2#3#4
+  {
+    \hbox_to_zero:n
+      { \@@_backend_destination:nnnn {#1} {#2} {#3} {#4} }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{PDF Page size (media box)}
+%
+%  Everything here is delayed to the start of the document so that the
+%  backend will definitely be loaded.
+%    \begin{macrocode}
+\cs_if_exist:NT \@kernel@before@begindocument
+  {
+    \tl_gput_right:Nn \@kernel@before@begindocument
+      {
+        \bool_lazy_all:nT
+          {
+            { \cs_if_exist_p:N \stockheight }
+            { \cs_if_exist_p:N \stockwidth }
+            { \cs_if_exist_p:N \IfDocumentMetadataTF }
+            { \IfDocumentMetadataTF { \c_true_bool } { \c_false_bool } }
+            { \int_compare_p:nNn \tex_mag:D = { 1000 } }
+          }
+          {
+            \bool_lazy_and:nnTF
+              { \dim_compare_p:nNn \stockheight > { 0pt } }
+              { \dim_compare_p:nNn \stockwidth  > { 0pt } }
+              {
+                \@@_backend_pagesize_gset:nn
+                  \stockwidth \stockheight
+              }
+              {
+                \bool_lazy_or:nnF
+                  { \dim_compare_p:nNn \stockheight < { 0pt } }
+                  { \dim_compare_p:nNn \stockwidth  < { 0pt } }
+                  {
+                    \bool_lazy_and:nnT
+                      { \dim_compare_p:nNn \paperheight > { 0pt } }
+                      { \dim_compare_p:nNn \paperwidth  > { 0pt } }
+                      {
+                        \@@_backend_pagesize_gset:nn
+                          \paperwidth \paperheight
+                      }
+                  }
+              }
+          }
+      }
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</tex>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

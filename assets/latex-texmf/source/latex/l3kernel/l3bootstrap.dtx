@@ -1,0 +1,357 @@
+% \iffalse meta-comment
+%
+%% File: l3bootstrap.dtx
+%
+% Copyright (C) 2011-2025 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full,kernel]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3bootstrap} module\\ Bootstrap code^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2025-01-18}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \section{Using the \LaTeX3 modules}
+%
+% The modules documented in ^^A
+% \ifinterface
+%   this file (and \file{source3} for documented sources) ^^A
+% \else
+%   \file{interface3} (and this file) ^^A
+% \fi
+% are designed to be used on top of \LaTeXe{} and are already pre-loaded
+% since \LaTeXe{} 2020-02-02.
+% To support older formats, the |\usepackage{expl3}| or |\RequirePackage{expl3}|
+% instructions are still available to load them all as one.
+%
+% As the modules use a coding syntax different from standard
+% \LaTeXe{} it provides a few functions for setting it up.
+%
+% \begin{function}[updated = 2011-08-13]{\ExplSyntaxOn, \ExplSyntaxOff}
+%   \begin{syntax}
+%     \cs{ExplSyntaxOn} \meta{code} \cs{ExplSyntaxOff}
+%   \end{syntax}
+%   The \cs{ExplSyntaxOn} function switches to a category code
+%   régime in which spaces and new lines are ignored, and in which the colon (|:|)
+%   and underscore (|_|) are treated as \enquote{letters}, thus allowing
+%   access to the names of code functions and variables. Within this
+%   environment, |~| is used to input a space. The \cs{ExplSyntaxOff}
+%   reverts to the document category code régime.
+%   \begin{texnote}
+%     Spaces introduced by~|~| behave much in the same way as normal
+%     space characters in the standard category code régime: they are
+%     ignored after a control word or at the start of a line, and
+%     multiple consecutive~|~| are equivalent to a single one.  However,
+%     |~|~is \emph{not} ignored at the end of a line.
+%   \end{texnote}
+% \end{function}
+%
+% \begin{function}[updated = 2017-03-19, updated = 2023-08-03]
+%   {\ProvidesExplPackage, \ProvidesExplClass, \ProvidesExplFile}
+%   \begin{syntax}
+%     \cs{ProvidesExplPackage} \Arg{package} \Arg{date} \Arg{version} \Arg{description}
+%   \end{syntax}
+%   These functions act broadly in the same way as the corresponding
+%   \LaTeXe{} kernel
+%   functions \tn{ProvidesPackage}, \tn{ProvidesClass} and
+%   \tn{ProvidesFile}. However, they also implicitly switch
+%   \cs{ExplSyntaxOn} for the remainder of the code with the file. At the
+%   end of the file, \cs{ExplSyntaxOff} will be called to reverse this.
+%   (This is the same concept as \LaTeXe{} provides in turning on
+%   \tn{makeatletter} within package and class code.) The \meta{date} should
+%   be given in the format \meta{year}/\meta{month}/\meta{day} or in the ISO
+%   date format \meta{year}-\meta{month}-\meta{day}. If the
+%   \meta{version} is given then a leading \texttt{v} is optional: if given
+%   as a \enquote{pure} version string, a \texttt{v} will be prepended.
+% \end{function}
+%
+% \begin{function}[updated = 2012-06-04]{\GetIdInfo}
+%   \begin{syntax}
+%     \cs{GetIdInfo} |$Id:| \meta{SVN info field} |$| \Arg{description}
+%   \end{syntax}
+%   Extracts all information from a SVN field. Spaces are not
+%   ignored in these fields. The information pieces are stored in
+%   separate control sequences with \cs{ExplFileName} for the part of the
+%   file name leading up to the period, \cs{ExplFileDate} for date,
+%   \cs{ExplFileVersion} for version and \cs{ExplFileDescription} for the
+%   description.
+% \end{function}
+%
+% To summarize: Every single package using this syntax should identify
+% itself using one of the above methods. Special care is taken so that
+% every package or class file loaded with \tn{RequirePackage} or similar
+% are loaded with usual \LaTeXe{} category codes and the \LaTeX3 category code
+% scheme is reloaded when needed afterwards. See implementation for
+% details. If you use the \cs{GetIdInfo} command you can use the
+% information when loading a package with
+% \begin{verbatim}
+%   \ProvidesExplPackage{\ExplFileName}
+%     {\ExplFileDate}{\ExplFileVersion}{\ExplFileDescription}
+% \end{verbatim}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3bootstrap} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%<@@=kernel>
+%    \end{macrocode}
+%
+% \subsection{The \tn{pdfstrcmp} primitive in \XeTeX{}}
+%
+% Only \pdfTeX{} has a primitive called \tn{pdfstrcmp}. The \XeTeX{}
+% version is just \tn{strcmp}, so there is some shuffling to do. As
+% this is still a real primitive, using the \pdfTeX{} name is \enquote{safe}.
+%    \begin{macrocode}
+\begingroup\expandafter\expandafter\expandafter\endgroup
+  \expandafter\ifx\csname pdfstrcmp\endcsname\relax
+  \let\pdfstrcmp\strcmp
+\fi
+%    \end{macrocode}
+%
+% \subsection{Loading support \Lua{} code}
+%
+% When \LuaTeX{} is used there are various pieces of \Lua{} code which need to
+% be loaded. The code itself is defined in \pkg{l3luatex} and is extracted into
+% a separate file. Thus here the task is to load the \Lua{} code both now and
+% (if required) at the start of each job.
+%    \begin{macrocode}
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname directlua\endcsname\relax
+\else
+  \ifnum\luatexversion<110 %
+  \else
+%    \end{macrocode}
+%   For \LuaTeX{} we make sure the basic support is loaded:
+%   this is only necessary in plain.
+%    \begin{macrocode}
+    \begingroup\expandafter\expandafter\expandafter\endgroup
+    \expandafter\ifx\csname newcatcodetable\endcsname\relax
+      \input{ltluatex}%
+    \fi
+    \begingroup\expandafter\expandafter\expandafter\endgroup
+    \expandafter\ifx\csname newluabytecode\endcsname\relax
+    \else
+      \newluabytecode\@expl@luadata@bytecode
+    \fi
+    \directlua{require("expl3")}%
+%    \end{macrocode}
+%   As the user might be making a custom format, no assumption is made about
+%   matching package mode with only loading the \Lua{} code once. Instead, a
+%   query to \Lua{} reveals what mode is in operation.
+%    \begin{macrocode}
+    \ifnum 0%
+      \directlua{
+        if status.ini_version then
+          tex.write("1")
+        end
+      }>0 %
+      \everyjob\expandafter{%
+        \the\expandafter\everyjob
+        \csname\detokenize{lua_now:n}\endcsname{require("expl3")}%
+      }%
+    \fi
+  \fi
+\fi
+%    \end{macrocode}
+%
+% \subsection{Engine requirements}
+%
+% The code currently requires \eTeX{}, the set of \enquote{\pdfTeX{}
+% extensions} \emph{including} \tn{expanded}, and for Unicode engines the
+% ability to generate arbitrary character tokens by expansion. That is covered
+% by all supported engines since \TeX{} Live 2019, which we therefore use
+% as a baseline for engine and \LaTeX{} format support.
+% For \LuaTeX, we require at least Lua 5.3 and the |token.set_lua| function.
+% This is available at least since \LuaTeX{} 1.10, which again is the one
+% in \TeX{} Live 2019. (u)p\TeX{} only gained \tn{ifincsname} for \TeX{}
+% Live 2020, but at present that primitive is unused in \pkg{expl3} so for
+% the present it's not tested. If and when that changes, we will need to
+% revisit the code here.
+%    \begin{macrocode}
+\begingroup
+  \def\next{\endgroup}%
+  \def\ShortText{Required primitives not found}%
+  \def\LongText%
+    {%
+      The L3 programming layer requires the e-TeX primitives and the
+      \LineBreak 'pdfTeX utilities' as described in the README file.
+      \LineBreak
+      These are available in the engines\LineBreak
+      - pdfTeX v1.40.20\LineBreak
+      - XeTeX v0.999991\LineBreak
+      - LuaTeX v1.10\LineBreak
+      - e-(u)pTeX v3.8.2\LineBreak
+      - Prote (2021)\LineBreak
+      or later.\LineBreak
+      \LineBreak
+    }%
+  \ifnum0%
+    \expandafter\ifx\csname luatexversion\endcsname\relax
+      \expandafter\ifx\csname expanded\endcsname\relax\else 1\fi
+    \else
+      \ifnum\luatexversion<110 \else 1\fi
+    \fi
+    =0 %
+      \newlinechar`\^^J %
+      \def\LineBreak{\noexpand\MessageBreak}%
+      \expandafter\ifx\csname PackageError\endcsname\relax
+        \def\LineBreak{^^J}%
+        \begingroup
+          \lccode`\~=`\ \lccode`\}=`\ %
+          \lccode`\T=`\T\lccode`\H=`\H%
+          \catcode`\ =11 %
+\lowercase{\endgroup\def\PackageError#1#2#3{%
+\begingroup\errorcontextlines-1\immediate\write0{}\errhelp{#3}\def%
+\                                                   {#1 Error: #2.^^J^^J
+Type  H <return>  for immediate help}\def~{\errmessage{%
+\                                                   }}~\endgroup}}%
+      \fi
+      \edef\next
+        {%
+          \noexpand\PackageError{expl3}{\ShortText}
+            {\LongText Loading of expl3 will abort!}%
+          \endgroup
+          \noexpand\endinput
+        }%
+  \fi
+\next
+%    \end{macrocode}
+%
+% \subsection{The \LaTeX3 code environment}
+%
+% The code environment is now set up.
+%
+% \begin{macro}{\ExplSyntaxOff}
+%   Before changing any category codes, in package mode we need to save
+%   the situation before loading. Note the set up here means that once applied
+%   \cs{ExplSyntaxOff} becomes a \enquote{do nothing} command until
+%   \cs{ExplSyntaxOn} is used.
+%    \begin{macrocode}
+\protected\edef\ExplSyntaxOff
+  {%
+    \protected\def\noexpand\ExplSyntaxOff{}%
+    \catcode   9 = \the\catcode   9\relax
+    \catcode  32 = \the\catcode  32\relax
+    \catcode  34 = \the\catcode  34\relax
+    \catcode  58 = \the\catcode  58\relax
+    \catcode  94 = \the\catcode  94\relax
+    \catcode  95 = \the\catcode  95\relax
+    \catcode 124 = \the\catcode 124\relax
+    \catcode 126 = \the\catcode 126\relax
+    \endlinechar = \the\endlinechar\relax
+    \chardef\csname\detokenize{l_@@_expl_bool}\endcsname = 0\relax
+  }%
+%    \end{macrocode}
+% \end{macro}
+%
+% The code environment is now set up.
+%    \begin{macrocode}
+\catcode 9   = 9\relax
+\catcode 32  = 9\relax
+\catcode 34  = 12\relax
+\catcode 58  = 11\relax
+\catcode 94  = 7\relax
+\catcode 95  = 11\relax
+\catcode 124 = 12\relax
+\catcode 126 = 10\relax
+\endlinechar = 32\relax
+%    \end{macrocode}
+%
+% \begin{variable}{\l_@@_expl_bool}
+%   The status for code syntax: this is on at present.
+%    \begin{macrocode}
+\global\chardef\l_@@_expl_bool = 1\relax
+%    \end{macrocode}
+%\end{variable}
+%
+% \begin{macro}{\ExplSyntaxOn}
+%  The idea here is that multiple \cs{ExplSyntaxOn} calls are not
+%  going to mess up category codes, and that multiple calls to
+%  \cs{ExplSyntaxOff} are also not wasting time. Applying
+%  \cs{ExplSyntaxOn} alters the definition of \cs{ExplSyntaxOff}
+%  and so in package mode this function should not be used until after
+%  the end of the loading process!
+%    \begin{macrocode}
+\protected \def \ExplSyntaxOn
+  {
+    \bool_if:NF \l_@@_expl_bool
+      {
+        \cs_set_protected:Npe \ExplSyntaxOff
+          {
+            \char_set_catcode:nn { 9 }   { \char_value_catcode:n { 9 } }
+            \char_set_catcode:nn { 32 }  { \char_value_catcode:n { 32 } }
+            \char_set_catcode:nn { 34 }  { \char_value_catcode:n { 34 } }
+            \char_set_catcode:nn { 58 }  { \char_value_catcode:n { 58 } }
+            \char_set_catcode:nn { 94 }  { \char_value_catcode:n { 94 } }
+            \char_set_catcode:nn { 95 }  { \char_value_catcode:n { 95 } }
+            \char_set_catcode:nn { 124 } { \char_value_catcode:n { 124 } }
+            \char_set_catcode:nn { 126 } { \char_value_catcode:n { 126 } }
+            \tex_endlinechar:D =
+              \tex_the:D \tex_endlinechar:D \scan_stop:
+            \bool_set_false:N \l_@@_expl_bool
+            \cs_set_protected:Npn \ExplSyntaxOff { }
+          }
+      }
+    \char_set_catcode_ignore:n           { 9 }   % tab
+    \char_set_catcode_ignore:n           { 32 }  % space
+    \char_set_catcode_other:n            { 34 }  % double quote
+    \char_set_catcode_letter:n           { 58 }  % colon
+    \char_set_catcode_math_superscript:n { 94 }  % circumflex
+    \char_set_catcode_letter:n           { 95 }  % underscore
+    \char_set_catcode_other:n            { 124 } % pipe
+    \char_set_catcode_space:n            { 126 } % tilde
+    \tex_endlinechar:D = 32 \scan_stop:
+    \bool_set_true:N \l_@@_expl_bool
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

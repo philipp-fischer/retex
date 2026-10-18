@@ -1,0 +1,9 @@
+/target/
+/.tools/
+/.venv/
+__pycache__/
+*.pyc
+missfont.log
+/web/generated/
+/web/node_modules/
+/dist/

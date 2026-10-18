@@ -1,0 +1,692 @@
+% \iffalse meta-comment
+%
+%% File: l3deprecation.dtx
+%
+% Copyright (C) 2017-2025 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full,kernel]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3deprecation} module\\ Deprecation errors^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2025-01-18}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \section{\pkg{l3deprecation} documentation}
+%
+% A few commands have had to be deprecated over the years.
+% All commands deprecated before release 2022-01-12 were already
+% removed; commands deprecated since then will no longer be removed.
+% Instead, this module defines them to produce errors.
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3deprecation} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=deprecation>
+%    \end{macrocode}
+%
+% \subsection{Patching definitions to deprecate}
+%
+% \begin{quote}
+%   \cs{__kernel_patch_deprecation:nnNNpn} \Arg{date} \Arg{replacement}
+%   \meta{definition} \meta{function} \meta{parameters} \Arg{code}
+% \end{quote}
+% defines the \meta{function} to produce an error and run its
+% \meta{code}.
+%
+% We make \cs{debug_on:n} |{deprecation}| turn the \meta{function} into
+% an \tn{outer} error, and \cs{debug_off:n} |{deprecation}| restore
+% whatever the behaviour was without \cs{debug_on:n} |{deprecation}|.
+%
+% In the explanations below, \meta{definition} \meta{function}
+% \meta{parameters} \Arg{code} or assignments that only differ in the
+% scope of the \meta{definition} will be called \enquote{the standard
+% definition}.
+%
+% \begin{macro}
+%   {
+%     \__kernel_patch_deprecation:nnNNpn, \@@_patch_aux:nnNNnn,
+%     \@@_warn_once:nnNnn,
+%     \@@_patch_aux:Nn,
+%     \@@_just_error:nnNN
+%   }
+%   (The parameter text is grabbed using |#5#|.)  The arguments of
+%   \cs{__kernel_deprecation_code:nn} are run upon \cs{debug_on:n}
+%   |{deprecation}| and \cs{debug_off:n} |{deprecation}|, respectively.
+%   In both scenarios we the \meta{function} may be \tn{outer} so we
+%   undefine it with \cs{tex_let:D} before redefining it, with
+%   \cs{__kernel_deprecation_error:Nnn} or with some code added shortly.
+%    \begin{macrocode}
+\cs_new_protected:Npn \__kernel_patch_deprecation:nnNNpn #1#2#3#4#5#
+  { \@@_patch_aux:nnNNnn {#1} {#2} #3 #4 {#5} }
+\cs_new_protected:Npn \@@_patch_aux:nnNNnn #1#2#3#4#5#6
+  {
+    \__kernel_deprecation_code:nn
+      {
+        \tex_let:D #4 \scan_stop:
+        \__kernel_deprecation_error:Nnn #4 {#2} {#1}
+      }
+      { \tex_let:D #4 \scan_stop: }
+    \cs_if_eq:NNTF #3 \cs_gset_protected:Npn
+      { \@@_warn_once:nnNnn {#1} {#2} #4 {#5} {#6} }
+      { \@@_patch_aux:Nn #3 { #4 #5 {#6} } }
+  }
+%    \end{macrocode}
+%   In case we want a warning, the \meta{function} is defined to produce
+%   such a warning without grabbing any argument, then redefine itself
+%   to the standard definition that the \meta{function} should have,
+%   with arguments, and call that definition.  The \texttt{e}-type
+%   expansion and \cs{exp_not:n} avoid needing to double the~|#|, which
+%   we could not do anyways.  We then deal with the code for
+%   \cs{debug_off:n} |{deprecation}|: presumably someone doing that does
+%   not need the warning so we simply do the standard definition.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_warn_once:nnNnn #1#2#3#4#5
+  {
+    \cs_gset_protected:Npe #3
+      {
+        \__kernel_if_debug:TF
+          {
+            \exp_not:N \msg_warning:nneee
+              { deprecation } { deprecated-command }
+              {#1}
+              { \token_to_str:N #3 }
+              { \tl_to_str:n {#2} }
+          }
+          { }
+        \exp_not:n { \cs_gset_protected:Npn #3 #4 {#5} }
+        \exp_not:N #3
+      }
+    \__kernel_deprecation_code:nn { }
+      { \cs_set_protected:Npn #3 #4 {#5} }
+  }
+%    \end{macrocode}
+%   In case we want neither warning nor error, the \meta{function} is
+%   given its standard definition.  Here |#1| is \cs{cs_new:Npn} or
+%   \cs{cs_new_protected:Npn}) and |#2| is \meta{function}
+%   \meta{parameters} \Arg{code}, so |#1#2| performs the assignment.
+%   For \cs{debug_off:n} |{deprecation}| we want to use the same
+%   assignment but with a different scope, hence the \cs{cs_if_eq:NNTF}
+%   test.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_patch_aux:Nn #1#2
+  {
+    #1 #2
+    \cs_if_eq:NNTF #1 \cs_gset_protected:Npn
+      { \__kernel_deprecation_code:nn { } { \cs_set_protected:Npn #2 } }
+      { \__kernel_deprecation_code:nn { } { \cs_set:Npn #2 } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\__kernel_deprecation_error:Nnn}
+%   The \tn{outer} definition here ensures the command cannot appear
+%   in an argument.
+%    \begin{macrocode}
+\cs_new_protected:Npn \__kernel_deprecation_error:Nnn #1#2#3
+  {
+    \tex_protected:D \tex_outer:D \tex_edef:D #1
+      {
+        \exp_not:N \msg_expandable_error:nnnnn
+          { deprecation } { deprecated-command }
+          { \tl_to_str:n {#3} } { \token_to_str:N #1 } { \tl_to_str:n {#2} }
+        \exp_not:N \msg_error:nneee
+          { deprecation } { deprecated-command }
+          { \tl_to_str:n {#3} } { \token_to_str:N #1 } { \tl_to_str:n {#2} }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\msg_new:nnn { deprecation } { deprecated-command }
+  {
+    \tl_if_blank:nF {#3} { Use~ \tl_trim_spaces:n {#3} ~not~ }
+    #2~deprecated~on~#1.
+  }
+%    \end{macrocode}
+%
+% \subsection{Deprecated \pkg{l3basics} functions}
+%
+%    \begin{macrocode}
+%<@@=cs>
+%    \end{macrocode}
+%
+% \begin{macro}[EXP, deprecated]{\cs_argument_spec:N}
+%   For the present, do not deprecate fully as \LaTeXe{} will need to catch
+%   up: one for Fall 2022.
+%    \begin{macrocode}
+%\__kernel_patch_deprecation:nnNNpn { 2022-06-24 } { \cs_parameter_spec:N }
+\cs_new:Npn \cs_argument_spec:N { \cs_parameter_spec:N }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3file} functions}
+%
+%    \begin{macrocode}
+%<@@=file>
+%    \end{macrocode}
+%
+% \begin{macro}[deprecated]
+%   {
+%     \iow_shipout_x:Nn, \iow_shipout_x:Nx,
+%     \iow_shipout_x:cn, \iow_shipout_x:cx
+%   }
+%   Previously described as \texttt{x}-type, but the hash behaviour is really
+%   \texttt{e}-type. Currently not \enquote{live} as we need to have a transition.
+%    \begin{macrocode}
+% \__kernel_patch_deprecation:nnNNpn { 2023-10-10 } { \iow_shipout_e:Nn }
+\cs_new_protected:Npn \iow_shipout_x:Nn { \iow_shipout_e:Nn }
+\cs_generate_variant:Nn \iow_shipout_x:Nn { Nx , c, cx }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3keys} functions}
+%
+%    \begin{macrocode}
+%<@@=keys>
+%    \end{macrocode}
+%
+% \begin{macro}[deprecated]{.str_set_x:N, .str_set_x:c}
+% \begin{macro}[deprecated]{.str_gset_x:N, .str_gset_x:c}
+%    \begin{macrocode}
+\cs_new_protected:cpn { \c_@@_props_root_str .str_set_x:N } #1
+  { \@@_variable_set:NnnN #1 { str } { } x }
+\cs_new_protected:cpn { \c_@@_props_root_str .str_set_x:c } #1
+  { \@@_variable_set:cnnN {#1} { str } { } x }
+\cs_new_protected:cpn { \c_@@_props_root_str .str_gset_x:N } #1
+  { \@@_variable_set:NnnN #1 { str } { g } x }
+\cs_new_protected:cpn { \c_@@_props_root_str .str_gset_x:c } #1
+  { \@@_variable_set:cnnN {#1} { str } { g } x }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[deprecated]{.tl_set_x:N, .tl_set_x:c}
+% \begin{macro}[deprecated]{.tl_gset_x:N, .tl_gset_x:c}
+%    \begin{macrocode}
+\cs_new_protected:cpn { \c_@@_props_root_str .tl_set_x:N } #1
+  { \@@_variable_set:NnnN #1 { tl } { } x }
+\cs_new_protected:cpn { \c_@@_props_root_str .tl_set_x:c } #1
+  { \@@_variable_set:cnnN {#1} { tl } { } x }
+\cs_new_protected:cpn { \c_@@_props_root_str .tl_gset_x:N } #1
+  { \@@_variable_set:NnnN #1 { tl } { g } x }
+\cs_new_protected:cpn { \c_@@_props_root_str .tl_gset_x:c } #1
+  { \@@_variable_set:cnnN {#1} { tl } { g } x }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[deprecated]
+%   {
+%     \keys_set_filter:nnnN, \keys_set_filter:nnVN,
+%     \keys_set_filter:nnvN, \keys_set_filter:nnoN
+%   }
+% \begin{macro}[deprecated]
+%   {
+%     \keys_set_filter:nnnnN, \keys_set_filter:nnVnN,
+%     \keys_set_filter:nnvnN, \keys_set_filter:nnonN
+%   }
+% \begin{macro}[deprecated]
+%   {
+%     \keys_set_filter:nnn, \keys_set_filter:nnV,
+%     \keys_set_filter:nnv, \keys_set_filter:nno
+%   }
+%   We need a transition here so for the present this is commented out:
+%   only needed for \texttt{latex-lab} code so this should not last for
+%   too long.
+%    \begin{macrocode}
+%\__kernel_patch_deprecation:nnNNpn { 2024-01-10 } { \keys_set_exclude_groups:nnn }
+\cs_new_protected:Npn \keys_set_filter:nnn { \keys_set_exclude_groups:nnn }
+\cs_generate_variant:Nn \keys_set_filter:nnn { nnV , nnv , nno }
+%\__kernel_patch_deprecation:nnNNpn { 2024-01-10 } { \keys_set_exclude_groups:nnnN }
+\cs_new_protected:Npn  \keys_set_filter:nnnN { \keys_set_exclude_groups:nnnN }
+\cs_generate_variant:Nn \keys_set_filter:nnnN { nnV , nnv , nno }
+%\__kernel_patch_deprecation:nnNNpn { 2024-01-10 } { \keys_set_exclude_groups:nnnnN }
+\cs_new_protected:Npn  \keys_set_filter:nnnnN { \keys_set_exclude_groups:nnnnN }
+\cs_generate_variant:Nn \keys_set_filter:nnnnN { nnV , nnv , nno }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3msg} functions}
+%
+%    \begin{macrocode}
+%<@@=msg>
+%    \end{macrocode}
+%
+% \begin{macro}[deprecated]{\msg_gset:nnnn, \msg_gset:nnn}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2024-02-13 } { \msg_set:nnnn }
+\cs_new_protected:Npn \msg_gset:nnnn { \msg_set:nnnn }
+\__kernel_patch_deprecation:nnNNpn { 2024-02-13 } { \msg_set:nnn }
+\cs_new_protected:Npn \msg_gset:nnn { \msg_set:nnn }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3pdf} functions}
+%
+%    \begin{macrocode}
+%<@@=pdf>
+%    \end{macrocode}
+%
+% \begin{variable}[deprecated]{\g_@@_object_prop}
+%   For tracking objects.
+%    \begin{macrocode}
+\prop_new:N \g_@@_object_prop
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}[deprecated]
+%   {\pdf_object_new:nn, \pdf_object_write:nn, \pdf_object_write:nx}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2022-08-30 } { [\pdf_object_new:n] }
+\cs_new_protected:Npn \pdf_object_new:nn #1#2
+  {
+    \prop_gput:Nnn \g_@@_object_prop {#1} {#2}
+    \pdf_object_new:n {#1}
+  }
+\__kernel_patch_deprecation:nnNNpn { 2022-08-30 } { [\pdf_object_write:n] }
+\cs_new_protected:Npn \pdf_object_write:nn #1#2
+  {
+    \exp_args:Nee \@@_backend_object_write:nnn
+      { \@@_object_retrieve:n {#1} }
+      { \prop_item:Nn \g_@@_object_prop {#1} } {#2}
+    \bool_gset_true:N \g_@@_init_bool
+  }
+\cs_generate_variant:Nn \pdf_object_write:nn { nx }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3prg} functions}
+%
+%    \begin{macrocode}
+%<@@=cs>
+%    \end{macrocode}
+%
+% \begin{macro}[EXP, noTF, deprecated]{\bool_case_true:n}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2023-05-03 } { \bool_case:n }
+\cs_new:Npn \bool_case_true:n { \bool_case:n }
+\__kernel_patch_deprecation:nnNNpn { 2023-05-03 } { \bool_case:nT }
+\cs_new:Npn \bool_case_true:nT { \bool_case:nT }
+\__kernel_patch_deprecation:nnNNpn { 2023-05-03 } { \bool_case:nF }
+\cs_new:Npn \bool_case_true:nF { \bool_case:nF }
+\__kernel_patch_deprecation:nnNNpn { 2023-05-03 } { \bool_case:nTF }
+\cs_new:Npn \bool_case_true:nTF { \bool_case:nTF }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3str} functions}
+%
+%    \begin{macrocode}
+%<@@=str>
+%    \end{macrocode}
+%
+% \begin{macro}[EXP, deprecated]
+%   {
+%     \str_lower_case:n, \str_lower_case:f,
+%     \str_upper_case:n, \str_upper_case:f,
+%     \str_fold_case:n,  \str_fold_case:V
+%   }
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_lowercase:n }
+\cs_new:Npn \str_lower_case:n { \str_lowercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_lowercase:f }
+\cs_new:Npn \str_lower_case:f { \str_lowercase:f }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_uppercase:n }
+\cs_new:Npn \str_upper_case:n { \str_uppercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_uppercase:f }
+\cs_new:Npn \str_upper_case:f { \str_uppercase:f }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_casefold:n }
+\cs_new:Npn \str_fold_case:n { \str_casefold:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_casefold:V }
+\cs_new:Npn \str_fold_case:V { \str_casefold:V }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP, deprecated]
+%   {\str_foldcase:n,  \str_foldcase:V}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2020-10-17 } { \str_casefold:n }
+\cs_new:Npn \str_foldcase:n { \str_casefold:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \str_casefold:V }
+\cs_new:Npn \str_foldcase:V { \str_casefold:V }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP, deprecated]
+%   {\str_declare_eight_bit_encoding:nnn}
+%   This command was made internal, with one more argument.  There is no
+%   easy way to compute a reasonable value for that extra argument so we
+%   take a value that is big enough to accommodate all of Unicode.
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2020-08-20 } { }
+\cs_new_protected:Npn \str_declare_eight_bit_encoding:nnn #1
+  { \@@_declare_eight_bit_encoding:nnnn {#1} { 1114112 } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3seq} functions}
+%
+%    \begin{macrocode}
+%<@@=seq>
+%    \end{macrocode}
+%
+% \begin{macro}[deprecated]{\seq_indexed_map_inline:Nn}
+% \begin{macro}[EXP, deprecated]{ \seq_indexed_map_function:NN}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2020-06-18 } { \seq_map_indexed_inline:Nn }
+\cs_new_protected:Npn \seq_indexed_map_inline:Nn { \seq_map_indexed_inline:Nn }
+\__kernel_patch_deprecation:nnNNpn { 2020-06-18 } { \seq_map_indexed_function:NN }
+\cs_new:Npn \seq_indexed_map_function:NN { \seq_map_indexed_function:NN }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[deprecated]{\seq_mapthread_function:NNN}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2023-05-10 } { \seq_map_pairwise_function:NNN }
+\cs_new:Npn \seq_mapthread_function:NNN { \seq_map_pairwise_function:NNN }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[deprecated]{\seq_set_map_x:NNn, \seq_gset_map_x:NNn}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2023-10-26 } { \seq_set_map_e:NNn }
+\cs_new_protected:Npn \seq_set_map_x:NNn { \seq_set_map_e:NNn }
+\__kernel_patch_deprecation:nnNNpn { 2023-10-26 } { \seq_gset_map_e:NNn }
+\cs_new_protected:Npn \seq_gset_map_x:NNn { \seq_gset_map_e:NNn }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3sys} functions}
+%
+%    \begin{macrocode}
+%<@@=sys>
+%    \end{macrocode}
+%
+% \begin{macro}[deprecated]{\sys_load_deprecation:}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2021-01-11 } { (no~longer~required) }
+\cs_new_protected:Npn \sys_load_deprecation: { }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3text} functions}
+%
+%    \begin{macrocode}
+%<@@=text>
+%    \end{macrocode}
+%
+% \begin{macro}[EXP, deprecated]{\text_titlecase:n}
+% \begin{macro}[EXP, deprecated]{\text_titlecase:nn}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2023-07-08 } { \text_titlecase_first:n }
+\cs_new:Npn \text_titlecase:n #1
+  { \text_titlecase_first:n { \text_lowercase:n {#1} } }
+\__kernel_patch_deprecation:nnNNpn { 2023-07-08 } { \text_titlecase_first:nn }
+\cs_new:Npn \text_titlecase:nn #1#2
+  { \text_titlecase_first:nn {#1} { \text_lowercase:n {#2} } }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3tl} functions}
+%
+%    \begin{macrocode}
+%<@@=tl>
+%    \end{macrocode}
+%
+% \begin{macro}[deprecated]
+%   {
+%     \tl_lower_case:n, \tl_lower_case:nn,
+%     \tl_upper_case:n, \tl_upper_case:nn,
+%     \tl_mixed_case:n, \tl_mixed_case:nn,
+%   }
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_lowercase:n }
+\cs_new:Npn \tl_lower_case:n #1
+  { \text_lowercase:n {#1} }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_lowercase:nn }
+\cs_new:Npn \tl_lower_case:nn #1#2
+  { \text_lowercase:nn {#1} {#2} }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_uppercase:n }
+\cs_new:Npn \tl_upper_case:n #1
+  { \text_uppercase:n {#1} }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_uppercase:nn }
+\cs_new:Npn \tl_upper_case:nn #1#2
+  { \text_uppercase:nn {#1} {#2} }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_titlecase_first:n }
+\cs_new:Npn \tl_mixed_case:n #1
+  { \text_titlecase_first:n { \text_lowercase:n {#1} } }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_titlecase_first:nn }
+\cs_new:Npn \tl_mixed_case:nn #1#2
+  { \text_titlecase_first:nn {#1} { \text_lowercase:n {#2} } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[noTF, deprecated]{\tl_case:Nn, \tl_case:cn}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2022-05-23 } { \token_case_meaning:Nn }
+\cs_new:Npn \tl_case:Nn { \token_case_meaning:Nn }
+\__kernel_patch_deprecation:nnNNpn { 2022-05-23 } { \token_case_meaning:NnT }
+\cs_new:Npn \tl_case:NnT { \token_case_meaning:NnT }
+\__kernel_patch_deprecation:nnNNpn { 2022-05-23 } { \token_case_meaning:NnF }
+\cs_new:Npn \tl_case:NnF { \token_case_meaning:NnF }
+\__kernel_patch_deprecation:nnNNpn { 2022-05-23 } { \token_case_meaning:NnTF }
+\cs_new:Npn \tl_case:NnTF { \token_case_meaning:NnTF }
+\cs_generate_variant:Nn \tl_case:Nn   { c }
+\prg_generate_conditional_variant:Nnn \tl_case:Nn
+  { c } { T , F , TF }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[deprecated]{\tl_build_clear:N, \tl_build_gclear:N}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2023-10-18 } { \tl_build_begin:N }
+\cs_new_protected:Npn \tl_build_clear:N { \tl_build_begin:N }
+\__kernel_patch_deprecation:nnNNpn { 2023-10-18 } { \tl_build_gbegin:N }
+\cs_new_protected:Npn \tl_build_gclear:N { \tl_build_gbegin:N }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[deprecated]{\tl_build_get:NN}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2023-10-25 } { \tl_build_get_intermediate:NN }
+\cs_new_protected:Npn \tl_build_get:NN { \tl_build_get_intermediate:NN }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3token} functions}
+%
+%    \begin{macrocode}
+%<@@=char>
+%    \end{macrocode}
+%
+% \begin{macro}[EXP, deprecated]{\char_to_utfviii_bytes:n}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2022-10-09 } { [ \codepoint_generate:nn ] }
+\cs_new:Npn \char_to_utfviii_bytes:n { \__kernel_codepoint_to_bytes:n }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP, deprecated]{\char_to_nfd:N, \char_to_nfd:n}
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2022-10-09 } { \codepoint_to_nfd:n }
+\cs_new:Npn \char_to_nfd:N #1 { \codepoint_to_nfd:n {`#1} }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-09 } { \codepoint_to_nfd:n }
+\cs_new:Npn \char_to_nfd:n { \codepoint_to_nfd:n }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP, deprecated]
+%   {
+%     \char_lower_case:N, \char_upper_case:N,
+%     \char_mixed_case:Nn, \char_fold_case:N,
+%     \char_str_lower_case:N, \char_str_upper_case:N,
+%     \char_str_mixed_case:N, \char_str_fold_case:N,
+%   }
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_lowercase:n }
+\cs_new:Npn \char_lower_case:N { \text_lowercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_uppercase:n }
+\cs_new:Npn \char_upper_case:N { \text_uppercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \text_titlecase_first:n }
+\cs_new:Npn \char_mixed_case:N { \text_titlecase_first:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_casefold:n }
+\cs_new:Npn \char_fold_case:N { \str_casefold:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_lowercase:n }
+\cs_new:Npn \char_str_lower_case:N { \str_lowercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_uppercase:n }
+\cs_new:Npn \char_str_upper_case:N { \str_uppercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_titlecase:n }
+\cs_new:Npn \char_str_mixed_case:N { \str_titlecase:n }
+\__kernel_patch_deprecation:nnNNpn { 2020-01-03 } { \str_casefold:n }
+\cs_new:Npn \char_str_fold_case:N { \str_casefold:n }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP, deprecated]
+%   {
+%     \char_lowercase:N, \char_titlecase:N, \char_uppercase:N,
+%     \char_foldcase:N,
+%     \char_str_lowercase:N, \char_str_titlecase:N, \char_str_uppercase:N,
+%     \char_str_foldcase:N,
+%   }
+%    \begin{macrocode}
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \text_lowercase:n }
+\cs_new:Npn \char_lowercase:N { \text_lowercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \text_uppercase:n }
+\cs_new:Npn \char_uppercase:N { \text_uppercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \text_titlecase_first:n }
+\cs_new:Npn \char_titlecase:N { \text_titlecase_first:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \str_casefold:n }
+\cs_new:Npn \char_foldcase:N { \str_casefold:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \str_lowercase:n }
+\cs_new:Npn \char_str_lowercase:N { \str_lowercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 }
+  { \tl_to_str:e { \text_titlecase_first:n } }
+\cs_new:Npn \char_str_titlecase:N #1
+  { \tl_to_str:e { \text_titlecase_first:n {#1} } }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \str_uppercase:n }
+\cs_new:Npn \char_str_uppercase:N { \str_uppercase:n }
+\__kernel_patch_deprecation:nnNNpn { 2022-10-17 } { \str_casefold:n }
+\cs_new:Npn \char_str_foldcase:N { \str_casefold:n }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[TF, deprecated]
+%   {
+%     \peek_catcode_ignore_spaces:N, \peek_catcode_remove_ignore_spaces:N,
+%     \peek_charcode_ignore_spaces:N, \peek_charcode_remove_ignore_spaces:N,
+%     \peek_meaning_ignore_spaces:N, \peek_meaning_remove_ignore_spaces:N
+%   }
+%    A little extra fun here to deal with the expansion.
+%    \begin{macrocode}
+\tl_map_inline:nn
+  {
+    { catcode } { catcode_remove }
+    { charcode } { charcode_remove }
+    { meaning } { meaning_remove }
+  }
+  {
+    \use:e
+      {
+        \__kernel_patch_deprecation:nnNNpn { 2022-01-11 } { \peek_remove_spaces:n }
+        \cs_gset_protected:Npn \exp_not:c { peek_ #1 _ignore_spaces:NTF } ##1##2##3
+          {
+            \peek_remove_spaces:n
+              { \exp_not:c { peek_ #1 :NTF } ##1 {##2} {##3} }
+          }
+        \__kernel_patch_deprecation:nnNNpn { 2022-01-11 } { \peek_remove_spaces:n }
+        \cs_gset_protected:Npn \exp_not:c { peek_ #1 _ignore_spaces:NT } ##1##2
+          {
+            \peek_remove_spaces:n
+              { \exp_not:c { peek_ #1 :NT } ##1 {##2} }
+          }
+        \__kernel_patch_deprecation:nnNNpn { 2022-01-11 } { \peek_remove_spaces:n }
+        \cs_gset_protected:Npn \exp_not:c { peek_ #1 _ignore_spaces:NF } ##1##2
+          {
+            \peek_remove_spaces:n
+              { \exp_not:c { peek_ #1 :NF } ##1 {##2} }
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Deprecated \pkg{l3prop} functions}
+%
+% \begin{macro}[deprecated]
+%   {
+%     \prop_put_if_new:Nnn, \prop_put_if_new:NVn, \prop_put_if_new:NnV,
+%     \prop_put_if_new:cnn, \prop_put_if_new:cVn, \prop_put_if_new:cnV,
+%     \prop_gput_if_new:Nnn, \prop_gput_if_new:NVn, \prop_gput_if_new:NnV,
+%     \prop_gput_if_new:cnn, \prop_gput_if_new:cVn, \prop_gput_if_new:cnV
+%   }
+%    \begin{macrocode}
+%\__kernel_patch_deprecation:nnNNpn { 2024-03-30 } { \prop_put_if_not_in:Nnn }
+\cs_new_protected:Npn \prop_put_if_new:Nnn { \prop_put_if_not_in:Nnn }
+%\__kernel_patch_deprecation:nnNNpn { 2024-03-30 } { \prop_gput_if_not_in:Nnn }
+\cs_new_protected:Npn \prop_gput_if_new:Nnn { \prop_gput_if_not_in:Nnn }
+\cs_generate_variant:Nn \prop_put_if_new:Nnn
+  { NnV , NV , c , cnV , cV }
+\cs_generate_variant:Nn \prop_gput_if_new:Nnn
+  { NnV , NV , c , cnV , cV }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

@@ -1,0 +1,15 @@
+% Core-language bootstrap fixture; no plain.tex or format file required.
+\def\swap#1,#2;{#2/#1}
+Delimited: \swap Alpha,Beta;\par
+\long\def\paragraphs#1{#1}
+\paragraphs{Long: First\par Long: Second}\par
+\def\next{OK}
+\def\check{\ifx\peek\next Futurelet: \else BAD\fi}
+\futurelet\peek\check\next\par
+\def\suffix{A}
+\expandafter\edef\csname result\suffix\endcsname{Dynamic: \swap Left,Right;}
+\csname resultA\endcsname\par
+\count0=0
+\def\iterate{\ifnum\count0<500 \advance\count0 by 1 \expandafter\iterate\fi}
+\iterate
+Finite: \the\count0\bye

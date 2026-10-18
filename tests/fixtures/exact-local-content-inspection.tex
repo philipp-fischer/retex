@@ -1,0 +1,9 @@
+\pdfoutput=1 \font\f=cmr10 \f
+\hsize=120pt \vsize=120pt \parindent=0pt
+\output={\setbox0=\vbox{\unvcopy255\global\setbox1=\lastbox}
+\setbox2=\hbox{\unhcopy1\unskip\unskip\unpenalty}
+\global\count0=0\ifdim\wd2>8pt\global\count0=1\fi
+\global\setbox1=\box99
+\immediate\write16{OBSERVED=\the\count0}
+\shipout\vbox{\unvbox255\hbox{\ifnum\count0=1 I\else O\fi}}}
+\noindent A\par\penalty-10000\end

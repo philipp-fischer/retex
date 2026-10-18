@@ -1,0 +1,1 @@
+soft ydoc  # for compiling the package documentation only

@@ -1,0 +1,1346 @@
+% \iffalse meta-comment
+%
+%% File: l3backend-color.dtx
+%
+% Copyright (C) 2019-2024 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3backend bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full,kernel]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3backend-color} module\\ Backend color support^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2024-05-08}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3backend-color} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%<@@=color>
+%    \end{macrocode}
+%
+% Color support is split into parts: collecting data from \LaTeXe{}, the color
+% stack, general color, separations, and color for drawings. We have different
+% approaches in each backend, and have some choices to make about
+% \texttt{dvipdfmx}/\XeTeX{} in particular. Whilst it is in some ways
+% convenient to use the same approach in multiple backends, the fact that
+% \texttt{dvipdfmx}/\XeTeX{} is PDF-based means it (largely) sticks closer to
+% direct PDF output.
+%
+% \subsection{The color stack}
+%
+% For PDF-based engines, we have a color stack available inside the specials.
+% This is used for concepts beyond color itself: it is needed to manage the
+% graphics state generally. Although \texttt{dvipdfmx}/\XeTeX{} have multiple
+% color stacks in recent releases, the way these interact with the original
+% single stack and with other graphic state operations means that currently it
+% is not feasible to use the multiple stacks.
+%
+% \subsubsection{Common code}
+%
+%    \begin{macrocode}
+%<*luatex|pdftex>
+%    \end{macrocode}
+%
+% \begin{variable}{\l_@@_backend_stack_int}
+%   For tracking which stack is in use where multiple stacks are used:
+%   currently just \pdfTeX{}/\LuaTeX{} but at some future stage may also cover
+%   \texttt{dvipdfmx}/\XeTeX{}.
+%    \begin{macrocode}
+\int_new:N \l_@@_backend_stack_int
+%    \end{macrocode}
+% \end{variable}
+%
+%    \begin{macrocode}
+%</luatex|pdftex>
+%    \end{macrocode}
+%
+% \subsubsection{\LuaTeX and \pdfTeX{}}
+%
+%    \begin{macrocode}
+%<*luatex|pdftex>
+%    \end{macrocode}
+%
+% \begin{macro}{\__kernel_color_backend_stack_init:Nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \__kernel_color_backend_stack_init:Nnn #1#2#3
+  {
+    \int_const:Nn #1
+      {
+%<*luatex>
+        \tex_pdffeedback:D colorstackinit ~
+%</luatex>
+%<*pdftex>
+        \tex_pdfcolorstackinit:D
+%</pdftex>
+        \tl_if_blank:nF {#2} { #2 ~ }
+        {#3}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\__kernel_color_backend_stack_push:nn}
+% \begin{macro}{\__kernel_color_backend_stack_pop:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \__kernel_color_backend_stack_push:nn #1#2
+  {
+%<*luatex>
+    \tex_pdfextension:D colorstack ~
+%</luatex>
+%<*pdftex>
+    \tex_pdfcolorstack:D
+%</pdftex>
+      \int_eval:n {#1} ~ push ~ {#2}
+  }
+\cs_new_protected:Npn \__kernel_color_backend_stack_pop:n #1
+  {
+%<*luatex>
+    \tex_pdfextension:D colorstack ~
+%</luatex>
+%<*pdftex>
+    \tex_pdfcolorstack:D
+%</pdftex>
+      \int_eval:n {#1} ~ pop \scan_stop:
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</luatex|pdftex>
+%    \end{macrocode}
+%
+% \subsection{General color}
+%
+% \subsubsection{\texttt{dvips}-style}
+%
+%    \begin{macrocode}
+%<*dvips|dvisvgm>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_select_cmyk:n  ,
+%     \@@_backend_select_gray:n  ,
+%     \@@_backend_select_named:n ,
+%     \@@_backend_select_rgb:n   ,
+%     \@@_backend_select:n
+%   }
+% \begin{macro}{\@@_backend_reset:}
+%    Push the data to the stack. In the case of \texttt{dvips} also saves the
+%    drawing color in raw PostScript. The |spot| model is for handling data
+%    in classical format.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_cmyk:n #1
+  { \@@_backend_select:n { cmyk ~ #1 } }
+\cs_new_protected:Npn \@@_backend_select_gray:n #1
+  { \@@_backend_select:n { gray ~ #1 } }
+\cs_new_protected:Npn \@@_backend_select_named:n #1
+  { \@@_backend_select:n { ~ #1 } }
+\cs_new_protected:Npn \@@_backend_select_rgb:n #1
+  { \@@_backend_select:n { rgb ~ #1 } }
+\cs_new_protected:Npn \@@_backend_select:n #1
+  {
+    \__kernel_backend_literal:n { color~push~ #1 }
+%<*dvips>
+    \__kernel_backend_postscript:n { /color.sc ~ { } ~ def }
+%</dvips>
+  }
+\cs_new_protected:Npn \@@_backend_reset:
+  { \__kernel_backend_literal:n { color~pop } }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvips|dvisvgm>
+%    \end{macrocode}
+%
+% \subsubsection{\LuaTeX{} and \pdfTeX{}}
+%
+%    \begin{macrocode}
+%<*luatex|pdftex>
+%    \end{macrocode}
+%
+% \begin{variable}{\l_@@_backend_fill_tl, \l_@@_backend_stroke_tl}
+%    \begin{macrocode}
+\tl_new:N \l_@@_backend_fill_tl
+\tl_new:N \l_@@_backend_stroke_tl
+\tl_set:Nn \l_@@_backend_fill_tl { 0 ~ g }
+\tl_set:Nn \l_@@_backend_stroke_tl { 0 ~ G }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_select_cmyk:n ,
+%     \@@_backend_select_gray:n ,
+%     \@@_backend_select_rgb:n
+%   }
+% \begin{macro}{\@@_backend_select:nn}
+% \begin{macro}{\@@_backend_reset:}
+%   Store the values then pass to the stack.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_cmyk:n #1
+  { \@@_backend_select:nn { #1 ~ k } { #1 ~ K } }
+\cs_new_protected:Npn \@@_backend_select_gray:n #1
+  { \@@_backend_select:nn { #1 ~ g } { #1 ~ G } }
+\cs_new_protected:Npn \@@_backend_select_rgb:n #1
+  { \@@_backend_select:nn { #1 ~ rg } { #1 ~ RG } }
+\cs_new_protected:Npn \@@_backend_select:nn #1#2
+  {
+    \tl_set:Nn \l_@@_backend_fill_tl {#1}
+    \tl_set:Nn \l_@@_backend_stroke_tl {#2}
+    \__kernel_color_backend_stack_push:nn \l_@@_backend_stack_int { #1 ~ #2 }
+  }
+\cs_new_protected:Npn \@@_backend_reset:
+  { \__kernel_color_backend_stack_pop:n \l_@@_backend_stack_int }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</luatex|pdftex>
+%    \end{macrocode}
+%
+% \subsubsection{\texttt{dvipmdfx}/\XeTeX{}}
+%
+% These backends have the most possible approaches: it recognises both
+% \texttt{dvips}-based color specials and its own format, plus one can
+% include PDF statements directly. Recent releases also have a color stack
+% approach similar to \pdfTeX{}. Of the stack methods, the dedicated
+% the most versatile is the latter as it can cover all of the use cases
+% we have. However, at present this interacts problematically with any color
+% on the original stack. We therefore stick to a single-stack approach here.
+%
+%    \begin{macrocode}
+%<*dvipdfmx|xetex>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_select:n      ,
+%     \@@_backend_select_cmyk:n ,
+%     \@@_backend_select_gray:n ,
+%     \@@_backend_select_rgb:n
+%   }
+% \begin{macro}{\@@_backend_reset:}
+%   Using the single stack is relatively easy as there is only one route.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select:n #1
+  { \__kernel_backend_literal:n { pdf : bc ~ [ #1 ] } }
+\cs_new_eq:NN \@@_backend_select_cmyk:n \@@_backend_select:n
+\cs_new_eq:NN \@@_backend_select_gray:n \@@_backend_select:n
+\cs_new_eq:NN \@@_backend_select_rgb:n  \@@_backend_select:n
+\cs_new_protected:Npn \@@_backend_reset:
+  { \__kernel_backend_literal:n { pdf : ec } }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_select_named:n}
+%   For classical named colors, the only value we should get is |Black|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_named:n #1
+  {
+    \str_if_eq:nnTF {#1} { Black }
+      { \@@_backend_select_gray:n { 0 } }
+      { \msg_error:nnn { color } { unknown-named-color } {#1} }
+  }
+\msg_new:nnn { color } { unknown-named-color }
+  { Named~color~'#1'~is~not~known. }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvipdfmx|xetex>
+%    \end{macrocode}
+%
+% \subsection{Separations}
+%
+% Here, life gets interesting and we need essentially one approach per
+% backend.
+%
+%    \begin{macrocode}
+%<*dvipdfmx|luatex|pdftex|xetex|dvips>
+%    \end{macrocode}
+%
+% But we start with some functionality needed for both PostScript and
+% PDF based backends.
+%
+% \begin{variable}{\g_@@_backend_colorant_prop}
+%    \begin{macrocode}
+\prop_new:N \g_@@_backend_colorant_prop
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}[EXP]{\@@_backend_devicen_colorants:n}
+% \begin{macro}[EXP]{\@@_backend_devicen_colorants:w}
+%    \begin{macrocode}
+\cs_new:Npe \@@_backend_devicen_colorants:n #1
+  {
+    \exp_not:N \tl_if_blank:nF {#1}
+      {
+        \c_space_tl
+        << ~
+          /Colorants ~
+            << ~
+              \exp_not:N \@@_backend_devicen_colorants:w #1 ~
+                \exp_not:N \q_recursion_tail \c_space_tl
+                \exp_not:N \q_recursion_stop
+            >> ~
+        >>
+      }
+  }
+\cs_new:Npn \@@_backend_devicen_colorants:w #1 ~
+  {
+    \quark_if_recursion_tail_stop:n {#1}
+    \prop_if_in:NnT \g_@@_backend_colorant_prop {#1}
+      {
+        #1 ~
+        \prop_item:Nn \g_@@_backend_colorant_prop {#1} ~
+      }
+    \@@_backend_devicen_colorants:w
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvipdfmx|luatex|pdftex|xetex|dvips>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*dvips>
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_backend_select_separation:nn, \@@_backend_select_devicen:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_separation:nn #1#2
+  { \@@_backend_select:n { separation ~ #1 ~ #2 } }
+\cs_new_eq:NN \@@_backend_select_devicen:nn \@@_backend_select_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_select_iccbased:nn}
+%   No support.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_iccbased:nn #1#2 { }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_separation_init:nnnnn,
+%     \@@_backend_separation_init:neenn
+%   }
+% \begin{macro}
+%   {\@@_backend_separation_init_aux:nnnnnn}
+% \begin{macro}[EXP]
+%   {
+%     \@@_backend_separation_init_/DeviceCMYK:nnn ,
+%     \@@_backend_separation_init_/DeviceGray:nnn ,
+%     \@@_backend_separation_init_/DeviceRGB:nnn
+%   }
+% \begin{macro}[EXP]{\@@_backend_separation_init_Device:Nn}
+% \begin{macro}[EXP]{\@@_backend_separation_init:nnn}
+% \begin{macro}[EXP]{\@@_backend_separation_init_count:n}
+% \begin{macro}[EXP]{\@@_backend_separation_init_count:w}
+% \begin{macro}[EXP]{\@@_backend_separation_init:nnnn}
+% \begin{macro}[EXP]{\@@_backend_separation_init:w}
+% \begin{macro}[EXP]{\@@_backend_separation_init:n}
+% \begin{macro}[EXP]{\@@_backend_separation_init:nw}
+% \begin{macro}{\@@_backend_separation_init_CIELAB:nnn}
+%   Initialising here means creating a small header set up plus massaging
+%   some data. This comes about as we have to deal with PDF-focussed data,
+%   which makes most sense \enquote{higher-up}. The approach is based on
+%   ideas from \url{https://tex.stackexchange.com/q/560093} plus using
+%   the PostScript manual for other aspects.
+%    \begin{macrocode}
+\cs_new_protected:Npe \@@_backend_separation_init:nnnnn #1#2#3#4#5
+  {
+    \bool_if:NT \g__kernel_backend_header_bool
+      {
+        \exp_not:N \exp_args:Ne \__kernel_backend_first_shipout:n
+          {
+            \exp_not:N \@@_backend_separation_init_aux:nnnnnn
+              { \exp_not:N \int_use:N \g_@@_model_int }
+              {#1} {#2} {#3} {#4} {#5}
+          }
+        \prop_gput:Nee \exp_not:N \g_@@_backend_colorant_prop
+          { / \exp_not:N \str_convert_pdfname:n {#1} }
+          {
+            << ~
+              /setcolorspace ~ {} ~
+            >> ~ begin ~
+              color \exp_not:N \int_use:N \g_@@_model_int \c_space_tl
+            end
+          }
+      }
+  }
+\cs_generate_variant:Nn \@@_backend_separation_init:nnnnn { nee }
+\cs_new_protected:Npn \@@_backend_separation_init_aux:nnnnnn #1#2#3#4#5#6
+  {
+    \__kernel_backend_literal:e
+      {
+        !
+        TeXDict ~ begin ~
+        /color #1
+          {
+            [ ~
+              /Separation ~ ( \str_convert_pdfname:n {#2} ) ~
+              [ ~ #3 ~ ] ~
+                {
+                  \cs_if_exist_use:cF { @@_backend_separation_init_ #3 :nnn }
+                    { \@@_backend_separation_init:nnn }
+                      {#4} {#5} {#6}
+                }
+            ] ~ setcolorspace
+          } ~ def ~
+        end
+      }
+  }
+\cs_new:cpn { @@_backend_separation_init_ /DeviceCMYK :nnn } #1#2#3
+  { \@@_backend_separation_init_Device:Nn 4 {#3} }
+\cs_new:cpn { @@_backend_separation_init_ /DeviceGray :nnn } #1#2#3
+  { \@@_backend_separation_init_Device:Nn 1 {#3} }
+\cs_new:cpn { @@_backend_separation_init_ /DeviceRGB :nnn } #1#2#3
+  { \@@_backend_separation_init_Device:Nn 2 {#3} }
+\cs_new:Npn \@@_backend_separation_init_Device:Nn #1#2
+  {
+    #2 ~
+    \prg_replicate:nn {#1}
+      { #1 ~ index ~ mul ~ #1 ~ 1 ~ roll ~ }
+    \int_eval:n { #1 + 1 } ~ -1 ~ roll ~ pop
+  }
+%    \end{macrocode}
+%   For the generic case, we cannot use |/FunctionType 2| unfortunately, so
+%   we have to code that idea up in PostScript. Here, we will therefore assume
+%   that a range is \emph{always} given. First, we count values in each argument:
+%   at the backend level, we can assume there are always well-behaved with
+%   spaces present.
+%    \begin{macrocode}
+\cs_new:Npn \@@_backend_separation_init:nnn #1#2#3
+  {
+    \exp_args:Ne \@@_backend_separation_init:nnnn
+      { \@@_backend_separation_init_count:n {#2} }
+      {#1} {#2} {#3}
+  }
+\cs_new:Npn \@@_backend_separation_init_count:n #1
+  { \int_eval:n { 0 \@@_backend_separation_init_count:w #1 ~ \s_@@_stop } }
+\cs_new:Npn \@@_backend_separation_init_count:w #1 ~ #2 \s_@@_stop
+  {
+    +1
+    \tl_if_blank:nF {#2}
+      { \@@_backend_separation_init_count:w #2 \s_@@_stop }
+  }
+%    \end{macrocode}
+%   Now we implement the algorithm. In the terms in the PostScript manual,
+%   we have $\mathbf{N} = 1$ and $\mathbf{Domain} = [0~1]$, with
+%   $\mathbf{Range}$ as |#2|, $\mathbf{C0}$ as |#3| and $\mathbf{C1}$
+%   as |#4|, with the number of output components in |#1|. So all we have
+%   to do is implement $y_{i} = \mathbf{C0}_{i} + x(\mathbf{C1}_{i} -
+%   \mathbf{C0}_{i})$ with lots of stack manipulation, then check the
+%   ranges. That's done by adding everything to the stack first, then using
+%   the fact we know all of the offsets. As manipulating the stack is tricky,
+%   we start by re-formatting the $\mathbf{C0}$ and $\mathbf{C1}$ arrays to
+%   be interleaved, and add a \texttt{0} to each pair: this is used
+%   to keep the stack of constant length while we are doing the first pass of
+%   mathematics. We then working through that list, calculating from the
+%   last to the first value before tidying up by removing all of the input
+%   values. We do that by first copying all of the final $y$ values to the
+%   end of the stack, then rolling everything so we can pop the now-unneeded
+%   material.
+%    \begin{macrocode}
+\cs_new:Npn \@@_backend_separation_init:nnnn #1#2#3#4
+  {
+    \@@_backend_separation_init:w #3 ~ \s_@@_stop #4 ~ \s_@@_stop
+    \prg_replicate:nn {#1}
+      {
+        pop ~ 1 ~ index ~ neg ~ 1 ~ index ~ add ~
+        \int_eval:n { 3 * #1 } ~ index ~ mul ~
+        2 ~ index ~ add ~
+        \int_eval:n { 3 * #1 } ~ #1 ~ roll ~
+      }
+    \int_step_function:nnnN {#1} { -1 } { 1 }
+      \@@_backend_separation_init:n
+    \int_eval:n { 4 * #1 + 1 } ~ #1 ~ roll ~
+    \prg_replicate:nn { 3 * #1 + 1 } { pop ~ }
+    \tl_if_blank:nF {#2}
+      { \@@_backend_separation_init:nw {#1} #2 ~ \s_@@_stop }
+  }
+\cs_new:Npn \@@_backend_separation_init:w
+  #1 ~ #2 \s_@@_stop #3 ~ #4 \s_@@_stop
+  {
+    #1 ~ #3 ~ 0 ~
+    \tl_if_blank:nF {#2}
+      { \@@_backend_separation_init:w #2 \s_@@_stop #4 \s_@@_stop }
+  }
+\cs_new:Npn \@@_backend_separation_init:n #1
+  { \int_eval:n { #1 * 2 } ~ index ~ }
+%    \end{macrocode}
+%   Finally, we deal with the range limit if required. This is handled
+%   by splitting the range into pairs. It's then just a question of doing
+%   the comparisons, this time dropping everything except the desired
+%   result.
+%    \begin{macrocode}
+\cs_new:Npn \@@_backend_separation_init:nw #1#2 ~ #3 ~ #4 \s_@@_stop
+  {
+    #2 ~ #3 ~
+    2 ~ index ~ 2 ~ index ~ lt ~
+      { ~ pop ~ exch ~ pop ~ } ~
+      { ~
+        2 ~ index ~ 1 ~ index ~ gt ~
+          { ~ exch ~ pop ~ exch ~ pop ~ } ~
+          { ~ pop ~ pop ~ } ~
+        ifelse ~
+      }
+    ifelse ~
+    #1 ~ 1 ~ roll ~
+    \tl_if_blank:nF {#4}
+      { \@@_backend_separation_init:nw {#1} #4 \s_@@_stop }
+  }
+%    \end{macrocode}
+%  CIELAB support uses the detail from the PostScript reference, page 227;
+%  other than that block of PostScript, this is the same as for PDF-based
+%  routes.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_separation_init_CIELAB:nnn #1#2#3
+  {
+    \@@_backend_separation_init:neenn
+      {#2}
+      {
+        /CIEBasedABC ~
+            << ~
+              /RangeABC ~ [ ~ \c_@@_model_range_CIELAB_tl \c_space_tl ] ~
+              /DecodeABC ~
+                [ ~
+                  { ~ 16 ~ add ~ 116 ~ div ~ } ~ bind ~
+                  { ~ 500 ~ div ~ } ~ bind ~
+                  { ~ 200 ~ div ~ } ~ bind ~
+                ] ~
+              /MatrixABC ~ [ ~ 1 ~ 1 ~ 1 ~ 1 ~ 0 ~ 0 ~ 0 ~ 0 ~ -1 ~ ] ~
+              /DecodeLMN ~
+                [ ~
+                  { ~
+                    dup ~ 6 ~ 29 ~ div ~ ge ~
+                      { ~ dup ~ dup ~ mul ~ mul ~ ~ } ~
+                      { ~ 4 ~ 29 ~ div ~ sub ~ 108 ~ 841 ~ div ~ mul ~ } ~
+                    ifelse ~
+                    0.9505 ~ mul ~
+                  } ~ bind ~
+                  { ~
+                    dup ~ 6 ~ 29 ~ div ~ ge ~
+                      { ~ dup ~ dup ~ mul ~ mul ~ } ~
+                      { ~ 4 ~ 29 ~ div ~ sub ~ 108 ~ 841 ~ div ~ mul ~ } ~
+                    ifelse ~
+                  } ~ bind ~
+                  { ~
+                    dup ~ 6 ~ 29 ~ div ~ ge ~
+                      { ~ dup ~ dup ~ mul ~ mul ~ } ~
+                      { ~ 4 ~ 29 ~ div ~ sub ~ 108 ~ 841 ~ div ~ mul ~ } ~
+                    ifelse ~
+                    1.0890 ~ mul ~
+                  } ~ bind
+                ] ~
+              /WhitePoint ~
+                [ ~ \tl_use:c { c_@@_model_whitepoint_CIELAB_ #1 _tl } ~ ] ~
+            >>
+      }
+      { \c_@@_model_range_CIELAB_tl }
+      { 100 ~ 0 ~ 0 }
+      {#3}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_devicen_init:nnn}
+%   Trivial as almost all of the work occurs in the shared code.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_devicen_init:nnn #1#2#3
+  {
+    \__kernel_backend_literal:e
+      {
+        !
+        TeXDict ~ begin ~
+        /color \int_use:N \g_@@_model_int
+          {
+            [ ~
+              /DeviceN ~
+              [ ~ #1 ~ ] ~
+              #2 ~
+              { ~ #3 ~ } ~
+              \@@_backend_devicen_colorants:n {#1}
+            ] ~ setcolorspace
+          } ~ def ~
+        end
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_iccbased_init:nnn}
+%   No support at present.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_iccbased_init:nnn #1#2#3 { }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvips>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*dvisvgm>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_select_separation:nn,
+%     \@@_backend_select_devicen:nn
+%   }
+%   No support at present.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_separation:nn #1#2 { }
+\cs_new_eq:NN \@@_backend_select_devicen:nn \@@_backend_select_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {\@@_backend_separation_init:nnnnn, \@@_backend_separation_init_CIELAB:nnn}
+%   No support at present.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_separation_init:nnnnn #1#2#3#4#5 { }
+\cs_new_protected:Npn \@@_backend_separation_init_CIELAB:nnnnnn #1#2#3 { }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_select_iccbased:nn}
+%   As detailed in \url{https://www.w3.org/TR/css-color-4/#at-profile},
+%   we can apply a color profile using CSS. As we have a local file, we use
+%   a relative URL.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_select_iccbased:nn #1#2
+  {
+    \__kernel_backend_literal_svg:e
+      {
+        <style>
+          @color-profile ~
+            \str_if_eq:nnTF {#2} { cmyk }
+              { device-cmyk }
+              { --color \int_use:N \g_@@_model_int }
+                \c_space_tl
+            {
+              src:("#1")
+            }
+        </style>
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvisvgm>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*dvipdfmx|luatex|pdftex|xetex>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_select_separation:nn,
+%     \@@_backend_select_devicen:nn   ,
+%     \@@_backend_select_iccbased:nn
+%   }
+%    \begin{macrocode}
+%<*dvipdfmx|xetex>
+\cs_new_protected:Npn \@@_backend_select_separation:nn #1#2
+  { \__kernel_backend_literal:e { pdf : bc ~ \pdf_object_ref:n {#1} ~ [ #2 ] } }
+%</dvipdfmx|xetex>
+%<*luatex|pdftex>
+\cs_new_protected:Npn \@@_backend_select_separation:nn #1#2
+  { \@@_backend_select:nn { /#1 ~ cs ~ #2 ~ scn  } { /#1 ~ CS ~ #2 ~ SCN } }
+%</luatex|pdftex>
+\cs_new_eq:NN \@@_backend_select_devicen:nn \@@_backend_select_separation:nn
+\cs_new_eq:NN \@@_backend_select_iccbased:nn \@@_backend_select_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_init_resource:n}
+%   Resource initiation comes up a few times. For \texttt{dvipdfmx}/\XeTeX{},
+%   we skip this as at present it's handled by the backend.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_init_resource:n #1
+  {
+%<*luatex|pdftex>
+    \bool_lazy_and:nnT
+      { \cs_if_exist_p:N \pdfmanagement_if_active_p: }
+      { \pdfmanagement_if_active_p: }
+      {
+        \use:e
+          {
+            \pdfmanagement_add:nnn
+              { Page / Resources / ColorSpace }
+              { #1 }
+              { \pdf_object_ref_last: }
+          }
+      }
+%</luatex|pdftex>
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_separation_init:nnnnn}
+% \begin{macro}{\@@_backend_separation_init:nn}
+% \begin{macro}{\@@_backend_separation_init_CIELAB:nnn}
+%   Initialising the PDF structures needs two parts: creating an object
+%   containing the \enquote{real} name of the Separation, then adding a reference
+%   to that to each page. We use a separate object for the tint transformation
+%   following the model in the PDF reference. The object here for the color
+%   needs to be named as that way it's accessible to
+%   \texttt{dvipdfmx}/\XeTeX{}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_separation_init:nnnnn #1#2#3#4#5
+  {
+    \pdf_object_unnamed_write:ne { dict }
+      {
+        /FunctionType ~ 2
+        /Domain ~ [0 ~ 1]
+        \tl_if_blank:nF {#3} { /Range ~ [#3] }
+        /C0 ~ [#4] ~
+        /C1 ~ [#5] /N ~ 1
+      }
+    \exp_args:Ne \@@_backend_separation_init:nn
+      { \str_convert_pdfname:n {#1} } {#2}
+    \@@_backend_init_resource:n { color \int_use:N \g_@@_model_int }
+  }
+\cs_new_protected:Npn \@@_backend_separation_init:nn #1#2
+  {
+    \use:e
+      {
+        \pdf_object_new:n { color \int_use:N \g_@@_model_int }
+        \pdf_object_write:nnn { color \int_use:N \g_@@_model_int } { array }
+          { /Separation /#1 ~ #2 ~ \pdf_object_ref_last: }
+      }
+    \prop_gput:Nne \g_@@_backend_colorant_prop { /#1 }
+      { \pdf_object_ref_last: }
+  }
+%    \end{macrocode}
+%   For CIELAB colors, we need one object per document for the illuminant,
+%   plus initialisation of the color space referencing that object.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_separation_init_CIELAB:nnn #1#2#3
+  {
+    \pdf_object_if_exist:nF { @@_illuminant_CIELAB_ #1 }
+      {
+        \pdf_object_new:n { @@_illuminant_CIELAB_ #1 }
+        \pdf_object_write:nne { @@_illuminant_CIELAB_ #1 } { array }
+          {
+            /Lab ~
+            <<
+              /WhitePoint ~
+                [ \tl_use:c { c_@@_model_whitepoint_CIELAB_ #1 _tl } ]
+              /Range ~ [ \c_@@_model_range_CIELAB_tl ]
+            >>
+          }
+      }
+    \@@_backend_separation_init:nnnnn
+      {#2}
+      { \pdf_object_ref:n { @@_illuminant_CIELAB_ #1 } }
+      { \c_@@_model_range_CIELAB_tl }
+      { 100 ~ 0 ~ 0 }
+      {#3}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_devicen_init:nnn}
+% \begin{macro}[EXP]{\@@_backend_devicen_init:w}
+%   Similar to the Separations case, but with an arbitrary function for
+%   the alternative space work.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_devicen_init:nnn #1#2#3
+  {
+    \pdf_object_unnamed_write:ne { stream }
+      {
+        {
+          /FunctionType ~ 4 ~
+          /Domain ~
+            [ ~
+              \prg_replicate:nn
+                { 0 \@@_backend_devicen_init:w #1 ~ \s_@@_stop }
+                { 0 ~ 1 ~ }
+            ] ~
+          /Range ~
+            [ ~
+              \str_case:nn {#2}
+                {
+                  { /DeviceCMYK } { 0 ~ 1 ~ 0 ~ 1 ~ 0 ~ 1 ~ 0 ~ 1 }
+                  { /DeviceGray } { 0 ~ 1 }
+                  { /DeviceRGB }  { 0 ~ 1 ~ 0 ~ 1 ~ 0 ~ 1 }
+                } ~
+            ]
+        }
+        { {#3} }
+      }
+    \use:e
+      {
+        \pdf_object_new:n { color \int_use:N \g_@@_model_int }
+        \pdf_object_write:nnn { color \int_use:N \g_@@_model_int } { array }
+          {
+            /DeviceN ~
+            [ ~ #1 ~ ] ~
+            #2 ~
+            \pdf_object_ref_last:
+            \@@_backend_devicen_colorants:n {#1}
+          }
+      }
+    \@@_backend_init_resource:n { color \int_use:N \g_@@_model_int }
+  }
+\cs_new:Npn \@@_backend_devicen_init:w #1 ~ #2 \s_@@_stop
+  {
+    + 1
+    \tl_if_blank:nF {#2}
+      { \@@_backend_devicen_init:w #2 \s_@@_stop }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_iccbased_init:nnn}
+%  Lots of data to save here: we only want to do that once per file,
+%  so track it by name.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_iccbased_init:nnn #1#2#3
+  {
+    \pdf_object_if_exist:nF { @@_icc_ #1 }
+      {
+        \pdf_object_new:n { @@_icc_ #1 }
+        \pdf_object_write:nne { @@_icc_ #1 } { fstream }
+          {
+            {
+              /N ~ \exp_not:n { #2 } ~
+              \tl_if_empty:nF { #3 } { /Range~[ #3 ] }
+            }
+            {#1}
+          }
+      }
+    \pdf_object_unnamed_write:ne { array }
+      { /ICCBased ~ \pdf_object_ref:n { @@_icc_ #1 } }
+    \@@_backend_init_resource:n { color \int_use:N \g_@@_model_int }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_iccbased_device:nnn}
+%   This is very similar to setting up a color space: the only part we
+%   add to the page resources differently.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_iccbased_device:nnn #1#2#3
+  {
+    \pdf_object_if_exist:nF { @@_icc_ #1 }
+      {
+        \pdf_object_new:n { @@_icc_ #1 }
+        \pdf_object_write:nnn { @@_icc_ #1 } { fstream }
+          {
+            { /N ~ #3 }
+            {#1}
+          }
+      }
+    \pdf_object_unnamed_write:ne { array }
+      { /ICCBased ~ \pdf_object_ref:n { @@_icc_ #1 } }
+    \@@_backend_init_resource:n { Default #2 }
+  }
+%    \end{macrocode}
+% \end{macro} 
+%
+%    \begin{macrocode}
+%</dvipdfmx|luatex|pdftex|xetex>
+%    \end{macrocode}
+%
+% \subsection{Fill and stroke color}
+%
+% Here, \texttt{dvipdfmx}/\XeTeX{} we write direct PDF specials for the fill,
+% and only use the stack for the stroke color (see above for comments on why
+% we cannot use multiple stacks with these backends). \LuaTeX{} and \pdfTeX{}
+% have multiple stacks that can deal with fill and stroke. For \texttt{dvips}
+% we have to manage fill and stroke color ourselves. We also handle
+% \texttt{dvisvgm} independently, as there we can create SVG directly.
+%
+%    \begin{macrocode}
+%<*dvipdfmx|xetex>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill:n        ,
+%     \@@_backend_fill_cmyk:n   ,
+%     \@@_backend_fill_gray:n   ,
+%     \@@_backend_fill_rgb:n    ,
+%     \@@_backend_stroke:n      ,
+%     \@@_backend_stroke_cmyk:n ,
+%     \@@_backend_stroke_gray:n ,
+%     \@@_backend_stroke_rgb:n
+%   }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill:n #1
+  { \__kernel_backend_literal:n { pdf : bc ~ fill ~ [ #1 ] } }
+\cs_new_eq:NN \@@_backend_fill_cmyk:n \@@_backend_fill:n
+\cs_new_eq:NN \@@_backend_fill_gray:n \@@_backend_fill:n
+\cs_new_eq:NN \@@_backend_fill_rgb:n  \@@_backend_fill:n
+\cs_new_protected:Npn \@@_backend_stroke:n #1
+  { \__kernel_backend_literal:n { pdf : bc ~ stroke ~ [ #1 ] } }
+\cs_new_eq:NN \@@_backend_stroke_cmyk:n \@@_backend_stroke:n
+\cs_new_eq:NN \@@_backend_stroke_gray:n \@@_backend_stroke:n
+\cs_new_eq:NN \@@_backend_stroke_rgb:n  \@@_backend_stroke:n
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_separation:nn,
+%     \@@_backend_stroke_separation:nn,
+%     \@@_backend_fill_devicen:nn,
+%     \@@_backend_stroke_devicen:nn
+%   }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_separation:nn #1#2
+  {
+    \__kernel_backend_literal:e
+      { pdf : bc ~ fill ~ \pdf_object_ref:n {#1} ~ [ #2 ] }
+  }
+\cs_new_protected:Npn \@@_backend_stroke_separation:nn #1#2
+  {
+    \__kernel_backend_literal:e
+      { pdf : bc ~ stroke ~ \pdf_object_ref:n {#1} ~ [ #2 ] }
+  }
+\cs_new_eq:NN \@@_backend_fill_devicen:nn \@@_backend_fill_separation:nn
+\cs_new_eq:NN \@@_backend_stroke_devicen:nn \@@_backend_stroke_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_fill_reset:, \@@_backend_stroke_reset:}
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_backend_fill_reset: \@@_backend_reset:
+\cs_new_eq:NN \@@_backend_stroke_reset: \@@_backend_reset:
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvipdfmx|xetex>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex|pdftex>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_cmyk:n   ,
+%     \@@_backend_fill_gray:n   ,
+%     \@@_backend_fill_rgb:n    ,
+%     \@@_backend_fill:n        ,
+%     \@@_backend_stroke_cmyk:n ,
+%     \@@_backend_stroke_gray:n ,
+%     \@@_backend_stroke_rgb:n  ,
+%     \@@_backend_stroke:n
+%   }
+%   Drawing (fill/stroke) color is handled in \texttt{dvipdfmx}/\XeTeX{} in the
+%   same way as \LuaTeX{}/\pdfTeX{}. We use the same approach as earlier, except the
+%   color stack is not involved so the generic direct PDF operation is used.
+%   There is no worry about the nature of strokes: everything is handled
+%   automatically.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_cmyk:n #1
+  { \@@_backend_fill:n { #1 ~ k } }
+\cs_new_protected:Npn \@@_backend_fill_gray:n #1
+  { \@@_backend_fill:n { #1 ~ g } }
+\cs_new_protected:Npn \@@_backend_fill_rgb:n #1
+  { \@@_backend_fill:n { #1 ~ rg } }
+\cs_new_protected:Npn \@@_backend_fill:n #1
+  {
+    \tl_set:Nn \l_@@_backend_fill_tl {#1}
+    \__kernel_color_backend_stack_push:nn \l_@@_backend_stack_int
+      { #1 ~ \l_@@_backend_stroke_tl }
+  }
+\cs_new_protected:Npn \@@_backend_stroke_cmyk:n #1
+  { \@@_backend_stroke:n { #1 ~ K } }
+\cs_new_protected:Npn \@@_backend_stroke_gray:n #1
+  { \@@_backend_stroke:n { #1 ~ G } }
+\cs_new_protected:Npn \@@_backend_stroke_rgb:n #1
+  { \@@_backend_stroke:n { #1 ~ RG } }
+\cs_new_protected:Npn \@@_backend_stroke:n #1
+  {
+    \tl_set:Nn \l_@@_backend_stroke_tl {#1}
+    \__kernel_color_backend_stack_push:nn \l_@@_backend_stack_int
+      { \l_@@_backend_fill_tl \c_space_tl #1 }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_separation:nn,
+%     \@@_backend_stroke_separation:nn,
+%     \@@_backend_fill_devicen:nn,
+%     \@@_backend_stroke_devicen:nn
+%   }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_separation:nn #1#2
+  { \@@_backend_fill:n { /#1 ~ cs ~ #2 ~ scn } }
+\cs_new_protected:Npn \@@_backend_stroke_separation:nn #1#2
+  { \@@_backend_stroke:n { /#1 ~ CS ~ #2 ~ SCN } }
+\cs_new_eq:NN \@@_backend_fill_devicen:nn \@@_backend_fill_separation:nn
+\cs_new_eq:NN \@@_backend_stroke_devicen:nn \@@_backend_stroke_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_fill_reset:, \@@_backend_stroke_reset:}
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_backend_fill_reset: \@@_backend_reset:
+\cs_new_eq:NN \@@_backend_stroke_reset: \@@_backend_reset:
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</luatex|pdftex>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*dvips>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_cmyk:n   ,
+%     \@@_backend_fill_gray:n   ,
+%     \@@_backend_fill_rgb:n    ,
+%     \@@_backend_fill:n    ,
+%     \@@_backend_stroke_cmyk:n ,
+%     \@@_backend_stroke_gray:n ,
+%     \@@_backend_stroke_rgb:n
+%   }
+%   Fill color here is the same as general color \emph{except} we skip the
+%   stroke part.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_cmyk:n #1
+  { \@@_backend_fill:n { cmyk ~ #1 } }
+\cs_new_protected:Npn \@@_backend_fill_gray:n #1
+  { \@@_backend_fill:n { gray ~ #1 } }
+\cs_new_protected:Npn \@@_backend_fill_rgb:n #1
+  { \@@_backend_fill:n { rgb ~ #1 } }
+\cs_new_protected:Npn \@@_backend_fill:n #1
+  {
+    \__kernel_backend_literal:n { color~push~ #1 }
+  }
+\cs_new_protected:Npn \@@_backend_stroke_cmyk:n #1
+  { \__kernel_backend_postscript:n { /color.sc { #1 ~ setcmykcolor } def } }
+\cs_new_protected:Npn \@@_backend_stroke_gray:n #1
+  { \__kernel_backend_postscript:n { /color.sc { #1 ~ setgray } def } }
+\cs_new_protected:Npn \@@_backend_stroke_rgb:n #1
+  { \__kernel_backend_postscript:n { /color.sc { #1 ~ setrgbcolor } def } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_separation:nn,
+%     \@@_backend_stroke_separation:nn,
+%     \@@_backend_fill_devicen:nn,
+%     \@@_backend_stroke_devicen:nn
+%   }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_separation:nn #1#2
+  { \@@_backend_fill:n { separation ~ #1 ~ #2 } }
+\cs_new_protected:Npn \@@_backend_stroke_separation:nn #1#2
+  { \__kernel_backend_postscript:n { /color.sc { separation ~ #1 ~ #2 } def } }
+\cs_new_eq:NN \@@_backend_fill_devicen:nn \@@_backend_fill_separation:nn
+\cs_new_eq:NN \@@_backend_stroke_devicen:nn \@@_backend_stroke_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_fill_reset:, \@@_backend_stroke_reset:}
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_backend_fill_reset: \@@_backend_reset:
+\cs_new_protected:Npn \@@_backend_stroke_reset: { }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvips>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*dvisvgm>
+%    \end{macrocode}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_cmyk:n   ,
+%     \@@_backend_fill_gray:n   ,
+%     \@@_backend_fill_rgb:n    ,
+%     \@@_backend_fill:n
+%   }
+%   Fill color here is the same as general color.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_cmyk:n #1
+  { \@@_backend_fill:n { cmyk ~ #1 } }
+\cs_new_protected:Npn \@@_backend_fill_gray:n #1
+  { \@@_backend_fill:n { gray ~ #1 } }
+\cs_new_protected:Npn \@@_backend_fill_rgb:n #1
+  { \@@_backend_fill:n { rgb ~ #1 } }
+\cs_new_protected:Npn \@@_backend_fill:n #1
+  {
+    \__kernel_backend_literal:n { color~push~ #1 }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_stroke_cmyk:n}
+% \begin{macro}{\@@_backend_stroke_gray:n, \@@_backend_stroke_gray_aux:n}
+% \begin{macro}{\@@_backend_stroke_rgb:n}
+% \begin{macro}{\@@_backend_stroke_rgb:w}
+% \begin{macro}{\@@_backend:nnn}
+%   For drawings in SVG, we use scopes for all stroke colors. The backend
+%   provides the necessary conversion for CMYK but only if that is set as
+%   the main color: a little bit of gymnastics as a result.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_stroke_cmyk:n #1
+  {
+    \@@_backend_fill_cmyk:n {#1}
+    \__kernel_backend_scope:n { stroke = "{?color}" }
+    \@@_backend_reset:
+  }
+\cs_new_protected:Npn \@@_backend_stroke_gray:n #1
+  {
+    \use:e
+      {
+        \@@_backend_stroke_gray_aux:n
+          { \fp_eval:n { 100 * (#1) } }
+      }
+  }
+\cs_new_protected:Npn \@@_backend_stroke_gray_aux:n #1
+  { \@@_backend:nnn {#1} {#1} {#1} }
+\cs_new_protected:Npn \@@_backend_stroke_rgb:n #1
+  { \@@_backend_rgb:w #1 \s_@@_stop }
+\cs_new_protected:Npn \@@_backend_stroke_rgb:w
+  #1 ~ #2 ~ #3 \s_@@_stop
+  {
+    \use:e
+      {
+        \@@_backend:nnn
+          { \fp_eval:n { 100 * (#1) } }
+          { \fp_eval:n { 100 * (#2) } }
+          { \fp_eval:n { 100 * (#3) } }
+      }
+  }
+\cs_new_protected:Npe \@@_backend:nnn #1#2#3
+  {
+    \__kernel_backend_scope:n
+      {
+        stroke =
+          "
+            rgb
+              (
+                #1 \c_percent_str ,
+                #2 \c_percent_str ,
+                #3 \c_percent_str
+              )
+          "
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_backend_fill_separation:nn,
+%     \@@_backend_stroke_separation:nn,
+%     \@@_backend_fill_devicen:nn,
+%     \@@_backend_stroke_devicen:nn
+%   }
+%   At present, these are no-ops.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_fill_separation:nn #1#2 { }
+\cs_new_protected:Npn \@@_backend_stroke_separation:nn #1#2 { }
+\cs_new_eq:NN \@@_backend_fill_devicen:nn \@@_backend_fill_separation:nn
+\cs_new_eq:NN \@@_backend_stroke_devicen:nn \@@_backend_stroke_separation:nn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_fill_reset:, \@@_backend_stroke_reset:}
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_backend_fill_reset: \@@_backend_reset:
+\cs_new_protected:Npn \@@_backend_stroke_reset: { }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_backend_devicen_init:nnn, \@@_backend_iccbased_init:nnn}
+%   No support at present.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_devicen_init:nnn #1#2#3 { }
+\cs_new_protected:Npn \@@_backend_iccbased_init:nnn #1#2#3 { }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvisvgm>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \subsection{Font handling integration}
+%
+% In \LuaTeX{} these colors should also be usable to color fonts, so
+% \texttt{luaotfload} color handling is extended to include these.
+%
+%    \begin{macrocode}
+%<*lua>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+local l = lpeg
+local spaces = l.P' '^0
+local digit16 = l.R('09', 'af', 'AF')
+
+local octet = digit16 * digit16 / function(s)
+  return string.format('%.3g ', tonumber(s, 16) / 255)
+end
+
+if luaotfload and luaotfload.set_transparent_colorstack then
+  local htmlcolor = l.Cs(octet * octet * octet * -1 * l.Cc'rg')
+  local color_export = {
+    token.create'tex_endlocalcontrol:D',
+    token.create'tex_hpack:D',
+    token.new(0, 1),
+    token.create'color_export:nnN',
+    token.new(0, 1),
+    '',
+    token.new(0, 2),
+    token.new(0, 1),
+    'backend',
+    token.new(0, 2),
+    token.create'l_tmpa_tl',
+    token.create'exp_after:wN',
+    token.create'@@_select:nn',
+    token.create'l_tmpa_tl',
+    token.new(0, 2),
+  }
+  local group_end = token.create'group_end:'
+  local value = (1 - l.P'}')^0
+  luatexbase.add_to_callback('luaotfload.parse_color', function (value)
+% Also allow HTML colors to preserve compatibility
+    local html = htmlcolor:match(value)
+    if html then return html end
+
+% If no l3color named color with this name is known, check for defined xcolor colors
+    local l3color_prop = token.get_macro(string.format('l_@@_named_%s_prop', value))
+    if l3color_prop == nil or l3color_prop == '' then
+      local legacy_color_macro = token.create(string.format('\\color@%s', value))
+      if legacy_color_macro.cmdname ~= 'undefined_cs' then
+        token.put_next(legacy_color_macro)
+        return token.scan_argument()
+      end
+    end
+
+    tex.runtoks(function()
+      token.get_next()
+      color_export[6] = value
+      tex.sprint(-2, color_export)
+    end)
+    local list = token.scan_list()
+    if not list.head or list.head.next
+        or list.head.subtype ~= node.subtype'pdf_colorstack' then
+      error'Unexpected backend behavior'
+    end
+    local cmd = list.head.data
+    node.free(list)
+    return cmd
+  end, 'l3color')
+end
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</lua>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*package>
+\lua_load_module:n {l3backend-luatex}
+%</package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</luatex>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

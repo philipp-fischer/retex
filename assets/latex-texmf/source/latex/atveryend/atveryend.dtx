@@ -1,0 +1,479 @@
+% \iffalse meta-comment
+%
+% File: atveryend.dtx
+% Version: 2024-08-06 v1.12
+% Info: Hooks at the very end of document
+%
+% Copyright (C)
+%    2009-2011 Heiko Oberdiek
+%    2016-2024 Oberdiek Package Support Group
+%    https://github.com/ho-tex/atveryend/issues
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3c of this license or (at your option) any later
+% version. This version of this license is in
+%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+% and the latest version of this license is in
+%    https://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status "maintained".
+%
+% The Current Maintainers of this work are
+% Heiko Oberdiek and the Oberdiek Package Support Group
+% https://github.com/ho-tex/atveryend/issues
+%
+% This work consists of the main source file atveryend.dtx
+% and the derived files
+%    atveryend.sty, atveryend.pdf, atveryend.ins, atveryend.drv,
+%    atveryend-test1.tex.
+%
+% Distribution:
+%    CTAN:macros/latex/contrib/atveryend/atveryend.dtx
+%    CTAN:macros/latex/contrib/atveryend/atveryend.pdf
+%
+% Unpacking:
+%    (a) If atveryend.ins is present:
+%           tex atveryend.ins
+%    (b) Without atveryend.ins:
+%           tex atveryend.dtx
+%    (c) If you insist on using LaTeX
+%           latex \let\install=y\input{atveryend.dtx}
+%        (quote the arguments according to the demands of your shell)
+%
+% Documentation:
+%    (a) If atveryend.drv is present:
+%           latex atveryend.drv
+%    (b) Without atveryend.drv:
+%           latex atveryend.dtx; ...
+%    The class ltxdoc loads the configuration file ltxdoc.cfg
+%    if available. Here you can specify further options, e.g.
+%    use A4 as paper format:
+%       \PassOptionsToClass{a4paper}{article}
+%
+%    Programm calls to get the documentation (example):
+%       pdflatex atveryend.dtx
+%       makeindex -s gind.ist atveryend.idx
+%       pdflatex atveryend.dtx
+%       makeindex -s gind.ist atveryend.idx
+%       pdflatex atveryend.dtx
+%
+% Installation:
+%    TDS:tex/latex/atveryend/atveryend.sty
+%    TDS:doc/latex/atveryend/atveryend.pdf
+%    TDS:source/latex/atveryend/atveryend.dtx
+%
+%<*ignore>
+\begingroup
+  \catcode123=1 %
+  \catcode125=2 %
+  \def\x{LaTeX2e}%
+\expandafter\endgroup
+\ifcase 0\ifx\install y1\fi\expandafter
+         \ifx\csname processbatchFile\endcsname\relax\else1\fi
+         \ifx\fmtname\x\else 1\fi\relax
+\else\csname fi\endcsname
+%</ignore>
+%<*install>
+\input docstrip.tex
+\Msg{************************************************************************}
+\Msg{* Installation}
+\Msg{* Package: atveryend 2024-08-06 v1.12 Hooks at the very end of document (HO)}
+\Msg{************************************************************************}
+
+\keepsilent
+\askforoverwritefalse
+
+\let\MetaPrefix\relax
+\preamble
+
+This is a generated file.
+
+Project: atveryend
+Version: 2024-08-06 v1.12
+
+Copyright (C)
+   2009-2011 Heiko Oberdiek
+   2016-2024 Oberdiek Package Support Group
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either
+version 1.3c of this license or (at your option) any later
+version. This version of this license is in
+   https://www.latex-project.org/lppl/lppl-1-3c.txt
+and the latest version of this license is in
+   https://www.latex-project.org/lppl.txt
+and version 1.3 or later is part of all distributions of
+LaTeX version 2005/12/01 or later.
+
+This work has the LPPL maintenance status "maintained".
+
+The Current Maintainers of this work are
+Heiko Oberdiek and the Oberdiek Package Support Group
+https://github.com/ho-tex/atveryend/issues
+
+
+This work consists of the main source file atveryend.dtx
+and the derived files
+   atveryend.sty, atveryend.pdf, atveryend.ins, atveryend.drv,
+   atveryend-test1.tex.
+
+\endpreamble
+\let\MetaPrefix\DoubleperCent
+
+\generate{%
+  \file{atveryend.ins}{\from{atveryend.dtx}{install}}%
+  \file{atveryend.drv}{\from{atveryend.dtx}{driver}}%
+  \usedir{tex/latex/atveryend}%
+  \file{atveryend.sty}{\from{atveryend.dtx}{package}}%
+}
+
+\catcode32=13\relax% active space
+\let =\space%
+\Msg{************************************************************************}
+\Msg{*}
+\Msg{* To finish the installation you have to move the following}
+\Msg{* file into a directory searched by TeX:}
+\Msg{*}
+\Msg{*     atveryend.sty}
+\Msg{*}
+\Msg{* To produce the documentation run the file `atveryend.drv'}
+\Msg{* through LaTeX.}
+\Msg{*}
+\Msg{* Happy TeXing!}
+\Msg{*}
+\Msg{************************************************************************}
+
+\endbatchfile
+%</install>
+%<*ignore>
+\fi
+%</ignore>
+%<*driver>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesFile{atveryend.drv}%
+  [2024-08-06 v1.12 Hooks at the very end of document (HO)]%
+\documentclass{ltxdoc}
+\usepackage{holtxdoc}[2011/11/22]
+\begin{document}
+  \DocInput{atveryend.dtx}%
+\end{document}
+%</driver>
+% \fi
+%
+%
+%
+% \GetFileInfo{atveryend.drv}
+%
+% \title{The \xpackage{atveryend} package}
+% \date{2024-08-06 v1.12}
+% \author{Heiko Oberdiek\thanks
+% {Please report any issues at \url{https://github.com/ho-tex/atveryend/issues}}}
+%
+% \maketitle
+%
+% \begin{abstract}
+% This \LaTeX\ package is a small wrapper around standard \LaTeX{} hooks at the end
+% of a document.
+% 
+% \end{abstract}
+%
+%
+% \section{Documentation}
+% 
+% In the past this package patched the command \cs{enddocument} to  
+% provided two additional hooks for \verb|\end{document}|
+% that were executed after the hook of \cs{AtEndDocument}.
+% 
+% Since 2020 this patching is no longer needed as the 
+% hooks are provided by \LaTeX{} directly. Since this time the code of the package 
+% was no longer used as \LaTeX{} suppressed the loading of the package
+% and replaced the commands by commands based on the new hooks. In version 1.12 
+% this new code was moved into \texttt{atveryend} directly.
+% 
+% The package defines the following user commands and maps them
+% to \cs{AddToHook} calls. A description of the used 
+% hooks can be found in \texttt{lhooks-doc.pdf}. 
+% 
+% \begin{declcs}{AfterLastShipout} \M{code}
+% \end{declcs}
+% This adds the code to the \texttt{enddocument/afterlastpage} hook.
+%
+% \begin{declcs}{AtVeryEndDocument} \M{code}
+% \end{declcs}
+% This adds the code to the \texttt{enddocument/afteraux} hook.
+%
+% \begin{declcs}{AtEndAfterFileList} \M{code}
+% \end{declcs}
+% This adds the code to the \texttt{enddocument/info} hook.%
+% 
+% \begin{declcs}{AtVeryVeryEnd} \M{code}
+% \end{declcs}
+% This adds the code to the \texttt{enddocument/end} hook.
+%
+% \begin{declcs}{BeforeClearDocument} \M{code}
+% \end{declcs}
+% This adds the code to the \texttt{enddocument} hook. 
+% It is recommended to use \cs{AtEndDocument} instead. 
+% 
+% \StopEventually{
+% }
+%
+% \section{Implementation}
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    Package identification.
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{atveryend}%
+  [2024-08-06 v1.12 Hooks at the very end of document (HO)]
+%    \end{macrocode}
+%
+% \subsection{Tools}
+%
+%    \begin{macro}{\AfterLastShipout}
+%    \begin{macrocode}
+\newcommand\AfterLastShipout  {\AddToHook{enddocument/afterlastpage}}
+%    \end{macrocode}
+%    \end{macro}
+%    \begin{macro}{\AtVeryEndDocument}
+%    \begin{macrocode}
+\newcommand\AtVeryEndDocument {\AddToHook{enddocument/afteraux}}
+%    \end{macrocode}
+%    \end{macro}
+%    \begin{macro}{\AtEndAfterFileList}
+%    \begin{macrocode}
+\newcommand\AtEndAfterFileList{\AddToHook{enddocument/info}}
+%    \end{macrocode}
+%    \end{macro}
+%    \begin{macro}{\AtVeryVeryEnd}
+%    \begin{macrocode}
+\newcommand\AtVeryVeryEnd     {\AddToHook{enddocument/end}}
+%    \end{macrocode}
+%    \end{macro}
+%    \begin{macro}{\BeforeClearDocument}
+%    \begin{macrocode}
+\newcommand\BeforeClearDocument{\AddToHook{enddocument}}
+%    \end{macrocode}
+%    \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+% \section{Installation}
+%
+% \subsection{Download}
+%
+% \paragraph{Package.} This package is available on
+% CTAN\footnote{\CTANpkg{atveryend}}:
+% \begin{description}
+% \item[\CTAN{macros/latex/contrib/atveryend/atveryend.dtx}] The source file.
+% \item[\CTAN{macros/latex/contrib/atveryend/atveryend.pdf}] Documentation.
+% \end{description}
+% 
+% \subsection{Package installation}
+%
+% \paragraph{Unpacking.} The \xfile{.dtx} file is a self-extracting
+% \docstrip\ archive. The files are extracted by running the
+% \xfile{.dtx} through \plainTeX:
+% \begin{quote}
+%   \verb|tex atveryend.dtx|
+% \end{quote}
+%
+% \paragraph{TDS.} Now the different files must be moved into
+% the different directories in your installation TDS tree
+% (also known as \xfile{texmf} tree):
+% \begin{quote}
+% \def\t{^^A
+% \begin{tabular}{@{}>{\ttfamily}l@{ $\rightarrow$ }>{\ttfamily}l@{}}
+%   atveryend.sty & tex/latex/atveryend/atveryend.sty\\
+%   atveryend.pdf & doc/latex/atveryend/atveryend.pdf\\
+%   atveryend.dtx & source/latex/atveryend/atveryend.dtx\\
+% \end{tabular}^^A
+% }^^A
+% \sbox0{\t}^^A
+% \ifdim\wd0>\linewidth
+%   \begingroup
+%     \advance\linewidth by\leftmargin
+%     \advance\linewidth by\rightmargin
+%   \edef\x{\endgroup
+%     \def\noexpand\lw{\the\linewidth}^^A
+%   }\x
+%   \def\lwbox{^^A
+%     \leavevmode
+%     \hbox to \linewidth{^^A
+%       \kern-\leftmargin\relax
+%       \hss
+%       \usebox0
+%       \hss
+%       \kern-\rightmargin\relax
+%     }^^A
+%   }^^A
+%   \ifdim\wd0>\lw
+%     \sbox0{\small\t}^^A
+%     \ifdim\wd0>\linewidth
+%       \ifdim\wd0>\lw
+%         \sbox0{\footnotesize\t}^^A
+%         \ifdim\wd0>\linewidth
+%           \ifdim\wd0>\lw
+%             \sbox0{\scriptsize\t}^^A
+%             \ifdim\wd0>\linewidth
+%               \ifdim\wd0>\lw
+%                 \sbox0{\tiny\t}^^A
+%                 \ifdim\wd0>\linewidth
+%                   \lwbox
+%                 \else
+%                   \usebox0
+%                 \fi
+%               \else
+%                 \lwbox
+%               \fi
+%             \else
+%               \usebox0
+%             \fi
+%           \else
+%             \lwbox
+%           \fi
+%         \else
+%           \usebox0
+%         \fi
+%       \else
+%         \lwbox
+%       \fi
+%     \else
+%       \usebox0
+%     \fi
+%   \else
+%     \lwbox
+%   \fi
+% \else
+%   \usebox0
+% \fi
+% \end{quote}
+% If you have a \xfile{docstrip.cfg} that configures and enables \docstrip's
+% TDS installing feature, then some files can already be in the right
+% place, see the documentation of \docstrip.
+%
+% \subsection{Refresh file name databases}
+%
+% If your \TeX~distribution
+% (\TeX\,Live, \mikTeX, \dots) relies on file name databases, you must refresh
+% these. For example, \TeX\,Live\ users run \verb|texhash| or
+% \verb|mktexlsr|.
+%
+% \subsection{Some details for the interested}
+%
+% \paragraph{Unpacking with \LaTeX.}
+% The \xfile{.dtx} chooses its action depending on the format:
+% \begin{description}
+% \item[\plainTeX:] Run \docstrip\ and extract the files.
+% \item[\LaTeX:] Generate the documentation.
+% \end{description}
+% If you insist on using \LaTeX\ for \docstrip\ (really,
+% \docstrip\ does not need \LaTeX), then inform the autodetect routine
+% about your intention:
+% \begin{quote}
+%   \verb|latex \let\install=y\input{atveryend.dtx}|
+% \end{quote}
+% Do not forget to quote the argument according to the demands
+% of your shell.
+%
+% \paragraph{Generating the documentation.}
+% You can use both the \xfile{.dtx} or the \xfile{.drv} to generate
+% the documentation. The process can be configured by the
+% configuration file \xfile{ltxdoc.cfg}. For instance, put this
+% line into this file, if you want to have A4 as paper format:
+% \begin{quote}
+%   \verb|\PassOptionsToClass{a4paper}{article}|
+% \end{quote}
+% An example follows how to generate the
+% documentation with pdf\LaTeX:
+% \begin{quote}
+%\begin{verbatim}
+%pdflatex atveryend.dtx
+%makeindex -s gind.ist atveryend.idx
+%pdflatex atveryend.dtx
+%makeindex -s gind.ist atveryend.idx
+%pdflatex atveryend.dtx
+%\end{verbatim}
+% \end{quote}
+%
+% \section{Acknowledgement}
+%
+% \begin{description}
+% \item[Arthur Ogawa:] He proposed the new API with \cs{AfterLastShipout}
+%   and gave me much feedback, comprehensive class/package lists, many
+%   suggestions and comments.
+% \end{description}
+%
+%
+% \begin{History}
+%   \begin{Version}{2009/12/06 v1.0}
+%   \item
+%     The first version.
+%   \end{Version}
+%   \begin{Version}{2009/12/07 v1.1}
+%   \item
+%     Bug fixes.
+%   \end{Version}
+%   \begin{Version}{2009/12/09 v1.2}
+%   \item
+%     Additional support of classes and packages.
+%   \end{Version}
+%   \begin{Version}{2009/12/11 v1.3}
+%   \item
+%     Patch for letter like classes that puts label into the `.aux' file.
+%   \item
+%     Hook \cs{BeforeClearDocument} added (request from Arthur Ogawa).
+%   \item
+%     Patch of \cs{clear@document} removed (Arthur Ogawa).
+%   \item
+%     A nested \cs{AtBeginDocument} removed.
+%   \end{Version}
+%   \begin{Version}{2010/01/25 v1.4}
+%   \item
+%     Moved from \texttt{TDS:*/generic/*} to \texttt{TDS:*/latex/*}.
+%   \end{Version}
+%   \begin{Version}{2010/03/24 v1.5}
+%   \item
+%     \cs{Call@BeforeClearDocument} fixed (Ahmed Musa).
+%   \end{Version}
+%   \begin{Version}{2011/04/15 v1.6}
+%   \item
+%     \cs{Call@AtEndAfterFileList} and \cs{Call@AtVeryVeryEnd} added.
+%   \end{Version}
+%   \begin{Version}{2011/04/23 v1.7}
+%   \item
+%     Some fix for \cs{AtVeryEnd@RedefCheckEnd}
+%     to avoid error because of undefined control sequence
+%     in some circumstances (thanks to D.P. Story for bug report).
+%   \end{Version}
+%   \begin{Version}{2011/06/30 v1.8}
+%   \item
+%     Support of changed \cs{enddocument} of \hologo{LaTeX2e} 2011/06/27.
+%   \end{Version}
+%   \begin{Version}{2016/05/16 v1.9}
+%   \item
+%     Documentation updates.
+%   \end{Version}
+%   \begin{Version}{2019/12/05 v1.10}
+%   \item
+%     Documentation updates.
+%   \end{Version}
+%   \begin{Version}{2019-12-11 v1.11}
+%   \item Updated
+%   \end{Version}
+%   
+%   \begin{Version}{2024-08-06 v1.12}
+%   \item Switch to kernel hooks
+%   \end{Version}
+% \end{History}
+%
+% \PrintIndex
+%
+% \Finale
+\endinput

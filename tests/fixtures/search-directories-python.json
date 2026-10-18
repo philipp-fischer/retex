@@ -1,0 +1,66 @@
+{
+  "scope": "Unmodified Python SearchElement; explicitly lexicographic Path provider matching the existing virtual-host enumeration contract. Native filesystem order is not normalized.",
+  "files": [
+    ".hidden/suffix/font.tfm",
+    "a/child/font.tfm",
+    "a/child/suffix/font.tfm",
+    "a/suffix/font.tfm",
+    "b/suffix/font.tfm",
+    "ordinary.tex",
+    "z/font.tfm"
+  ],
+  "cases": [
+    {
+      "pattern": "/project//",
+      "directories": [
+        "/project",
+        "/project/a",
+        "/project/a/child",
+        "/project/a/child/suffix",
+        "/project/a/suffix",
+        "/project/b",
+        "/project/b/suffix",
+        "/project/z"
+      ]
+    },
+    {
+      "pattern": "/project//suffix",
+      "directories": [
+        "/project/a/suffix",
+        "/project/a/child/suffix",
+        "/project/b/suffix"
+      ]
+    },
+    {
+      "pattern": "/project//a//suffix",
+      "directories": [
+        "/project/a/suffix",
+        "/project/a/child/suffix"
+      ]
+    },
+    {
+      "pattern": "/project//child//",
+      "directories": [
+        "/project/a/child",
+        "/project/a/child/suffix"
+      ]
+    },
+    {
+      "pattern": "/project/a//",
+      "directories": [
+        "/project/a",
+        "/project/a/child",
+        "/project/a/child/suffix",
+        "/project/a/suffix"
+      ]
+    },
+    {
+      "pattern": "/project//missing",
+      "directories": []
+    },
+    {
+      "pattern": "/project/ordinary.tex//",
+      "directories": []
+    }
+  ]
+}

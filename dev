@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Use the installed Rust toolchain, or an optional checkout-local toolchain.
+set -euo pipefail
+RETEX_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if ! command -v cargo >/dev/null && [[ -x "$RETEX_ROOT/.tools/toolchain/bin/cargo" ]]; then
+    export PATH="$RETEX_ROOT/.tools/toolchain/bin:$PATH"
+fi
+if [[ -z "${CARGO_HOME:-}" && -d "$RETEX_ROOT/.tools/cargo" ]]; then
+    export CARGO_HOME="$RETEX_ROOT/.tools/cargo"
+fi
+export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$RETEX_ROOT/target}"
+cd "$RETEX_ROOT"
+exec cargo "$@"

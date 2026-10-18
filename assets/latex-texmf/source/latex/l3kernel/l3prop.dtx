@@ -1,0 +1,2636 @@
+% \iffalse meta-comment
+%
+%% File: l3prop.dtx
+%
+% Copyright (C) 1990-2025 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full,kernel]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3prop} module\\ Property lists^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2025-01-18}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \pkg{expl3} implements a \enquote{property list} data type, which contain
+% an unordered list of entries each of which consists of a \meta{key} (string)
+% and an associated \meta{value} (token list). The \meta{key} and \meta{value}
+% may both be given as any balanced text, and the \meta{key} is processed using
+% \cs{tl_to_str:n}, meaning that category codes are ignored. Entries can be
+% manipulated individually, as well as collectively by applying a function to
+% every key--value pair within the list.
+%
+% Each entry in a property list must have a unique \meta{key}: if an entry is
+% added to a property list which already contains the \meta{key} then the new
+% entry overwrites the existing one. The \meta{keys} are compared on a
+% string basis, using the same method as \cs{str_if_eq:nnTF}.
+%
+% Property lists are intended for storing key-based information for use within
+% code. They can be converted from and to key--value lists, which are a form of
+% \emph{input} parsed by the \pkg{l3keys} module.  If a key--value list contains
+% a \meta{key} multiple times, only the last \meta{value} associated to it will
+% be kept in the conversion to a property list.
+%
+% Internally, property lists can use two distinct implementations with different
+% data storage, which are decided when declaring the property list variable
+% using \cs{prop_new:N} (\enquote{flat} storage) or \cs{prop_new_linked:N}
+% (\enquote{linked} storage). After a property list is declared with
+% \cs{prop_new:N} or \cs{prop_new_linked:N}, the type of internal data storage
+% can be changed by \cs{prop_make_flat:N} or \cs{prop_make_linked:N}, but only
+% at the outermost group level. All other \pkg{l3prop} functions transparently
+% manipulate either storage method and convert as needed.
+% \begin{itemize}
+%   \item
+%     The (default) \enquote{flat} storage method is suited for a relatively
+%     small number of entries, or when the property list is likely to be
+%     manipulated (copied, mapped) as a whole rather than entry-wise.  It is
+%     significantly faster for \cs{prop_set_eq:NN}, and only slightly faster for
+%     \cs{prop_clear:N}, \cs{prop_concat:NNN}, and mapping functions
+%     \cs[no-index]{prop_map_\ldots{}}.
+%
+%   \item
+%     The \enquote{linked} storage method is meant for property lists with a
+%     large numbers of entries.  It takes up more of \TeX{}'s memory during a run, but is
+%     significantly faster (for long lists) when accessing or modifying
+%     individual entries using functions such as \cs{prop_if_in:Nn},
+%     \cs{prop_item:Nn}, \cs{prop_put:Nnn}, \cs{prop_get:NnN},
+%     \cs{prop_pop:NnN}, \cs{prop_remove:Nn}, as it takes a constant
+%     time for these operations (rather than the number of items for a
+%     \enquote{flat} property list).  A technical drawback is that
+%     memory is permanently used\footnote{Until the end of the run, that
+%     is.} by \meta{keys} stored in a \enquote{linked} property list,
+%     even after they are removed and the property list is deleted.
+% \end{itemize}
+%
+% \section{Creating and initialising property lists}
+%
+% \begin{function}{\prop_new:N, \prop_new:c}
+%   \begin{syntax}
+%     \cs{prop_new:N} \meta{property list}
+%   \end{syntax}
+%   Creates a new \enquote{flat} \meta{property list} or raises an error if the
+%   name is already taken. The declaration is global. The \meta{property list}
+%   initially contains no entries.  See also \cs{prop_new_linked:N}.
+% \end{function}
+%
+% \begin{function}[added = 2024-02-12]{\prop_new_linked:N, \prop_new_linked:c}
+%   \begin{syntax}
+%     \cs{prop_new_linked:N} \meta{property list}
+%   \end{syntax}
+%   Creates a new \enquote{linked} \meta{property list} or raises an error if
+%   the name is already taken. The declaration is global. The \meta{property
+%   list} initially contains no entries.  The internal data storage differs from
+%   that produced by \cs{prop_new:N} and it is optimized for property lists with
+%   a large number of entries.
+% \end{function}
+%
+% \begin{function}
+%   {\prop_clear:N, \prop_clear:c, \prop_gclear:N, \prop_gclear:c}
+%   \begin{syntax}
+%     \cs{prop_clear:N} \meta{property list}
+%   \end{syntax}
+%   Clears all entries from the \meta{property list}.
+% \end{function}
+%
+% \begin{function}
+%   {
+%     \prop_clear_new:N,  \prop_clear_new:c,
+%     \prop_gclear_new:N, \prop_gclear_new:c
+%   }
+%   \begin{syntax}
+%     \cs{prop_clear_new:N} \meta{property list}
+%   \end{syntax}
+%   Ensures that the \meta{property list} exists globally by applying
+%   \cs{prop_new:N} if necessary, then applies
+%   \cs[index=prop_clear:N]{prop_(g)clear:N} to leave the list empty.
+%   \begin{texnote}
+%     If the property list exists and is of \enquote{linked} type, it
+%     is cleared but not made into a flat property list.
+%   \end{texnote}
+% \end{function}
+%
+% \begin{function}[added = 2024-02-12]
+%   {
+%     \prop_clear_new_linked:N,  \prop_clear_new_linked:c,
+%     \prop_gclear_new_linked:N, \prop_gclear_new_linked:c
+%   }
+%   \begin{syntax}
+%     \cs{prop_clear_new_linked:N} \meta{property list}
+%   \end{syntax}
+%   Ensures that the \meta{property list} exists globally by applying
+%   \cs{prop_new_linked:N} if necessary, then applies
+%   \cs[index=prop_clear:N]{prop_(g)clear:N} to leave the list empty.
+%   \begin{texnote}
+%     If the property list exists and is of \enquote{flat} type, it
+%     is cleared but not made into a linked property list.
+%   \end{texnote}
+% \end{function}
+%
+% \begin{function}
+%   {
+%     \prop_set_eq:NN,  \prop_set_eq:cN,  \prop_set_eq:Nc,  \prop_set_eq:cc,
+%     \prop_gset_eq:NN, \prop_gset_eq:cN, \prop_gset_eq:Nc, \prop_gset_eq:cc
+%   }
+%   \begin{syntax}
+%     \cs{prop_set_eq:NN} \meta{property list_1} \meta{property list_2}
+%   \end{syntax}
+%   Sets the content of \meta{property list_1} equal to that of \meta{property
+%   list_2}.  This converts as needed between the two storage types.
+% \end{function}
+%
+% \begin{function}[added = 2017-11-28, updated = 2021-11-07]
+%   {
+%     \prop_set_from_keyval:Nn, \prop_set_from_keyval:cn,
+%     \prop_gset_from_keyval:Nn, \prop_gset_from_keyval:cn,
+%   }
+%   \begin{syntax}
+%     \cs{prop_set_from_keyval:Nn} \meta{property list} \\
+%     ~~\{ \\
+%     ~~~~\meta{key_1} |=| \meta{value_1} |,| \\
+%     ~~~~\meta{key_2} |=| \meta{value_2} |,| \ldots{} \\
+%     ~~\}
+%   \end{syntax}
+%   Sets \meta{property list} to contain key--value pairs given in the second
+%   argument.  If duplicate keys appear only the last of the values is kept.
+%   In contrast to most keyval lists (\emph{e.g.}~those in \pkg{l3keys}), each
+%   key here \emph{must} be followed with an \texttt{=} sign even to specify an
+%   empty \meta{value}.
+%
+%   Spaces are trimmed around every \meta{key} and every \meta{value},
+%   and if the result of trimming spaces consists of a single brace
+%   group then a set of outer braces is removed.  This enables both the
+%   \meta{key} and the \meta{value} to contain spaces, commas or equal
+%   signs.  The \meta{key} is then processed by \cs{tl_to_str:n}.
+%   This function correctly detects the |=| and |,| signs provided they
+%   have the standard category code~$12$ or they are active.
+% \end{function}
+%
+% \begin{function}[added = 2017-11-28, updated = 2021-11-07]
+%   {\prop_const_from_keyval:Nn, \prop_const_from_keyval:cn}
+%   \begin{syntax}
+%     \cs{prop_const_from_keyval:Nn} \meta{property list} \\
+%     ~~\{ \\
+%     ~~~~\meta{key_1} |=| \meta{value_1} |,| \\
+%     ~~~~\meta{key_2} |=| \meta{value_2} |,| \ldots{} \\
+%     ~~\}
+%   \end{syntax}
+%   Creates a new constant \enquote{flat} \meta{property list} or raises
+%   an error if the
+%   name is already taken. The \meta{property list} is set globally to
+%   contain key--value pairs given in the second argument, processed in
+%   the way described for \cs{prop_set_from_keyval:Nn}.  If duplicate
+%   keys appear only the last of the values is kept.
+%   This function correctly detects the |=| and |,| signs provided they
+%   have the standard category code~$12$ or they are active.
+% \end{function}
+%
+% \begin{function}[added = 2024-02-12]
+%   {\prop_const_linked_from_keyval:Nn, \prop_const_linked_from_keyval:cn}
+%   \begin{syntax}
+%     \cs{prop_const_linked_from_keyval:Nn} \meta{property list} \\
+%     ~~\{ \\
+%     ~~~~\meta{key_1} |=| \meta{value_1} |,| \\
+%     ~~~~\meta{key_2} |=| \meta{value_2} |,| \ldots{} \\
+%     ~~\}
+%   \end{syntax}
+%   Creates a new constant \enquote{linked} \meta{property list} or raises an
+%   error if the
+%   name is already taken. The \meta{property list} is set globally to
+%   contain key--value pairs given in the second argument, processed in
+%   the way described for \cs{prop_set_from_keyval:Nn}.  If duplicate
+%   keys appear only the last of the values is kept.
+%   This function correctly detects the |=| and |,| signs provided they
+%   have the standard category code~$12$ or they are active.
+% \end{function}
+%
+% \begin{function}[added = 2024-02-12]{\prop_make_flat:N, \prop_make_flat:c}
+%   \begin{syntax}
+%     \cs{prop_make_flat:N} \meta{property list}
+%   \end{syntax}
+%   Changes the internal storage type of the \meta{property list} to be
+%   the same \enquote{flat} storage as \cs{prop_new:N}.  The key--value
+%   pairs of the \meta{property list} are preserved by the change.  If
+%   the property list was already flat then nothing is done.  This
+%   function can only be used at the outermost group level.
+% \end{function}
+%
+% \begin{function}[added = 2024-02-12]{\prop_make_linked:N, \prop_make_linked:c}
+%   \begin{syntax}
+%     \cs{prop_make_linked:N} \meta{property list}
+%   \end{syntax}
+%   Changes the internal storage type of the \meta{property list} to be
+%   the same \enquote{linked} storage as \cs{prop_new_linked:N}.  The
+%   key--value pairs of the \meta{property list} are preserved by the
+%   change.  If the property list was already linked then nothing is
+%   done.  This function can only be used at the outermost group level.
+% \end{function}
+%
+% \section{Adding and updating property list entries}
+%
+% \begin{function}[updated = 2012-07-09]
+%   {
+%     \prop_put:Nnn,  \prop_put:NnV,  \prop_put:Nnv,  \prop_put:Nne,
+%     \prop_put:NVn,  \prop_put:NVV,  \prop_put:NVv,  \prop_put:NVe,
+%     \prop_put:Nvn,  \prop_put:NvV,  \prop_put:Nvv,  \prop_put:Nve, 
+%     \prop_put:Nen,  \prop_put:NeV,  \prop_put:Nev,  \prop_put:Nee,
+%     \prop_put:Nno,  \prop_put:Non,  \prop_put:Noo,
+%     \prop_put:cnn,  \prop_put:cnV,  \prop_put:cnv,  \prop_put:cne,
+%     \prop_put:cVn,  \prop_put:cVV,  \prop_put:cVv,  \prop_put:cVe,
+%     \prop_put:cvn,  \prop_put:cvV,  \prop_put:cvv,  \prop_put:cve, 
+%     \prop_put:cen,  \prop_put:ceV,  \prop_put:cev,  \prop_put:cee,
+%     \prop_put:cno,  \prop_put:con,  \prop_put:coo,
+%     \prop_gput:Nnn, \prop_gput:NnV, \prop_gput:Nnv, \prop_gput:Nne,
+%     \prop_gput:NVn, \prop_gput:NVV, \prop_gput:NVv, \prop_gput:NVe,
+%     \prop_gput:Nvn, \prop_gput:NvV, \prop_gput:Nvv, \prop_gput:Nve, 
+%     \prop_gput:Nen, \prop_gput:NeV, \prop_gput:Nev, \prop_gput:Nee,
+%     \prop_gput:Nno, \prop_gput:Non, \prop_gput:Noo,
+%     \prop_gput:cnn, \prop_gput:cnV, \prop_gput:cnv, \prop_gput:cne,
+%     \prop_gput:cVn, \prop_gput:cVV, \prop_gput:cVv, \prop_gput:cVe,
+%     \prop_gput:cvn, \prop_gput:cvV, \prop_gput:cvv, \prop_gput:cve, 
+%     \prop_gput:cen, \prop_gput:ceV, \prop_gput:cev, \prop_gput:cee,
+%     \prop_gput:cno, \prop_gput:con, \prop_gput:coo
+%   }
+%   \begin{syntax}
+%     \cs{prop_put:Nnn} \meta{property list} \Arg{key} \Arg{value}
+%   \end{syntax}
+%   Adds an entry to the \meta{property list} which may be accessed
+%   using the \meta{key} and which has \meta{value}. If the \meta{key}
+%   is already present in the \meta{property list}, the existing entry
+%   is overwritten by the new \meta{value}. Both the \meta{key} and
+%   \meta{value} may contain any \meta{balanced text}. The \meta{key} is
+%   stored after processing with \cs{tl_to_str:n}, meaning that category
+%   codes are ignored.
+% \end{function}
+%
+% \begin{function}[added = 2024-03-30, updated = 2024-05-07]
+%   {
+%     \prop_put_if_not_in:Nnn, \prop_put_if_not_in:NnV, \prop_put_if_not_in:Nnv, \prop_put_if_not_in:Nne,
+%     \prop_put_if_not_in:NVn, \prop_put_if_not_in:NVV, \prop_put_if_not_in:NVv, \prop_put_if_not_in:NVe,
+%     \prop_put_if_not_in:Nvn, \prop_put_if_not_in:NvV, \prop_put_if_not_in:Nvv, \prop_put_if_not_in:Nve,
+%     \prop_put_if_not_in:Nen, \prop_put_if_not_in:NeV, \prop_put_if_not_in:Nev, \prop_put_if_not_in:Nee,
+%     \prop_put_if_not_in:cnn, \prop_put_if_not_in:cnV, \prop_put_if_not_in:cnv, \prop_put_if_not_in:cne,
+%     \prop_put_if_not_in:cVn, \prop_put_if_not_in:cVV, \prop_put_if_not_in:cVv, \prop_put_if_not_in:cVe,
+%     \prop_put_if_not_in:cvn, \prop_put_if_not_in:cvV, \prop_put_if_not_in:cvv, \prop_put_if_not_in:cve,
+%     \prop_put_if_not_in:cen, \prop_put_if_not_in:ceV, \prop_put_if_not_in:cev, \prop_put_if_not_in:cee,
+%     \prop_gput_if_not_in:Nnn, \prop_gput_if_not_in:NnV, \prop_gput_if_not_in:Nnv, \prop_gput_if_not_in:Nne,
+%     \prop_gput_if_not_in:NVn, \prop_gput_if_not_in:NVV, \prop_gput_if_not_in:NVv, \prop_gput_if_not_in:NVe,
+%     \prop_gput_if_not_in:Nvn, \prop_gput_if_not_in:NvV, \prop_gput_if_not_in:Nvv, \prop_gput_if_not_in:Nve,
+%     \prop_gput_if_not_in:Nen, \prop_gput_if_not_in:NeV, \prop_gput_if_not_in:Nev, \prop_gput_if_not_in:Nee,
+%     \prop_gput_if_not_in:cnn, \prop_gput_if_not_in:cnV, \prop_gput_if_not_in:cnv, \prop_gput_if_not_in:cne,
+%     \prop_gput_if_not_in:cVn, \prop_gput_if_not_in:cVV, \prop_gput_if_not_in:cVv, \prop_gput_if_not_in:cVe,
+%     \prop_gput_if_not_in:cvn, \prop_gput_if_not_in:cvV, \prop_gput_if_not_in:cvv, \prop_gput_if_not_in:cve,
+%     \prop_gput_if_not_in:cen, \prop_gput_if_not_in:ceV, \prop_gput_if_not_in:cev, \prop_gput_if_not_in:cee
+%   }
+%   \begin{syntax}
+%     \cs{prop_put_if_not_in:Nnn} \meta{property list} \Arg{key} \Arg{value}
+%   \end{syntax}
+%   If the \meta{key} is present in the \meta{property list} then no
+%   action is taken. Otherwise, a new entry is added as described for
+%   \cs{prop_put:Nnn}.
+% \end{function}
+%
+% \begin{function}[added = 2021-05-16]
+%   {
+%     \prop_concat:NNN,  \prop_concat:ccc,
+%     \prop_gconcat:NNN, \prop_gconcat:ccc
+%   }
+%   \begin{syntax}
+%     \cs{prop_concat:NNN} \meta{property list_1} \meta{property list_2} \meta{property list_3}
+%   \end{syntax}
+%   Combines the key--value pairs of \meta{property list_2} and
+%   \meta{property list_3}, and saves the result in \meta{property list_1}.  If a
+%   key appears in both \meta{property list_2} and \meta{property list_3} then the
+%   last value, namely the value in \meta{property list_3} is kept.
+%   This converts as needed between the two storage types.
+% \end{function}
+%
+% \begin{function}[added = 2021-05-16, updated = 2021-11-07]
+%   {
+%     \prop_put_from_keyval:Nn, \prop_put_from_keyval:cn,
+%     \prop_gput_from_keyval:Nn, \prop_gput_from_keyval:cn,
+%   }
+%   \begin{syntax}
+%     \cs{prop_put_from_keyval:Nn} \meta{property list} \\
+%     ~~\{ \\
+%     ~~~~\meta{key_1} |=| \meta{value_1} |,| \\
+%     ~~~~\meta{key_2} |=| \meta{value_2} |,| \ldots{} \\
+%     ~~\}
+%   \end{syntax}
+%   Updates the \meta{property list} by adding entries for each key--value
+%   pair given in the second argument.  The addition is done through
+%   \cs{prop_put:Nnn}, hence if the \meta{property list} already contains
+%   some of the keys, the corresponding values are discarded and
+%   replaced by those given in the key--value list.  If duplicate keys
+%   appear in the key--value list then only the last of the values is kept.
+%
+%   The function is equivalent to storing the key--value pairs in a
+%   temporary property list using \cs{prop_set_from_keyval:Nn}, then
+%   combining \meta{property list} with the temporary variable using
+%   \cs{prop_concat:NNN}.  In particular, the \meta{keys} and
+%   \meta{values} are space-trimmed and unbraced as described in
+%   \cs{prop_set_from_keyval:Nn}.
+%   This function correctly detects the |=| and |,| signs provided they
+%   have the standard category code~$12$ or they are active.
+% \end{function}
+%
+% \section{Recovering values from property lists}
+%
+% \begin{function}[updated = 2011-08-28]
+%   {
+%     \prop_get:NnN, \prop_get:NVN, \prop_get:NvN, \prop_get:NeN,
+%     \prop_get:NoN,
+%     \prop_get:cnN, \prop_get:cVN, \prop_get:cvN, \prop_get:ceN,
+%     \prop_get:coN,
+%     \prop_get:cnc
+%   }
+%   \begin{syntax}
+%     \cs{prop_get:NnN} \meta{property list} \Arg{key} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored with \meta{key} from the
+%   \meta{property list}, and places this in the \meta{tl
+%   var}. If the \meta{key} is not found in the
+%   \meta{property list} then the \meta{tl~var} is set
+%   to the special marker \cs{q_no_value}. The \meta{tl
+%     var} is set within the current \TeX{} group. See also
+%   \cs{prop_get:NnNTF}.
+% \end{function}
+%
+% \begin{function}[updated = 2011-08-18]
+%   {
+%     \prop_pop:NnN, \prop_pop:NVN,
+%     \prop_pop:NoN, 
+%     \prop_pop:cnN, \prop_pop:cVN,
+%     \prop_pop:coN
+%   }
+%   \begin{syntax}
+%     \cs{prop_pop:NnN} \meta{property list} \Arg{key} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored with \meta{key} from the
+%   \meta{property list}, and places this in the \meta{tl
+%   var}. If the \meta{key} is not found in the
+%   \meta{property list} then the \meta{tl~var} is set
+%   to the special marker \cs{q_no_value}. The \meta{key} and
+%   \meta{value} are then deleted from the property list. Both
+%   assignments are local.  See also \cs{prop_pop:NnNTF}.
+% \end{function}
+%
+% \begin{function}[updated = 2011-08-18]
+%   {
+%     \prop_gpop:NnN, \prop_gpop:NVN,
+%     \prop_gpop:NoN,
+%     \prop_gpop:cnN, \prop_gpop:cVN,
+%     \prop_gpop:coN
+%   }
+%   \begin{syntax}
+%     \cs{prop_gpop:NnN} \meta{property list} \Arg{key} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored with \meta{key} from the
+%   \meta{property list}, and places this in the \meta{tl
+%   var}. If the \meta{key} is not found in the
+%   \meta{property list} then the \meta{tl~var} is set
+%   to the special marker \cs{q_no_value}. The \meta{key} and
+%   \meta{value} are then deleted from the property list.
+%   The \meta{property list} is modified globally, while the assignment of
+%   the \meta{tl~var} is local.  See also \cs{prop_gpop:NnNTF}.
+% \end{function}
+%
+% \begin{function}[EXP, added = 2014-07-17]
+%   {
+%     \prop_item:Nn, \prop_item:NV, \prop_item:Ne, \prop_item:No,
+%     \prop_item:cn, \prop_item:cV, \prop_item:ce, \prop_item:co
+%   }
+%   \begin{syntax}
+%     \cs{prop_item:Nn} \meta{property list} \Arg{key}
+%   \end{syntax}
+%   Expands to the \meta{value} corresponding to the \meta{key} in
+%   the \meta{property list}. If the \meta{key} is missing, this has
+%   an empty expansion.
+%   \begin{texnote}
+%     For \enquote{flat} property lists, this expandable function iterates
+%     through every key--value pair and is therefore slower than a
+%     non-expandable approach based on \cs{prop_get:NnN}.
+%     (For \enquote{linked} property lists both functions are fast.)
+%
+%     The result is returned within the \tn{unexpanded}
+%     primitive (\cs{exp_not:n}), which means that the \meta{value}
+%     does not expand further when appearing in an \texttt{e}-type
+%     or \texttt{x}-type argument expansion.
+%   \end{texnote}
+% \end{function}
+%
+% \begin{function}[EXP]{\prop_count:N, \prop_count:c}
+%   \begin{syntax}
+%     \cs{prop_count:N} \meta{property list}
+%   \end{syntax}
+%   Leaves the number of key--value pairs in the \meta{property list} in
+%   the input stream as an \meta{integer denotation}.
+% \end{function}
+%
+% \begin{function}[EXP]{\prop_to_keyval:N}
+%   \begin{syntax}
+%     \cs{prop_to_keyval:N} \meta{property list}
+%   \end{syntax}
+%   Expands to the \meta{property list} in a key--value notation. Keep in mind
+%   that a \meta{property list} is \emph{unordered}, while key--value interfaces
+%   are not necessarily, so this cannot be used for arbitrary interfaces.
+%   \begin{texnote}
+%     The result is returned within the \tn{unexpanded} primitive
+%     (\cs{exp_not:n}), which means that the key--value list does not expand
+%     further when appearing in an \texttt{e}-type or \texttt{x}-type argument expansion.
+%     It also needs exactly two steps of expansion.
+%   \end{texnote}
+% \end{function}
+%
+% \section{Modifying property lists}
+%
+% \begin{function}[added = 2012-05-12]
+%   {
+%     \prop_remove:Nn,  \prop_remove:NV,  \prop_remove:Ne,
+%     \prop_remove:cn,  \prop_remove:cV,  \prop_remove:ce,
+%     \prop_gremove:Nn, \prop_gremove:NV, \prop_gremove:Ne,
+%     \prop_gremove:cn, \prop_gremove:cV, \prop_gremove:ce,
+%   }
+%   \begin{syntax}
+%     \cs{prop_remove:Nn} \meta{property list} \Arg{key}
+%   \end{syntax}
+%   Removes the entry listed under \meta{key} from the
+%   \meta{property list}.  If the \meta{key} is
+%   not found in the \meta{property list} no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a key before
+%   deleting it.
+% \end{function}
+%
+% \section{Property list conditionals}
+%
+% \begin{function}[EXP, pTF, added = 2012-03-03]
+%   {\prop_if_exist:N, \prop_if_exist:c}
+%   \begin{syntax}
+%     \cs{prop_if_exist_p:N} \meta{property list}
+%     \cs{prop_if_exist:NTF} \meta{property list} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests whether the \meta{property list} is currently defined.  This does not
+%   check that the \meta{property list} really is a property list variable.
+% \end{function}
+%
+% \begin{function}[EXP, pTF]{\prop_if_empty:N, \prop_if_empty:c}
+%   \begin{syntax}
+%     \cs{prop_if_empty_p:N} \meta{property list}
+%     \cs{prop_if_empty:NTF} \meta{property list} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if the \meta{property list} is empty (containing no entries).
+% \end{function}
+%
+% \begin{function}[EXP, pTF, updated = 2011-09-15]
+%   {
+%     \prop_if_in:Nn, \prop_if_in:NV, \prop_if_in:Ne, \prop_if_in:No,
+%     \prop_if_in:cn, \prop_if_in:cV, \prop_if_in:ce, \prop_if_in:co
+%   }
+%   \begin{syntax}
+%     \cs{prop_if_in_p:Nn} \meta{property list} \Arg{key}
+%     \cs{prop_if_in:NnTF} \meta{property list} \Arg{key} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if the \meta{key} is present in the \meta{property list},
+%   making the comparison using the method described by \cs{str_if_eq:nnTF}.
+%   \begin{texnote}
+%     For \enquote{flat} property lists, this expandable function iterates
+%     through every key--value pair and is therefore slower than a
+%     non-expandable approach based on \cs{prop_get:NnNTF}.
+%     (For \enquote{linked} property lists both functions are fast.)
+%   \end{texnote}
+% \end{function}
+%
+% \section{Recovering values from property lists with branching}
+%
+% The functions in this section combine tests for the presence of a key
+% in a property list with  recovery of the associated valued. This makes them
+% useful for cases where different code follows depending on the presence
+% or absence of a key in a property list. They offer increased readability
+% and performance over separate testing and recovery phases.
+%
+% \begin{function}[TF, updated = 2012-05-19]
+%   {
+%     \prop_get:NnN, \prop_get:NVN, \prop_get:NvN, \prop_get:NeN,
+%     \prop_get:NoN,
+%     \prop_get:cnN, \prop_get:cVN, \prop_get:cvN, \prop_get:ceN,
+%     \prop_get:coN,
+%     \prop_get:cnc
+%   }
+%   \begin{syntax}
+%     \cs{prop_get:NnNTF} \meta{property list} \Arg{key} \meta{tl~var} \\
+%     ~~\Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   If the \meta{key} is not present in the \meta{property list}, leaves
+%   the \meta{false code} in the input stream.  The value of the
+%   \meta{tl~var} is not defined in this case and should
+%   not be relied upon.  If the \meta{key} is present in the
+%   \meta{property list}, stores the corresponding \meta{value} in the
+%   \meta{tl~var} without removing it from the
+%   \meta{property list}, then leaves the \meta{true code} in the input
+%   stream.  The \meta{tl~var} is assigned locally.
+% \end{function}
+%
+% \begin{function}[TF, added = 2011-08-18, updated = 2012-05-19]
+%   {
+%     \prop_pop:NnN, \prop_pop:NVN,
+%     \prop_pop:NoN,
+%     \prop_pop:cnN, \prop_pop:cVN,
+%     \prop_pop:coN
+%   }
+%   \begin{syntax}
+%     \cs{prop_pop:NnNTF} \meta{property list} \Arg{key} \meta{tl~var} \\
+%     ~~\Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   If the \meta{key} is not present in the \meta{property list}, leaves
+%   the \meta{false code} in the input stream.  The value of the
+%   \meta{tl~var} is not defined in this case and should
+%   not be relied upon.  If the \meta{key} is present in
+%   the \meta{property list}, pops the corresponding \meta{value}
+%   in the \meta{tl~var}, \emph{i.e.}~removes the item from
+%   the \meta{property list}.
+%   Both the \meta{property list} and the \meta{tl~var}
+%   are assigned locally.
+% \end{function}
+%
+% \begin{function}[TF, added = 2011-08-18, updated = 2012-05-19]
+%   {
+%     \prop_gpop:NnN, \prop_gpop:NVN,
+%     \prop_gpop:NoN,
+%     \prop_gpop:cnN, \prop_gpop:cVN,
+%     \prop_gpop:coN
+%   }
+%   \begin{syntax}
+%     \cs{prop_gpop:NnNTF} \meta{property list} \Arg{key} \meta{tl~var} \\
+%     ~~\Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   If the \meta{key} is not present in the \meta{property list}, leaves
+%   the \meta{false code} in the input stream.  The value of the
+%   \meta{tl~var} is not defined in this case and should
+%   not be relied upon.  If the \meta{key} is present in
+%   the \meta{property list}, pops the corresponding \meta{value}
+%   in the \meta{tl~var}, \emph{i.e.}~removes the item from
+%   the \meta{property list}.
+%   The \meta{property list} is modified globally, while the
+%   \meta{tl~var} is assigned locally.
+% \end{function}
+%
+% \section{Mapping over property lists}
+%
+% All mappings are done at the current group level, \emph{i.e.}~any
+% local assignments made by the \meta{function} or \meta{code} discussed
+% below remain in effect after the loop.
+%
+% \begin{function}[rEXP, updated = 2013-01-08]
+%   {\prop_map_function:NN, \prop_map_function:cN}
+%   \begin{syntax}
+%     \cs{prop_map_function:NN} \meta{property list} \meta{function}
+%   \end{syntax}
+%   Applies \meta{function} to every \meta{entry} stored in the
+%   \meta{property list}. The \meta{function} receives two arguments for
+%   each iteration: the \meta{key} and associated \meta{value}.
+%   The order in which \meta{entries} are returned is not defined and
+%   should not be relied upon.
+%   To pass further arguments to the \meta{function}, see
+%   \cs{prop_map_inline:Nn} (non-expandable) or \cs{prop_map_tokens:Nn}.
+% \end{function}
+%
+% \begin{function}[updated = 2013-01-08]
+%   {\prop_map_inline:Nn, \prop_map_inline:cn}
+%   \begin{syntax}
+%     \cs{prop_map_inline:Nn} \meta{property list} \Arg{inline function}
+%   \end{syntax}
+%   Applies \meta{inline function} to every \meta{entry} stored
+%   within the \meta{property list}. The \meta{inline function} should
+%   consist of code which receives the \meta{key} as |#1| and the
+%   \meta{value} as |#2|.
+%   The order in which \meta{entries} are returned is not defined and
+%   should not be relied upon.
+% \end{function}
+%
+% \begin{function}[rEXP]
+%   {\prop_map_tokens:Nn, \prop_map_tokens:cn}
+%   \begin{syntax}
+%     \cs{prop_map_tokens:Nn} \meta{property list} \Arg{code}
+%   \end{syntax}
+%   Analogue of \cs{prop_map_function:NN} which maps several tokens
+%   instead of a single function.  The \meta{code} receives each
+%   key--value pair in the \meta{property list} as two trailing brace
+%   groups. For instance,
+%   \begin{verbatim}
+%     \prop_map_tokens:Nn \l_my_prop { \str_if_eq:nnT { mykey } }
+%   \end{verbatim}
+%   expands to the value corresponding to \texttt{mykey}: for each
+%   pair in |\l_my_prop| the function \cs{str_if_eq:nnT} receives
+%   \texttt{mykey}, the \meta{key} and the \meta{value} as its three
+%   arguments.  For that specific task, \cs{prop_item:Nn} is faster.
+% \end{function}
+%
+% \begin{function}[rEXP, updated = 2012-06-29]{\prop_map_break:}
+%   \begin{syntax}
+%     \cs{prop_map_break:}
+%   \end{syntax}
+%   Used to terminate a \cs[no-index]{prop_map_\ldots} function before all
+%   entries in the \meta{property list} have been processed. This
+%   normally takes place within a conditional statement, for example
+%   \begin{verbatim}
+%     \prop_map_inline:Nn \l_my_prop
+%       {
+%         \str_if_eq:nnTF { #1 } { bingo }
+%           { \prop_map_break: }
+%           {
+%             % Do something useful
+%           }
+%       }
+%   \end{verbatim}
+%   Use outside of a \cs[no-index]{prop_map_\ldots} scenario leads to low
+%   level \TeX{} errors.
+%   \begin{texnote}
+%     When the mapping is broken, additional tokens may be inserted
+%     before further items are taken
+%     from the input stream. This depends on the design of the mapping
+%     function.
+%   \end{texnote}
+% \end{function}
+%
+% \begin{function}[rEXP, updated = 2012-06-29]{\prop_map_break:n}
+%   \begin{syntax}
+%     \cs{prop_map_break:n} \Arg{code}
+%   \end{syntax}
+%   Used to terminate a \cs[no-index]{prop_map_\ldots} function before all
+%   entries in the \meta{property list} have been processed, inserting
+%   the \meta{code} after the mapping has ended. This
+%   normally takes place within a conditional statement, for example
+%   \begin{verbatim}
+%     \prop_map_inline:Nn \l_my_prop
+%       {
+%         \str_if_eq:nnTF { #1 } { bingo }
+%           { \prop_map_break:n { <code> } }
+%           {
+%             % Do something useful
+%           }
+%       }
+%   \end{verbatim}
+%   Use outside of a \cs[no-index]{prop_map_\ldots} scenario leads to low
+%   level \TeX{} errors.
+%   \begin{texnote}
+%     When the mapping is broken, additional tokens may be inserted
+%     before the \meta{code} is
+%     inserted into the input stream.
+%     This depends on the design of the mapping function.
+%   \end{texnote}
+% \end{function}
+%
+% \section{Viewing property lists}
+%
+% \begin{function}[updated = 2021-04-29]{\prop_show:N, \prop_show:c}
+%   \begin{syntax}
+%     \cs{prop_show:N} \meta{property list}
+%   \end{syntax}
+%   Displays the entries in the \meta{property list} in the terminal,
+%   and specifies its storage type.
+% \end{function}
+%
+% \begin{function}[added = 2014-08-12, updated = 2021-04-29]{\prop_log:N, \prop_log:c}
+%   \begin{syntax}
+%     \cs{prop_log:N} \meta{property list}
+%   \end{syntax}
+%   Writes the entries in the \meta{property list} in the log file,
+%   and specifies its storage type.
+% \end{function}
+%
+% \section{Scratch property lists}
+%
+% There is no need to include both flat and linked property lists as
+% scratch variables.  We arbitrarily pick the older implementation.
+%
+% \begin{variable}[added = 2012-06-23]{\l_tmpa_prop, \l_tmpb_prop}
+%   Scratch \enquote{flat} property lists for local assignment.
+%   These are never used by
+%   the kernel code, and so are safe for use with any \LaTeX3-defined
+%   function. However, they may be overwritten by other non-kernel
+%   code and so should only be used for short-term storage.
+% \end{variable}
+%
+% \begin{variable}[added = 2012-06-23]{\g_tmpa_prop, \g_tmpb_prop}
+%   Scratch \enquote{flat} property lists for global assignment.
+%   These are never used by
+%   the kernel code, and so are safe for use with any \LaTeX3-defined
+%   function. However, they may be overwritten by other non-kernel
+%   code and so should only be used for short-term storage.
+% \end{variable}
+%
+% \section{Constants}
+%
+% \begin{variable}{\c_empty_prop}
+%   A permanently-empty property list used for internal comparisons.
+% \end{variable}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3prop} implementation}
+%
+% \TestFiles{m3prop001, m3prop002, m3prop003, m3prop004, m3show001}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=prop>
+%    \end{macrocode}
+%
+% With the (default) flat data storage, a property list is a macro whose
+% top-level expansion is of the form
+% \begin{quote}
+%   \cs{s_@@} \cs{@@_chk:w}
+%   \cs{@@_pair:wn} \meta{key_1} \cs{s_@@} \Arg{value_1} \\
+%   \ldots{} \\
+%   \cs{@@_pair:wn} \meta{key_n} \cs{s_@@} \Arg{value_n} \\
+% \end{quote}
+% where \cs{s_@@} is a scan mark (equal to \cs{scan_stop:}), \cs{@@_chk:w}
+% produces a suitable error if the property list is used directly in the input
+% stream, and \cs{@@_pair:wn} can be used to map through the property list.
+%
+% With the linked data storage, each property list entry
+% \meta{key_i}--\meta{value_i} is stored into a token list
+% \cs[no-index]{@@~\meta{prefix}~\meta{key_i}}.  The \meta{prefix} is one or
+% more characters (no spaces), constructed automatically only once, when the
+% property list is initially declared.  The control sequence name does not
+% conform to standard naming for variables because (1) this is an internal
+% control sequence, not really a \pkg{expl3} variable; (2) keeping track of the
+% scope |l| or~|g| throughout all functions would be a pretty big mess,
+% especially if users accidentally mix local and global use (we would have to
+% always check for such mistakes, rather than only checking when suitable debug
+% options are set); (3) shorter control sequence names use less memory and are
+% quicker in case of hash collisions, which may matter since we are using many
+% control sequences.
+%
+% We need to enable mapping through such a property list, but without storing a
+% list of all entries anywhere: this is achieved by making each of these token
+% lists also store a pointer to the next entry.  To enable efficient deletion,
+% the token lists also store a pointer to the previous entry.  This means we
+% have a doubly-linked list.  To avoid having to special-case the two ends of
+% the doubly-linked list when deleting entries, we include as a zeroth entry in
+% the doubly-linked list the property list variable itself, and we include as an
+% $(n+1)$-th entry in the doubly-linked list an end-pointer
+% \cs{@@~\meta{prefix}} (no trailing space, so it differs from an empty key).
+% The space before \meta{prefix} ensures there is no collision with
+% other \pkg{l3prop} internal functions, even if we have very many
+% linked property lists being defined.
+%
+% The property list variable itself is a token list of the form
+% \begin{quote}
+%   \cs{@@_flatten:w} \cs{@@~\meta{prefix}} \cs{s_@@} \Arg{prefix}
+%   \cs[no-index]{@@~\meta{prefix}~\meta{key_1}}
+% \end{quote}
+% Here, \cs{@@_flatten:w} serves as an efficiently recognized marker, and when
+% \texttt{f}-expanded it is tasked with fully unpacking the property list into
+% the same form as the default data storage so as to ease conversion.  The
+% \meta{prefix} is used when looking up an entry.  The token list
+% \cs{@@~\meta{prefix}} (see below) contains a pointer to the last key to help
+% insert a new entry.  The pointer to \meta{key_1} is needed to start a mapping.
+% The token list labeled by \meta{key_i} is of the form
+% \begin{quote}
+%   \cs{use_none:n} \cs[no-index]{@@~\meta{prefix}~\meta{key$_{i-1}$}}
+%   \cs{@@_pair:wn} \meta{key_i} \cs{s_@@} \Arg{value_i}
+%   \cs[no-index]{@@~\meta{prefix}~\meta{key$_{i+1}$}}
+% \end{quote}
+% where the pointer to \meta{key$_{i-1}$} is needed when deleting the
+% \meta{key_i}.  Expanding this will run \cs{@@_pair:wn} on the
+% \meta{key_i}--\meta{value_i} pair (for speed, \meta{key_i} is kept as explicit
+% tokens rather than slowly extracting it from a control sequence name), then
+% move on to the next key, thus mapping through the whole list.  The mapping is
+% ended upon expanding \cs{@@~\meta{prefix}}, which is the token list
+% \begin{quote}
+%   \cs{use_none:n} \cs[no-index]{@@~\meta{prefix}~\meta{key_n}}
+% \end{quote}
+% Let us think about deleting the \meta{key_i}.  We need to update the
+% \meta{key$_{i-1}$} and \meta{key$_{i+1}$} to point to each other
+% instead of \meta{key_i}.  To edit the corresponding token lists, it is
+% important that \cs[no-index]{@@~\meta{prefix}~\meta{key_i}} be at the
+% \enquote{same place} in the token lists also in the boundary cases
+% $i=1$ or $i=n$, namely as the second token, or as the second argument
+% after \cs{s_@@}.
+%
+% \subsection{Internal auxiliaries}
+%
+% \begin{macro}{\@@_tmp:w}
+%   Scratch macro, defined as needed, for instance to save \cs{@@_pair:wn} when
+%   concatenating.
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_tmp:w ?
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}{\l_@@_internal_tl}
+%   Token list used in various places: for the prefix; when converting from flat
+%   to linked props; and to store the new key--value pair inserted by
+%   \cs{prop_put:Nnn}.
+%    \begin{macrocode}
+\tl_new:N \l_@@_internal_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\s_@@_mark,\s_@@_stop}
+%   Internal scan marks.
+%    \begin{macrocode}
+\scan_new:N \s_@@_mark
+\scan_new:N \s_@@_stop
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\q_@@_recursion_tail,\q_@@_recursion_stop}
+%   Internal recursion quarks.
+%    \begin{macrocode}
+\quark_new:N \q_@@_recursion_tail
+\quark_new:N \q_@@_recursion_stop
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}[EXP]{\@@_if_recursion_tail_stop:n}
+% \begin{macro}[EXP]{\@@_if_recursion_tail_stop:o}
+%   Functions to query recursion quarks.
+%    \begin{macrocode}
+\__kernel_quark_new_test:N \@@_if_recursion_tail_stop:n
+\cs_generate_variant:Nn \@@_if_recursion_tail_stop:n { o }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Structure of a property list}
+%
+% \begin{macro}{\s_@@}
+%   A private scan mark is used as a marker after each key, and at the
+%   very beginning of the property list.
+%    \begin{macrocode}
+\scan_new:N \s_@@
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_chk:w, \@@_chk_loop:nw, \@@_chk_get:nw}
+%   This removes the flat property list from the input stream and complains
+%   about a bad use of a property list.  Since property lists do not have an
+%   end-marker, we slowly peek ahead in a loop.  Speed does not matter since
+%   this is for an error situation.  While \cs{@@_pair:wn} does not keep a fixed
+%   definition, it always includes the internal \cs{s_@@} in its argument
+%   specification, so that there is no risk of accidentally picking up a public
+%   token instead of \cs{@@_pair:wn} when doing a meaning test.  We collect the
+%   keys and values to produce a more useful error message.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_chk:w { \@@_chk_loop:nw { } }
+\cs_new_protected:Npn \@@_chk_loop:nw #1
+  {
+    \peek_meaning:NTF \@@_pair:wn
+      { \@@_chk_get:nw {#1} }
+      { \msg_error:nne { prop } { misused } {#1} }
+  }
+\cs_new_protected:Npn \@@_chk_get:nw #1 \@@_pair:wn #2 \s_@@ #3
+  { \@@_chk_loop:nw { #1 , ~ {#2} = { \tl_to_str:n {#3} } } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_pair:wn}
+%   Used as \cs{@@_pair:wn} \meta{key} \cs{s_@@} \Arg{item} for both storage
+%   types, this internal token starts each key--value pair in the property list.
+%   This default definition is changed globally by any mapping function, so
+%   there is not much point trying to make it an error.  Instead, the error is
+%   produced by \cs{@@_chk:w}.
+%    \begin{macrocode}
+\cs_new:Npn \@@_pair:wn #1 \s_@@ #2 { }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_flatten:w}
+%   We implement here the fact that \texttt{f}-expanding a linked property list
+%   gives a flat property list.
+%   Leaving a linked property list in the input stream will turn it into a flat
+%   property list so that the error implemented by \cs{@@_chk:w} will correctly
+%   be triggered.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_flatten:w #1 \s_@@ #2#3
+  { \use:e { \@@_flatten_aux:N #3 } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[rEXP]
+%   {\@@_flatten:N, \@@_flatten_aux:w, \@@_flatten_aux:N, \@@_flatten_loop:w}
+%   The main function \cs{@@_flatten:N} receives a linked property list and
+%   flattens it.  The auxiliary \cs{@@_flatten_aux:N} receives a pointer to the
+%   first key and flattens the linked property list into a flat property list.
+%   This is only restricted-expandable as it involves mapping through all of the
+%   property list's entries starting from \meta{key_1}.  The looping function
+%   \cs{@@_flatten_loop:w} removes \cs{use_none:n} and a backwards pointer~|#2|,
+%   leaves the key--value pair for \cs{use:e} to receive, and calls itself
+%   again after expanding the next key's token list.  Its argument |#3| is
+%   empty, except at the end where it is the \cs{use_none:nnnn} appearing in the
+%   definition of~\cs{@@_flatten_aux:N}, which ends the loop.
+%    \begin{macrocode}
+\cs_new:Npn \@@_flatten:N #1
+  { \exp_after:wN \@@_flatten_aux:w #1 }
+\cs_new:Npn \@@_flatten_aux:w #1 \s_@@ #2 { \@@_flatten_aux:N }
+\cs_new:Npn \@@_flatten_aux:N #1
+  {
+    \s_@@ \@@_chk:w
+    \exp_after:wN \@@_flatten_loop:w #1
+    \use_none:nnnn \@@_pair:wn \s_@@ { }
+  }
+\cs_new:Npn \@@_flatten_loop:w #1#2#3 \@@_pair:wn #4 \s_@@ #5
+  {
+    #3
+    \exp_not:n { \@@_pair:wn #4 \s_@@ {#5} }
+    \exp_after:wN \@@_flatten_loop:w
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}{\g_@@_prefix_int, \c_@@_basis_int}
+%   Used to assign prefixes for each linked property list.  It is converted to
+%   base \cs{c_@@_basis_int}, then each digit is converted to a character,
+%   starting at |!| (the character after space).
+%    \begin{macrocode}
+\int_new:N \g_@@_prefix_int
+\int_const:Nn \c_@@_basis_int { \c_max_char_int - `\! }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_next_prefix:, \@@_to_prefix:n}
+%   Store in \cs{l_@@_internal_tl} the conversion of \cs{g_@@_prefix_int} to
+%   characters, and increment this integer for use in the next linked property
+%   list.  No need to optimize since this is only used when declaring the
+%   property list the first time.
+%   The aim here is to make this string as short as we can, given the
+%   range of distinct characters available.  This speeds up the work of
+%   \cs{cs:w} \ldots{} \cs{cs_end:} that looks up keys in the hash table.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_next_prefix:
+  {
+    \tl_set:Ne \l_@@_internal_tl
+      { \@@_to_prefix:n { \g_@@_prefix_int } }
+    \int_gincr:N \g_@@_prefix_int
+  }
+\cs_new:Npn \@@_to_prefix:n #1
+  {
+    \int_compare:nNnTF {#1} > \c_@@_basis_int
+      {
+        \exp_args:Nf \@@_to_prefix:n
+          { \int_div_truncate:nn {#1} \c_@@_basis_int }
+        \exp_args:Nf \@@_to_prefix:n
+          { \int_mod:nn {#1} \c_@@_basis_int }
+      }
+      { \char_generate:nn { `\! + #1 } { 12 } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_if_flat:NTF, \@@_if_flat_aux:w}
+%   We could either test for the presence of \cs{@@_chk:w} (flat
+%   property list) or of \cs{@@_flatten:w} (linked property list).  We
+%   make the second choice; this way props that are accidentally
+%   \tn{relax} are treated as they were before.  The auxiliary receives
+%   \cs{use_i:nn} or \cs{use_ii:nn} as~|#3|.
+%   As a transitional fix we avoid erroring in case the prop is undefined (the \cs{exp_after:wN} is omitted in that case, taking the flat branch).
+%    \begin{macrocode}
+\cs_new:Npn \@@_if_flat:NTF #1
+  {
+    \prop_if_exist:NT #1
+    \exp_after:wN \@@_if_flat_aux:w #1
+    \s_@@_mark \use_ii:nn
+    \@@_flatten:w \s_@@_mark \use_i:nn \s_@@_stop
+  }
+\cs_new:Npn \@@_if_flat_aux:w
+    #1 \@@_flatten:w #2 \s_@@_mark #3 #4 \s_@@_stop {#3}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Allocation and initialisation}
+%
+% \begin{variable}[tested = m3prop004]{\c_empty_prop}
+%   An empty flat prop.
+%    \begin{macrocode}
+\tl_const:Nn \c_empty_prop { \s_@@ \@@_chk:w }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}[tested = m3prop001]{\prop_new:N, \prop_new:c}
+%   Flat property lists are initialized with the value \cs{c_empty_prop}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_new:N #1
+  {
+    \__kernel_chk_if_free_cs:N #1
+    \cs_gset_eq:NN #1 \c_empty_prop
+  }
+\cs_generate_variant:Nn \prop_new:N { c }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop001]{\prop_new_linked:N, \prop_new_linked:c}
+% \begin{macro}{\@@_new_linked:N}
+%   The auxiliary is used in \cs{prop_make_linked:N}.
+%   For linked property lists, get a new prefix in \cs{l_@@_internal_tl}, then
+%   use it to set up the internal structure: the last token in~|#1| is usually a
+%   pointer to the first key, which is here the end-pointer.  That end-pointer
+%   has a pointer to the previous key (usually the last key), which is the
+%   variable~|#1| itself that begins the doubly-linked list.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_new_linked:N #1
+  {
+    \__kernel_chk_if_free_cs:N #1
+    \@@_new_linked:N #1
+  }
+\cs_new_protected:Npn \@@_new_linked:N #1
+  {
+    \@@_next_prefix:
+    \cs_gset_nopar:Npe #1
+      {
+        \@@_flatten:w
+        \exp_not:c { @@ ~ \l_@@_internal_tl }
+        \s_@@ { \l_@@_internal_tl }
+        \exp_not:c { @@ ~ \l_@@_internal_tl }
+      }
+    \cs_gset_nopar:cpe { @@ ~ \l_@@_internal_tl }
+      {
+        \exp_not:N \use_none:n
+        \exp_not:N #1
+      }
+  }
+\cs_generate_variant:Nn \prop_new_linked:N { c }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop001]{\prop_clear:N, \prop_clear:c}
+% \begin{macro}[tested = m3prop001]{\prop_gclear:N, \prop_gclear:c}
+% \begin{macro}{\@@_clear:NNN, \@@_clear:wNNN, \@@_clear_loop:Nw}
+%   Clearing a flat property list is like declaring it anew, simply setting it
+%   equal to \cs{c_empty_prop}.  For linked property lists we must clear all of
+%   the variables storing individual keys, which requires a loop.  At each step
+%   of the loop, \cs{@@_clear_loop:Nw} receives
+%   \cs[index=cs_set_eq:NN]{cs_(g)set_eq:NN}, \cs{use_none:n}, the backwards
+%   pointer, an empty~|#4| (except at the end of the loop), and the key--value
+%   pair |#5=#6| which we disregard.  The looping auxiliary undefines the
+%   previous key's token list (this includes the main token list, but that is
+%   fine because it is restored at the end) and calls itself after expanding the
+%   next key's token list.  The loop ends when |#4| is \cs{use_none:nnnn}.
+%   After the loop, \cs{@@_clear:wNNN} correctly sets up the main variable~|#6|
+%   and the end-pointer~|#1|.  Importantly, this is done using
+%   \cs[index=cs_set_nopar:Npe]{cs_(g)set_nopar:Npe} and \cs{exp_not:n} because
+%   the almost-equivalent \cs{tl_set:Nn} would complain in debug mode about the
+%   fact that the main variable is undefined at this stage.  Importantly,
+%   \cs{@@_clear_entries:NN} is used in the implementation of
+%   \cs{prop_set_eq:NN}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_clear:N
+  { \@@_clear:NNN \cs_set_eq:NN \cs_set_nopar:Npe }
+\cs_generate_variant:Nn \prop_clear:N  { c }
+\cs_new_protected:Npn \prop_gclear:N
+  { \@@_clear:NNN \cs_gset_eq:NN \cs_gset_nopar:Npe }
+\cs_generate_variant:Nn \prop_gclear:N { c }
+\cs_new_protected:Npn \@@_clear:NNN #1#2#3
+  {
+    \@@_if_flat:NTF #3
+      { #1 #3 \c_empty_prop }
+      { \exp_after:wN \@@_clear:wNNN #3 #1 #2 #3 }
+  }
+\cs_new_protected:Npn \@@_clear:wNNN
+    \@@_flatten:w #1 \s_@@ #2#3#4#5#6
+  {
+    \@@_clear_entries:NN #4 #3
+    #5 #6 { \exp_not:n { \@@_flatten:w #1 \s_@@ {#2} #1 } }
+    #5 #1 { \exp_not:n { \use_none:n #6 } }
+  }
+\cs_new_protected:Npn \@@_clear_entries:NN #1#2
+  {
+    \exp_after:wN \@@_clear_loop:Nw \exp_after:wN #1 #2
+    \use_none:nnnn \@@_pair:wn \s_@@ { }
+  }
+\cs_new_protected:Npn \@@_clear_loop:Nw
+    #1#2#3#4 \@@_pair:wn #5 \s_@@ #6
+  {
+    #1 #3 \tex_undefined:D
+    #4
+    \exp_after:wN \@@_clear_loop:Nw
+    \exp_after:wN #1
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop001]
+%   {
+%     \prop_clear_new:N, \prop_clear_new:c,
+%     \prop_gclear_new:N, \prop_gclear_new:c,
+%     \prop_clear_new_linked:N, \prop_clear_new_linked:c,
+%     \prop_gclear_new_linked:N, \prop_gclear_new_linked:c
+%   }
+%   A simple variation of the token list functions.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_clear_new:N  #1
+  { \prop_if_exist:NTF #1 { \prop_clear:N #1 } { \prop_new:N #1 } }
+\cs_generate_variant:Nn \prop_clear_new:N  { c }
+\cs_new_protected:Npn \prop_gclear_new:N #1
+  { \prop_if_exist:NTF #1 { \prop_gclear:N #1 } { \prop_new:N #1 } }
+\cs_generate_variant:Nn \prop_gclear_new:N { c }
+\cs_new_protected:Npn \prop_clear_new_linked:N  #1
+  { \prop_if_exist:NTF #1 { \prop_clear:N #1 } { \prop_new_linked:N #1 } }
+\cs_generate_variant:Nn \prop_clear_new_linked:N  { c }
+\cs_new_protected:Npn \prop_gclear_new_linked:N #1
+  { \prop_if_exist:NTF #1 { \prop_gclear:N #1 } { \prop_new_linked:N #1 } }
+\cs_generate_variant:Nn \prop_gclear_new_linked:N { c }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop001]
+%   {\prop_set_eq:NN, \prop_set_eq:cN, \prop_set_eq:Nc, \prop_set_eq:cc}
+% \begin{macro}[tested = m3prop001]
+%   {\prop_gset_eq:NN, \prop_gset_eq:cN, \prop_gset_eq:Nc, \prop_gset_eq:cc}
+% \begin{macro}
+%   {
+%     \@@_set_eq:NNNN, \@@_set_eq:wNNNN, \@@_set_eq:nNnNN,
+%     \@@_set_eq_loop:NNnw, \@@_set_eq_end:w
+%   }
+%   If both variables are accidentally the same variable (or equal flat property
+%   lists, as it turns out) we do nothing, otherwise the following code would
+%   lose all entries.  If the target variable~|#3| is a flat prop, either copy
+%   directly or flatten before copying.  If it is a linked prop, we must clear
+%   it, then go through the entries in~|#4| to add them to~|#3|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_set_eq:NN
+  { \@@_set_eq:NNNN \cs_set_eq:NN \cs_set_nopar:Npe }
+\cs_generate_variant:Nn \prop_set_eq:NN { Nc , cN , cc }
+\cs_new_protected:Npn \prop_gset_eq:NN
+  { \@@_set_eq:NNNN \cs_gset_eq:NN \cs_gset_nopar:Npe }
+\cs_generate_variant:Nn \prop_gset_eq:NN { Nc , cN , cc }
+\cs_new_protected:Npn \@@_set_eq:NNNN #1#2#3#4
+  {
+    \cs_if_eq:NNF #3#4
+      {
+        \@@_if_flat:NTF #3
+          {
+            \@@_if_flat:NTF #4
+              { #1 #3 #4 }
+              { #2 #3 { \@@_flatten:N #4 } }
+          }
+          { \exp_after:wN \@@_set_eq:wNNNN #3 #1#2#3#4 }
+      }
+  }
+\cs_new_protected:Npn \@@_set_eq:wNNNN
+    \@@_flatten:w #1 \s_@@ #2#3#4#5#6#7
+  {
+    \@@_clear_entries:NN #4 #3
+    \exp_args:Nf \@@_set_eq:nNnNN {#7} #1 {#2} #5 #6
+  }
+%    \end{macrocode}
+%   We have used that |f|-expanding either type of prop gives a flat prop.  At
+%   this stage \cs{@@_set_eq:nNnNN} receives the second variable as a flat prop,
+%   the end-pointer, the prefix, the suitable
+%   \cs[index=cs_set_nopar:Npe]{cs_(g)set_nopar:Npe} assignment, and the first
+%   variable itself.  Remove the leading \cs{s_@@} and \cs{@@_chk:w} with
+%   \cs{use_i:nnn}, then start the loop.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_set_eq:nNnNN #1#2#3#4#5
+  {
+    \use_i:nnn
+      {
+        \@@_set_eq_loop:NNnw #5 #4 {#3}
+        \@@_flatten:w #2 \s_@@ {#3}
+      }
+      #1
+    \use_none:n \@@_pair:wn ? \s_@@
+  }
+%    \end{macrocode}
+%   The looping function receives the current pointer~|#1| (initially the
+%   variable itself), the defining function~|#2| and the prefix~|#3|, then a
+%   partial definition~|#4| (which in later stages includes the backwards
+%   pointer), followed by the current value as \cs{s_@@} |{#5}|.  It seeks the
+%   next key~|#7| to construct in \cs{l_@@_internal_tl} the next pointer
+%   \cs[no-index]{@@~\meta{prefix}~\meta{next key}} (the
+%   argument~|#6| is empty, except at the end of the loop, where it is
+%   \cs{use_none:n} in such a way as to delete the \meta{space} and \meta{next
+%   key}).  Then the token list (current pointer)~|#1| is set-up to contain the
+%   partial definition and current value, as well as the newly constructed next
+%   pointer.  After a line responsible for correctly ending the loop with
+%   \cs{@@_set_eq_end:w}, we loop, setting up the next definition, which starts
+%   with \cs{use_none:n} and a backwards pointer to~|#1| followed by the
+%   \meta{next key}~|#7| and so on.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_set_eq_loop:NNnw
+    #1#2#3#4 \s_@@ #5#6 \@@_pair:wn #7 \s_@@
+  {
+    \tl_set:Ne \l_@@_internal_tl { \exp_not:c { @@ ~ #3 #6 ~ #7 } }
+    #2 #1 { \exp_not:n { #4 \s_@@ {#5} } \exp_not:o \l_@@_internal_tl }
+    \use_none:n #6 \@@_set_eq_end:w
+    \exp_after:wN \@@_set_eq_loop:NNnw \l_@@_internal_tl #2 {#3}
+    \use_none:n #1 \@@_pair:wn #7 \s_@@
+  }
+%    \end{macrocode}
+%   The end-code picks up what is needed to correctly assign the last token
+%   list (the end pointer), which is simply \cs{use_none:n}
+%   \cs[no-index]{@@_\meta{prefix}\meta{space}\meta{key_n}}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_set_eq_end:w
+    \exp_after:wN \@@_set_eq_loop:NNnw #1#2#3
+    \use_none:n #4#5 \s_@@
+  {
+    \exp_after:wN #2 \l_@@_internal_tl { \exp_not:n { \use_none:n #4 } }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\prop_make_flat:N, \prop_make_flat:c \@@_make_flat:Nn}
+%   The only interesting case is when given a linked prop.  Clear the
+%   linked property list using \cs{@@_clear:wNNN} with local assignments
+%   (it does not matter since we are at the outermost group level, and
+%   \cs{cs_set_eq:NN} is very slightly faster than its global version.
+%   Then store the contents (expanded preventively by \cs{exp_args:NNf})
+%   with an assignment \cs{cs_set_nopar:Npe} that does not perform
+%   \pkg{l3debug} checks.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_make_flat:N #1
+  {
+    \int_compare:nNnTF { \tex_currentgrouplevel:D } = 0
+      {
+        \@@_if_flat:NTF #1 { }
+          { \exp_args:NNf \@@_make_flat:Nn #1 {#1} }
+      }
+      {
+        \msg_error:nnee { prop } { inner-make }
+          { \token_to_str:N \prop_make_flat:N } { \token_to_str:N #1 }
+      }
+  }
+\cs_generate_variant:Nn \prop_make_flat:N { c }
+\cs_new_protected:Npn \@@_make_flat:Nn #1#2
+  {
+    \exp_after:wN \@@_clear:wNNN #1 \cs_set_eq:NN \cs_set_nopar:Npe #1
+    \cs_set_nopar:Npe #1 { \exp_not:n {#2} }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\prop_make_linked:N, \prop_make_linked:c, \@@_make_linked:Nn}
+%   The only interesting case is when given a flat prop.  We expand the
+%   contents for later use.  Then \cs{@@_new_linked:N} disregards that
+%   previous value of~|#1| and initializes the linked prop.  We can then
+%   use an auxiliary \cs{@@_set_eq:wNNNN} underlying
+%   \cs{prop_set_eq:NN}, with the prop contents saved as
+%   \cs{l_@@_internal_tl}.  That step is a bit unsafe, as
+%   \cs{l_@@_internal_tl} (really, a flat prop here) is used within
+%   \cs{@@_set_eq:wNNNN} itself, but it is in fact expanded early enough
+%   to be ok.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_make_linked:N #1
+  {
+    \int_compare:nNnTF { \tex_currentgrouplevel:D } = 0
+      {
+        \@@_if_flat:NTF #1
+          { \exp_args:NNo \@@_make_linked:Nn #1 {#1} } { }
+      }
+      {
+        \msg_error:nnee { prop } { inner-make }
+          { \token_to_str:N \prop_make_linked:N } { \token_to_str:N #1 }
+      }
+  }
+\cs_generate_variant:Nn \prop_make_linked:N { c }
+\cs_new_protected:Npn \@@_make_linked:Nn #1#2
+  {
+    \@@_new_linked:N #1
+    \tl_set:Nn \l_@@_internal_tl {#2}
+    \exp_after:wN \@@_set_eq:wNNNN #1
+      \cs_set_eq:NN \cs_set_nopar:Npe #1 \l_@@_internal_tl
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}[tested = m3prop004]{\l_tmpa_prop, \l_tmpb_prop}
+% \begin{variable}[tested = m3prop004]{\g_tmpa_prop, \g_tmpb_prop}
+%   We can now initialize the scratch variables.
+%    \begin{macrocode}
+\prop_new:N \l_tmpa_prop
+\prop_new:N \l_tmpb_prop
+\prop_new:N \g_tmpa_prop
+\prop_new:N \g_tmpb_prop
+%    \end{macrocode}
+% \end{variable}
+% \end{variable}
+%
+% \begin{macro}
+%   {
+%     \prop_concat:NNN, \prop_concat:ccc,
+%     \prop_gconcat:NNN, \prop_gconcat:ccc,
+%     \@@_concat:NNNNN, \@@_concat:nNNN
+%   }
+%   The basic strategy is to copy the first variable into the target,
+%   then loop through the second variable, calling
+%   \cs[index=prop_put:Nnn]{prop_(g)put:Nnn} on each item.  To avoid
+%   running the \pkg{l3debug} scope checks on each of these steps, we
+%   use the auxiliaries that underly \cs{prop_set_eq:NN} and
+%   \cs{prop_put:Nnn}, whose syntax is a bit unwieldy.
+%   We work directly with the target prop |#3| as a scratch space,
+%   because copying over from a temporary variable to |#3| would be slow
+%   in the linked case.  If |#5| is |#3| itself we have to be careful
+%   not to lose the data, and we even take the opportunity to skip the
+%   copying step completely.  To keep the correct version of the
+%   duplicate keys we use the code underlying \cs{prop_put_if_not_in:Nnn},
+%   which involves passing \cs{use_none:nnn} to the auxiliary instead of
+%   nothing.
+%   There is no need to check for the case where |#3| is equal to~|#4|
+%   because in that case \cs[index=prop_set_eq:NN]{prop_(g)set_eq:NN}
+%   |#3| |#4| (or rather the underlying auxiliary) is correctly set up
+%   to do no needless work.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_concat:NNN
+  { \@@_concat:NNNNN \cs_set_eq:NN \cs_set_nopar:Npe }
+\cs_generate_variant:Nn \prop_concat:NNN { ccc }
+\cs_new_protected:Npn \prop_gconcat:NNN
+  { \@@_concat:NNNNN \cs_gset_eq:NN \cs_gset_nopar:Npe }
+\cs_generate_variant:Nn \prop_gconcat:NNN { ccc }
+\cs_new_protected:Npn \@@_concat:NNNNN #1#2#3#4#5
+  {
+    \cs_if_eq:NNTF #3 #5
+      { \@@_concat:nNNN \use_none:nnn #2 #3 #4 }
+      {
+        \@@_set_eq:NNNN #1 #2 #3 #4
+        \@@_concat:nNNN { } #2 #3 #5
+      }
+  }
+\cs_new_protected:Npn \@@_concat:nNNN #1#2#3#4
+  {
+    \cs_gset_eq:NN \@@_tmp:w \@@_pair:wn
+    \cs_gset_protected:Npn \@@_pair:wn ##1 \s_@@
+      { \@@_put:nNNnn {#1} #2 #3 {##1} }
+    \exp_last_unbraced:Nf \use_none:nn #4
+    \cs_gset_eq:NN \@@_pair:wn \@@_tmp:w
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \prop_put_from_keyval:Nn, \prop_put_from_keyval:cn,
+%     \prop_gput_from_keyval:Nn, \prop_gput_from_keyval:cn,
+%     \@@_from_keyval:nn, \@@_from_keyval:Nnn,
+%     \@@_missing_eq:n
+%   }
+%   The core is a call to \cs{keyval_parse:nnn}, with an error message
+%   \cs{@@_missing_eq:n} for entries without~|=|, and a call to (essentially)
+%   \cs[index=prop_put:Nnn]{prop_(g)put:Nnn} for valid key--value pairs.
+%   To avoid repeated scope checks (and errors) when \pkg{l3debug} is
+%   active, we instead use the auxiliary underlying \cs{prop_put:Nnn}.
+%   Because blank keys are valid here, in contrast to \pkg{l3keys}, we set and
+%   restore \cs{l__kernel_keyval_allow_blank_keys_bool}.
+%   The key--value argument may be quite large so we avoid reading it until it
+%   is really necessary.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_put_from_keyval:Nn #1
+  { \@@_from_keyval:nn { \@@_put:nNNnn { } \cs_set_nopar:Npe #1 } }
+\cs_generate_variant:Nn \prop_put_from_keyval:Nn { c }
+\cs_new_protected:Npn \prop_gput_from_keyval:Nn #1
+  { \@@_from_keyval:nn { \@@_put:nNNnn { } \cs_gset_nopar:Npe #1 } }
+\cs_generate_variant:Nn \prop_gput_from_keyval:Nn { c }
+\cs_new_protected:Npn \@@_from_keyval:nn
+  {
+    \bool_if:NTF \l__kernel_keyval_allow_blank_keys_bool
+      { \@@_from_keyval:Nnn \c_true_bool }
+      { \@@_from_keyval:Nnn \c_false_bool }
+  }
+\cs_new_protected:Npn \@@_from_keyval:Nnn #1#2#3
+  {
+    \bool_set_eq:NN \l__kernel_keyval_allow_blank_keys_bool \c_true_bool
+    \keyval_parse:nnn \@@_missing_eq:n {#2} {#3}
+    \bool_set_eq:NN \l__kernel_keyval_allow_blank_keys_bool #1
+  }
+\cs_new_protected:Npn \@@_missing_eq:n
+  { \msg_error:nnn { prop } { prop-keyval } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \prop_set_from_keyval:Nn, \prop_set_from_keyval:cn,
+%     \prop_gset_from_keyval:Nn, \prop_gset_from_keyval:cn,
+%   }
+%   Just empty the prop (with the auxiliary underlying
+%   \cs{prop_clear:N} to avoid \pkg{l3debug} problems) and push
+%   key--value entries using
+%   \cs[index=prop_put_from_keyval:Nn]{prop_(g)put_from_keyval:Nn}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_set_from_keyval:Nn #1
+  {
+    \@@_clear:NNN \cs_set_eq:NN \cs_set_nopar:Npe #1
+    \prop_put_from_keyval:Nn #1
+  }
+\cs_generate_variant:Nn \prop_set_from_keyval:Nn { c }
+\cs_new_protected:Npn \prop_gset_from_keyval:Nn #1
+  {
+    \@@_clear:NNN \cs_gset_eq:NN \cs_gset_nopar:Npe #1
+    \prop_gput_from_keyval:Nn #1
+  }
+\cs_generate_variant:Nn \prop_gset_from_keyval:Nn { c }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \prop_const_from_keyval:Nn, \prop_const_from_keyval:cn,
+%     \prop_const_linked_from_keyval:Nn, \prop_const_linked_from_keyval:cn
+%   }
+%   For both flat and linked constant props, we create |#1| then use the
+%   same auxiliary as for \cs{prop_gput_from_keyval:Nn}.  It is most
+%   natural to use the already packaged \cs{prop_gput:Nnn}, but that
+%   would mean doing an assignment on a supposedly constant property
+%   list.  To avoid errors when \pkg{l3debug} is activated, we use the
+%   auxiliary underlying \cs{prop_gput:Nnn}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_const_from_keyval:Nn #1
+  {
+    \prop_new:N #1
+    \@@_from_keyval:nn { \@@_put:nNNnn { } \cs_gset_nopar:Npe #1 }
+  }
+\cs_generate_variant:Nn \prop_const_from_keyval:Nn { c }
+\cs_new_protected:Npn \prop_const_linked_from_keyval:Nn #1
+  {
+    \prop_new_linked:N #1
+    \@@_from_keyval:nn { \@@_put:nNNnn { } \cs_gset_nopar:Npe #1 }
+  }
+\cs_generate_variant:Nn \prop_const_linked_from_keyval:Nn { c }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Accessing data in property lists}
+%
+% Accessing/deleting/adding entries is mostly done by \cs{@@_split:NnTFn}, which
+% must be fast because it is used in many \pkg{l3prop} functions.  Its syntax is
+% as follows.
+% \begin{quote}
+%   \cs{@@_split:NnTFn} \meta{property list} \Arg{key} \\
+%   ~~\Arg{true code} \Arg{false code} \Arg{link code}
+% \end{quote}
+% If the \meta{property list} uses the linked data storage, then it runs
+% the \meta{link code}, otherwise it does as follows.
+%
+% It splits the \meta{property list} at the \meta{key}, giving three
+% token lists: the \meta{entries before} the \meta{key}, the
+% \meta{value} associated with the \meta{key} and the \meta{entries
+% after} the \meta{key}.  Both the \meta{entries before} and the
+% \meta{entries after} can be empty or consist of some number of
+% consecutive entries \cs{@@_pair:wn} \meta{key_i} \cs{s_@@}
+% \Arg{value_i}.  If the \meta{key} is present in the \meta{property
+% list} then the \meta{true code} is left in the input stream, with
+% |#1|, |#2|, and |#3| replaced by the \meta{entries before},
+% \meta{value}, and \meta{entries after}.  If the \meta{key} is not
+% present in the \meta{property list} then the \meta{false code} is left
+% in the input stream.  Only the \meta{true code} is used in the
+% replacement text of a macro defined internally, which requires
+% |##|~doubling.
+%
+% \begin{macro}
+%   {
+%     \@@_split:NnTFn, \@@_split_aux:nNTFn, \@@_split_test:wn,
+%     \@@_split_flat:w, \@@_split_linked:w, \@@_split_wrong:Nw
+%   }
+%   The aim is to distinguish four cases: a flat prop that contains the
+%   given \meta{key}, a flat prop that does not contain it, a linked
+%   prop, and an invalid prop.  The last case includes those that are
+%   set to \tn{relax} by \texttt{c}-expansion, as well as unrelated
+%   token list variables since these unfortunately used to
+%   \enquote{work} in earlier implementations.
+%   In the first three cases we run the \texttt{T}, \texttt{F}, and
+%   \texttt{n} arguments, and in the last case we raise an error, set
+%   the variable to a known state (empty prop), and run the \texttt{F}
+%   code (some conditionals such as \cs{prop_pop:NnNTF} otherwise blow
+%   up pretty badly).
+%
+%   The first distinction between these cases is done by
+%   \cs{@@_split_test:wn}, which looks for the argument after \cs{s_@@}.
+%   For a flat prop it will be \cs{@@_chk:w}, which leads to running
+%   \cs{@@_split_flat:w}, explained below.  For a linked prop it is the
+%   prefix, consisting of characters, so we end up running
+%   \cs{@@_split_linked:w}, which cleans up and selects the
+%   aforementioned \texttt{n} argument.  For invalid props, or rather,
+%   variables that do not contain \cs{s_@@}, the argument includes
+%   \cs{fi:}, and we end up calling \cs{@@_split_wrong:Nw}, which calls
+%   \cs{prop_show:N} to raise a detailed error stating how the variable
+%   is wrong.
+%
+%   Let us return to \cs{@@_split_flat:w}.  This function is defined
+%   dynamically as
+%   \begin{quote}
+%     \cs{cs_set:Npn} \cs{@@_split_flat:w} \cs{@@_split_linked:w} |#1| \\
+%     \quad \cs{@@_pair:wn} \meta{key} \cs{s_@@} |#2| \\
+%     \quad |#3| \cs{s_@@_mark} |#4| |#5| \cs{s_@@_stop} \\
+%     \quad |{| |#4| \Arg{true code} |}|
+%   \end{quote}
+%   Its job is to seek the \meta{key} in the property list (known to be
+%   flat at this stage) by using an argument |#1| delimited essentially
+%   by that key.  If indeed the variable contained the \meta{key}, then
+%   |#1|~is the \meta{extract_1} before the key--value pair, |#2|~is the
+%   \meta{value} associated with the \meta{key}, |#3|~is the
+%   \meta{extract_2} after the key--value pair, |#4|~is \cs{use_i:nnn},
+%   and we run \cs{use_i:nnn} \Arg{true code} \Arg{false code} \Arg{link
+%   code}, selecting the \meta{true code}.  Otherwise, the whole
+%   property list together with \cs{s_@@_mark} \cs{use_i:nnn} is taken
+%   in as |#1|, then |#2| is some tokens |?| \cs{fi:}
+%   \cs{@@_split_wrong:Nw} \meta{variable} that were only useful in the
+%   case of invalid props, |#3|~is empty, and most importantly |#4| is
+%   \cs{use_ii:nnn}.  This command selects the \meta{false code}.
+%
+%   Note that we define \cs{@@_split_flat:w} in all cases even though it
+%   is only used in the flat case.  Indeed, to avoid taking in the whole
+%   property list (which may be large) as an argument more than strictly
+%   necessary, we would have to keep the \meta{true code} positioned
+%   before the expansion of the prop variable in order to use it in the
+%   definition.  The only way to do that is to store it using an
+%   assignment so we might as well just perform the assignment that we
+%   can actually use in the flat case.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_split:NnTFn #1#2
+  {
+    \exp_after:wN \@@_split_aux:nNTFn
+    \exp_after:wN { \tl_to_str:n {#2} } #1
+  }
+\cs_new_protected:Npn \@@_split_aux:nNTFn #1#2#3
+  {
+    \cs_set:Npn \@@_split_flat:w \@@_split_linked:w ##1
+      \@@_pair:wn #1 \s_@@ ##2 ##3 \s_@@_mark ##4 ##5 \s_@@_stop
+      { ##4 {#3} }
+    \exp_after:wN \@@_split_test:wn #2 \s_@@_mark \use_i:nnn
+      \@@_pair:wn #1 \s_@@ { ? \fi: \@@_split_wrong:Nw #2 }
+      \s_@@_mark \use_ii:nnn
+      \s_@@_stop
+  }
+\cs_new:Npn \@@_split_flat:w { }
+\cs_new_protected:Npn \@@_split_test:wn #1 \s_@@ #2
+  {
+    \if_meaning:w \@@_chk:w #2 \exp_after:wN \@@_split_flat:w \fi:
+    \@@_split_linked:w
+  }
+\cs_new_protected:Npn \@@_split_linked:w #1 \s_@@_stop #2#3 {#3}
+\cs_new_protected:Npn \@@_split_wrong:Nw #1#2 \s_@@_stop #3#4
+  {
+    \prop_show:N #1
+    \cs_gset_eq:NN #1 \c_empty_prop
+    #3
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_get:NnN, \prop_get:NVN, \prop_get:NvN, \prop_get:NeN,
+%     \prop_get:NoN, \prop_get:NxN,
+%     \prop_get:cnN, \prop_get:cVN, \prop_get:cvN, \prop_get:ceN,
+%     \prop_get:coN, \prop_get:cxN,
+%     \prop_get:cnc
+%   }
+% \begin{macro}[TF, tested = m3prop004]
+%   {
+%     \prop_get:NnN, \prop_get:NVN, \prop_get:NvN, \prop_get:NeN,
+%     \prop_get:NoN, \prop_get:NxN,
+%     \prop_get:cnN, \prop_get:cVN, \prop_get:cvN, \prop_get:ceN,
+%     \prop_get:coN, \prop_get:cxN,
+%     \prop_get:cnc
+%   }
+% \begin{macro}{\@@_get:NnnTF}
+% \begin{macro}[EXP]{\@@_get_linked:w, \@@_get_linked_aux:w}
+%   Here we implement both \cs{prop_get:NnN} and its branching version through
+%   \cs{@@_get:NnnTF}.  It receives the prop and key, followed by an assignment
+%   used when the value is found, \meta{true code} to run after the assignment,
+%   and some fall-back \meta{false code} for absent values.  It relies on
+%   \cs{@@_split:NnTFn}.  For a flat prop, the first four arguments of
+%   \cs{@@_split:NnTFn} are used, and run either the assignment~|#3{##3}| and
+%   \meta{true code}~|#4|, or the \meta{false code}~|#5|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_get:NnN #1#2#3
+  {
+    \@@_get:NnnTF #1 {#2}
+      { \tl_set:Nn #3 } { } { \tl_set:Nn #3 { \q_no_value } }
+  }
+\cs_generate_variant:Nn \prop_get:NnN { NV , Nv , Ne , c , cV , cv , ce }
+\cs_generate_variant:Nn \prop_get:NnN { No , Nx , co , cx }
+\cs_generate_variant:Nn \prop_get:NnN { cnc }
+\prg_new_protected_conditional:Npnn \prop_get:NnN #1#2#3 { T , F , TF }
+  {
+    \@@_get:NnnTF #1 {#2}
+      { \tl_set:Nn #3 } \prg_return_true: \prg_return_false:
+  }
+\prg_generate_conditional_variant:Nnn \prop_get:NnN
+  { NV , Nv , Ne , c , cV , cv , ce } { T , F , TF }
+\prg_generate_conditional_variant:Nnn \prop_get:NnN
+  { No , Nx , co , cx } { T , F , TF }
+\prg_generate_conditional_variant:Nnn \prop_get:NnN
+  { cnc } { T , F , TF }
+\cs_new_protected:Npn \@@_get:NnnTF #1#2#3#4#5
+  {
+    \@@_split:NnTFn #1 {#2}
+      { #3 {##2} #4 }
+      {#5}
+      { \exp_after:wN \@@_get_linked:w #1 {#2} {#3} {#4} {#5} }
+  }
+%    \end{macrocode}
+%   For a linked prop we must work a bit: \cs{@@_get_linked:w} is followed by
+%   the expansion of the prop, then by four brace groups: the key~|#4|, the
+%   assignment code~|#5|, \meta{true code}~|#6|, and \meta{false code}~|#7|.  If
+%   the key is present, its value is stored in the token list
+%   \cs[no-index]{@@_}|#2~#4|.  If that token list exists,
+%   \cs{@@_get_linked_aux:w} gets called followed by the expansion of that token
+%   list and we grab as~|#2| the value associated to that key, which we feed to
+%   the assignment code and follow-up code.  If the key is absent the token list
+%   can be \tn{undefined} or \tn{relax}.  In both cases \cs{@@_get_linked_aux:w}
+%   finds an empty brace group as~|#2|, \cs{use_none:n} as~|#4| and the
+%   \meta{false code} as~|#5|.
+%   Note that we made \cs{@@_get_linked:w} and subsequent auxiliaries
+%   expandable, because they are also used in \cs{prop_item:Nn}.
+%    \begin{macrocode}
+\cs_new:Npn \@@_get_linked:w
+    \@@_flatten:w #1 \s_@@ #2#3#4#5#6#7
+  {
+    \if_cs_exist:w @@ ~ #2 ~ \tl_to_str:n {#4} \cs_end:
+      \exp_after:wN \exp_after:wN \exp_after:wN \@@_get_linked_aux:w
+      \cs:w @@ ~ #2 ~ \tl_to_str:n {#4} \exp_after:wN \cs_end:
+    \else:
+      \exp_after:wN \@@_get_linked_aux:w
+    \fi:
+    \s_@@_mark {#5} {#6}
+    \s_@@ { } \s_@@_mark \use_none:n {#7}
+    \s_@@_stop
+  }
+\cs_new:Npn \@@_get_linked_aux:w
+    #1 \s_@@ #2 #3 \s_@@_mark #4 #5 #6 \s_@@_stop { #4 {#2} #5 }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%     \prop_item:Nn, \prop_item:NV, \prop_item:No, \prop_item:Ne,
+%     \prop_item:cn, \prop_item:cV, \prop_item:co, \prop_item:ce
+%   }
+% \begin{macro}[EXP]{\@@_item:nnn}
+%   Getting the value corresponding to a key in a flat property list in an
+%   expandable fashion simply uses \cs{prop_map_tokens:Nn} to go through
+%   the property list.  The auxiliary \cs{@@_item:nnn} receives the
+%   search string~|#1|, the key~|#2| and the value~|#3| and returns as
+%   appropriate.
+%    \begin{macrocode}
+\cs_new:Npn \prop_item:Nn #1#2
+  {
+    \@@_if_flat:NTF #1
+      {
+        \exp_args:NNo \prop_map_tokens:Nn #1
+          {
+            \exp_after:wN \@@_item:nnn
+            \exp_after:wN { \tl_to_str:n {#2} }
+          }
+      }
+      { \exp_after:wN \@@_get_linked:w #1 {#2} \exp_not:n { } { } }
+  }
+\cs_new:Npn \@@_item:nnn #1#2#3
+  {
+    \str_if_eq:eeT {#1} {#2}
+      { \prop_map_break:n { \exp_not:n {#3} } }
+  }
+\cs_generate_variant:Nn \prop_item:Nn { NV , No , Ne , c , cV , co , ce }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Removing data from property lists}
+%
+% \begin{macro}
+%   {
+%     \@@_pop:NnNNnTF,
+%     \@@_pop_linked:wnNNnTF, \@@_pop_linked:NNNn,
+%     \@@_pop_linked:w,
+%     \@@_pop_linked_prev:w, \@@_pop_linked_next:w
+%   }
+%   This auxiliary is used by both the \cs[no-index]{prop_pop} family and
+%   the \cs[no-index]{prop_remove} family of functions.
+%   It receives a \meta{prop} and a \Arg{key}, three assignment functions
+%   (\cs{tl_set:Nn} \cs{cs_set_eq:NN} \cs{cs_set_nopar:Npe} or their global
+%   versions), then \Arg{code} \Arg{true code} \Arg{false code}.
+%
+%   For a flat prop, split it.  If the \meta{key} is there, reconstruct the rest
+%   of the prop from the two extracts |##2| |##4| and assign using
+%   \cs[index=tl_set:Nn]{tl_(g)set:Nn}, then run \meta{code} \Arg{value} with
+%   the \meta{value} found, and run the \meta{true code}.  If the \meta{key} is
+%   absent, run the \meta{false code}.
+%
+%   For a linked prop, the removal is done by \cs{@@_pop_linked:wnNNnTF}, which
+%   removes the key--value pair from the doubly-linked list and runs its last
+%   three arguments \Arg{code} \Arg{true code} \Arg{false code} depending on
+%   whether the key--value is found, in the same way as for flat props.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_pop:NnNNnTF #1#2#3#4#5#6#7
+  {
+    \@@_split:NnTFn #1 {#2}
+      {
+        #4 #1 { \exp_not:n { \s_@@ \@@_chk:w ##1 ##3 } }
+        #5 {##2}
+        #6
+      }
+      {#7}
+      {
+        \exp_after:wN \@@_pop_linked:wnNNnTF #1 {#2}
+          #3 #4 {#5} {#6} {#7}
+      }
+  }
+%    \end{macrocode}
+%   The next auxiliary \cs{@@_pop_linked:wnNNnTF}, together with the |NNNn|
+%   auxiliary, checks if the key is present in the \meta{linked prop}, then the
+%   corresponding value (if present) is passed as a braced argument to the
+%   \meta{code} and the \meta{true code} or \meta{false code} is run as
+%   appropriate.  Before that, there are also three assignments: the token lists
+%   for the previous key and next key are made to point to each other, cf.\
+%   \cs{@@_pop_linked:w}, and the token list for the given key is made
+%   undefined.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_pop_linked:wnNNnTF
+    \@@_flatten:w #1 \s_@@ #2#3#4#5#6#7
+  {
+    \if_cs_exist:w @@ ~ #2 ~ \tl_to_str:n {#4} \cs_end:
+      \exp_after:wN \@@_pop_linked:NNNn
+      \cs:w @@ ~ #2 ~ \tl_to_str:n {#4} \cs_end:
+      #5 #6 {#7}
+    \else:
+      \exp_after:wN \use_iii:nnn
+    \fi:
+    \use_i:nn
+  }
+\cs_new_protected:Npn \@@_pop_linked:NNNn #1#2#3#4
+  {
+    \if_meaning:w \scan_stop: #1
+      \exp_after:wN \exp_after:wN \exp_after:wN \use_iii:nnn
+    \else:
+      \exp_after:wN \@@_pop_linked:w #1 #1 #2 #3 {#4}
+    \fi:
+  }
+\cs_new_protected:Npn \@@_pop_linked:w
+    \use_none:n #1#2 \s_@@ #3#4#5#6#7#8
+  {
+    #6 #5 \tex_undefined:D
+    #7 #1
+      {
+        \exp_after:wN \@@_pop_linked_prev:w #1
+        \exp_not:N #4
+      }
+    #7 #4
+      {
+        \exp_not:n { \use_none:n #1 }
+        \exp_not:f { \exp_after:wN \@@_pop_linked_next:w #4 }
+      }
+    #8 {#3}
+  }
+\cs_new:Npn \@@_pop_linked_prev:w #1 \s_@@ #2#3
+  { \exp_not:n { #1 \s_@@ {#2} } }
+\cs_new:Npn \@@_pop_linked_next:w \use_none:n #1 { \exp_stop_f: }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_remove:Nn, \prop_remove:NV, \prop_remove:Ne,
+%     \prop_remove:cn, \prop_remove:cV, \prop_remove:ce
+%   }
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_gremove:Nn, \prop_gremove:NV, \prop_gremove:Ne,
+%     \prop_gremove:cn, \prop_gremove:cV, \prop_gremove:ce
+%   }
+%   Deleting from a property relies on \cs{@@_pop:NnNNnTF}.  The three
+%   assignment functions are suitably local or global.  The last three arguments
+%   are \cs{use_none:n} and two empty brace groups: if the key is found we get
+%   \cs{use_none:n} \Arg{key} \meta{empty}, which expands to nothing, and
+%   otherwise we just get \meta{empty}.  The auxiliary takes care of actually
+%   removing the entry from the prop.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_remove:Nn #1#2
+  {
+    \@@_pop:NnNNnTF #1 {#2}
+      \cs_set_eq:NN \cs_set_nopar:Npe
+      \use_none:n { } { }
+  }
+\cs_new_protected:Npn \prop_gremove:Nn #1#2
+  {
+    \@@_pop:NnNNnTF #1 {#2}
+      \cs_gset_eq:NN \cs_gset_nopar:Npe
+      \use_none:n { } { }
+  }
+\cs_generate_variant:Nn \prop_remove:Nn  { NV , Ne , c , cV , ce }
+\cs_generate_variant:Nn \prop_gremove:Nn { NV , Ne , c , cV , ce }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_pop:NnN, \prop_pop:NVN, \prop_pop:NoN,
+%     \prop_pop:cnN, \prop_pop:cVN, \prop_pop:coN,
+%     \prop_gpop:NnN, \prop_gpop:NVN, \prop_gpop:NoN,
+%     \prop_gpop:cnN, \prop_gpop:cVN, \prop_gpop:coN,
+%   }
+% \begin{macro}[TF, tested = m3prop004]
+%   {
+%     \prop_pop:NnN, \prop_pop:NVN, \prop_pop:NoN,
+%     \prop_pop:cnN, \prop_pop:cVN, \prop_pop:coN,
+%     \prop_gpop:NnN, \prop_gpop:NVN, \prop_gpop:NoN,
+%     \prop_gpop:cnN, \prop_gpop:cVN, \prop_gpop:coN,
+%   }
+%   Popping a value is almost the same, but the value found is kept.
+%   For the non-branching version, we additionally set the target token list to
+%   \cs{q_no_value}, while for the branching version we must produce
+%   \cs{prg_return_true:} or \cs{prg_return_false:}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_pop:NnN #1#2#3
+  {
+    \@@_pop:NnNNnTF #1 {#2}
+      \cs_set_eq:NN \cs_set_nopar:Npe
+      { \tl_set:Nn #3 } { } { \tl_set:Nn #3 { \q_no_value } }
+  }
+\cs_new_protected:Npn \prop_gpop:NnN #1#2#3
+  {
+    \@@_pop:NnNNnTF #1 {#2}
+      \cs_gset_eq:NN \cs_gset_nopar:Npe
+      { \tl_set:Nn #3 } { } { \tl_set:Nn #3 { \q_no_value } }
+  }
+\cs_generate_variant:Nn \prop_pop:NnN  {     NV , No }
+\cs_generate_variant:Nn \prop_pop:NnN  { c , cV , co }
+\cs_generate_variant:Nn \prop_gpop:NnN {     NV , No }
+\cs_generate_variant:Nn \prop_gpop:NnN { c , cV , co }
+\prg_new_protected_conditional:Npnn \prop_pop:NnN #1#2#3 { T , F , TF }
+  {
+    \@@_pop:NnNNnTF #1 {#2}
+      \cs_set_eq:NN \cs_set_nopar:Npe
+      { \tl_set:Nn #3 } \prg_return_true: \prg_return_false:
+  }
+\prg_new_protected_conditional:Npnn \prop_gpop:NnN #1#2#3 { T , F , TF }
+  {
+    \@@_pop:NnNNnTF #1 {#2}
+      \cs_gset_eq:NN \cs_gset_nopar:Npe
+      { \tl_set:Nn #3 } \prg_return_true: \prg_return_false:
+  }
+\prg_generate_conditional_variant:Nnn \prop_pop:NnN
+  { NV , No , c , cV , co } { T , F , TF }
+\prg_generate_conditional_variant:Nnn \prop_gpop:NnN
+  { NV , No , c , cV , co } { T , F , TF }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Adding data to property lists}
+%
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_put:Nnn,  \prop_put:NnV,  \prop_put:Nnv,  \prop_put:Nne,
+%     \prop_put:NVn,  \prop_put:NVV,  \prop_put:NVv,  \prop_put:NVe,
+%     \prop_put:Nvn,  \prop_put:NvV,  \prop_put:Nvv,  \prop_put:Nve,
+%     \prop_put:Nen,  \prop_put:NeV,  \prop_put:Nev,  \prop_put:Nee,
+%     \prop_put:Nno,  \prop_put:Non,  \prop_put:Noo,
+%     \prop_put:Nnx,  \prop_put:NVx,  \prop_put:NxV,  \prop_put:Nxx,
+%     \prop_put:cnn,  \prop_put:cnV,  \prop_put:cnv,  \prop_put:cne,
+%     \prop_put:cVn,  \prop_put:cVV,  \prop_put:cVv,  \prop_put:cVe,
+%     \prop_put:cvn,  \prop_put:cvV,  \prop_put:cvv,  \prop_put:cve,
+%     \prop_put:cen,  \prop_put:ceV,  \prop_put:cev,  \prop_put:cee,
+%     \prop_put:cno,  \prop_put:con,  \prop_put:coo,
+%     \prop_put:cnx,  \prop_put:cVx,  \prop_put:cxV,  \prop_put:cxx
+%   }
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_gput:Nnn, \prop_gput:NnV, \prop_gput:Nnv, \prop_gput:Nne,
+%     \prop_gput:NVn, \prop_gput:NVV, \prop_gput:NVv, \prop_gput:NVe,
+%     \prop_gput:Nvn, \prop_gput:NvV, \prop_gput:Nvv, \prop_gput:Nve,
+%     \prop_gput:Nen, \prop_gput:NeV, \prop_gput:Nev, \prop_gput:Nee,
+%     \prop_gput:Nno, \prop_gput:Non, \prop_gput:Noo,
+%     \prop_gput:Nnx, \prop_gput:NVx, \prop_gput:NxV, \prop_gput:Nxx,
+%     \prop_gput:cnn, \prop_gput:cnV, \prop_gput:cnv, \prop_gput:cne,
+%     \prop_gput:cVn, \prop_gput:cVV, \prop_gput:cVv, \prop_gput:cVe,
+%     \prop_gput:cvn, \prop_gput:cvV, \prop_gput:cvv, \prop_gput:cve,
+%     \prop_gput:cen, \prop_gput:ceV, \prop_gput:cev, \prop_gput:cee,
+%     \prop_gput:cno, \prop_gput:con, \prop_gput:coo,
+%     \prop_gput:cnx, \prop_gput:cVx, \prop_gput:cxV, \prop_gput:cxx
+%   }
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \prop_put_if_not_in:Nnn, \prop_put_if_not_in:NnV, \prop_put_if_not_in:Nnv, \prop_put_if_not_in:Nne,
+%     \prop_put_if_not_in:NVn, \prop_put_if_not_in:NVV, \prop_put_if_not_in:NVv, \prop_put_if_not_in:NVe,
+%     \prop_put_if_not_in:Nvn, \prop_put_if_not_in:NvV, \prop_put_if_not_in:Nvv, \prop_put_if_not_in:Nve,
+%     \prop_put_if_not_in:Nen, \prop_put_if_not_in:NeV, \prop_put_if_not_in:Nev, \prop_put_if_not_in:Nee,
+%     \prop_put_if_not_in:cnn, \prop_put_if_not_in:cnV, \prop_put_if_not_in:cnv, \prop_put_if_not_in:cne,
+%     \prop_put_if_not_in:cVn, \prop_put_if_not_in:cVV, \prop_put_if_not_in:cVv, \prop_put_if_not_in:cVe,
+%     \prop_put_if_not_in:cvn, \prop_put_if_not_in:cvV, \prop_put_if_not_in:cvv, \prop_put_if_not_in:cve,
+%     \prop_put_if_not_in:cen, \prop_put_if_not_in:ceV, \prop_put_if_not_in:cev, \prop_put_if_not_in:cee,
+%     \prop_gput_if_not_in:Nnn, \prop_gput_if_not_in:NnV, \prop_gput_if_not_in:Nnv, \prop_gput_if_not_in:Nne,
+%     \prop_gput_if_not_in:NVn, \prop_gput_if_not_in:NVV, \prop_gput_if_not_in:NVv, \prop_gput_if_not_in:NVe,
+%     \prop_gput_if_not_in:Nvn, \prop_gput_if_not_in:NvV, \prop_gput_if_not_in:Nvv, \prop_gput_if_not_in:Nve,
+%     \prop_gput_if_not_in:Nen, \prop_gput_if_not_in:NeV, \prop_gput_if_not_in:Nev, \prop_gput_if_not_in:Nee,
+%     \prop_gput_if_not_in:cnn, \prop_gput_if_not_in:cnV, \prop_gput_if_not_in:cnv, \prop_gput_if_not_in:cne,
+%     \prop_gput_if_not_in:cVn, \prop_gput_if_not_in:cVV, \prop_gput_if_not_in:cVv, \prop_gput_if_not_in:cVe,
+%     \prop_gput_if_not_in:cvn, \prop_gput_if_not_in:cvV, \prop_gput_if_not_in:cvv, \prop_gput_if_not_in:cve,
+%     \prop_gput_if_not_in:cen, \prop_gput_if_not_in:ceV, \prop_gput_if_not_in:cev, \prop_gput_if_not_in:cee
+%   }
+% \begin{macro}[tested = m3prop002]
+%   {
+%     \@@_put:NNNnn, \@@_put_linked:wnNN,
+%     \@@_put_linked:NNNN, \@@_put_linked_old:w,
+%     \@@_put_linked_new:w
+%   }
+%   All of the \cs[no-index]{prop_(g)put(_if_new):Nnn} functions are
+%   based on the same auxiliary, which receives \meta{code} and an
+%   \enquote{assignment}, followed by \meta{prop} \Arg{key} \Arg{new
+%   value}.  The
+%   assignment \cs[index=cs_set_nopar:Npe]{cs_(g)set_nopar:Npe} is the
+%   primitive assignment without any checking: in the case of linked
+%   props it is applied to individual
+%   pieces of the linked prop, which are typically not yet defined.
+%   Debugging the scope of the variable is done at a higher level by
+%   letting \pkg{l3debug} change \cs{prop_put:Nnn} and friends.  This
+%   allows other \pkg{l3prop} commands to directly call the underlying
+%   auxiliary to skip this checking step and avoid getting multiple
+%   error messages for the same error.
+%   The \meta{code} (empty for |put| and \cs{use_none:nnn} for
+%   |put_if_not_in|) is placed before the assignment in cases where the key
+%   is already present, in order to suppress the assignment in the
+%   |put_if_not_in| case.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_put:Nnn
+  { \@@_put:nNNnn { } \cs_set_nopar:Npe }
+\cs_new_protected:Npn \prop_gput:Nnn
+  { \@@_put:nNNnn { } \cs_gset_nopar:Npe }
+\cs_new_protected:Npn \prop_put_if_not_in:Nnn
+  { \@@_put:nNNnn \use_none:nnn \cs_set_nopar:Npe }
+\cs_new_protected:Npn \prop_gput_if_not_in:Nnn
+  { \@@_put:nNNnn \use_none:nnn \cs_gset_nopar:Npe }
+\cs_generate_variant:Nn \prop_put:Nnn
+  {
+         NnV , Nnv , Nne , NV , NVV , NVv , NVe ,
+    Nv , NvV , Nvv , Nve , Ne , NeV , Nev , Nee
+  }
+\cs_generate_variant:Nn \prop_put:Nnn
+  { Nno , No , Noo , Nnx , NVx , NxV , Nxx }
+\cs_generate_variant:Nn \prop_put:Nnn
+  {
+    c  , cnV , cnv , cne , cV , cVV , cVv , cVe ,
+    cv , cvV , cvv , cve , ce , ceV , cev , cee
+  }
+\cs_generate_variant:Nn \prop_put:Nnn
+  { cno , co , coo , cnx , cVx , cxV , cxx }
+\cs_generate_variant:Nn \prop_gput:Nnn
+  {
+         NnV , Nnv , Nne , NV , NVV , NVv , NVe ,
+    Nv , NvV , Nvv , Nve , Ne , NeV , Nev , Nee
+  }
+\cs_generate_variant:Nn \prop_gput:Nnn
+  { Nno , No , Noo , Nnx , NVx , NxV , Nxx }
+\cs_generate_variant:Nn \prop_gput:Nnn
+  {
+    c  , cnV , cnv , cne , cV , cVV , cVv , cVe ,
+    cv , cvV , cvv , cve , ce , ceV , cev , cee
+  }
+\cs_generate_variant:Nn \prop_gput:Nnn
+  { cno , co , coo , cnx , cVx , cxV , cxx }
+\cs_generate_variant:Nn \prop_put_if_not_in:Nnn
+  {
+         NnV , Nnv , Nne , NV , NVV , NVv , NVe ,
+    Nv , NvV , Nvv , Nve , Ne , NeV , Nev , Nee ,
+    c  , cnV , cnv , cne , cV , cVV , cVv , cVe ,
+    cv , cvV , cvv , cve , ce , ceV , cev , cee
+  }
+\cs_generate_variant:Nn \prop_gput_if_not_in:Nnn
+  {
+         NnV , Nnv , Nne , NV , NVV , NVv , NVe ,
+    Nv , NvV , Nvv , Nve , Ne , NeV , Nev , Nee ,
+    c  , cnV , cnv , cne , cV , cVV , cVv , cVe ,
+    cv , cvV , cvv , cve , ce , ceV , cev , cee
+  }
+%    \end{macrocode}
+%   Since the true branch of \cs{@@_split:NnTFn} is used as the
+%   replacement text of an internal macro, and since the \meta{key} and
+%   new \meta{value} may contain arbitrary tokens, it is not safe to
+%   include them in the argument of \cs{@@_split:NnTFn}.  We thus start
+%   by storing in \cs{l_@@_internal_tl} tokens which (after
+%   \texttt{x}-expansion) encode the key--value pair.  This variable can
+%   safely be used in \cs{@@_split:NnTFn}.  For a flat prop, if the
+%   \meta{key} was absent, append the new key--value to the list;
+%   otherwise concatenate the extracts |##2| and |##4| with the new
+%   key--value pair \cs{l_@@_internal_tl}.  The updated entry is placed
+%   at the same spot as the original \meta{key} in the property list,
+%   preserving the order of entries.  For a linked prop, call
+%   \cs{@@_put_linked:wnNN}, which constructs the control sequence in
+%   which we will place the new value.  If it matches \cs{scan_stop:}
+%   then the key was not yet there and we add it using
+%   \cs{@@_put_linked_new:w}, otherwise it was already there and we use
+%   \cs{@@_put_linked_old:w}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_put:nNNnn #1#2#3#4#5
+  {
+    \tl_set:Nn \l_@@_internal_tl
+      {
+        \exp_not:N \@@_pair:wn \tl_to_str:n {#4}
+        \s_@@ { \exp_not:n {#5} }
+      }
+    \@@_split:NnTFn #3 {#4}
+      {
+        #1 #2 #3
+          {
+            \s_@@ \@@_chk:w \exp_not:n {##1}
+            \l_@@_internal_tl \exp_not:n {##3}
+          }
+      }
+      { #2 #3 { \exp_not:o {#3} \l_@@_internal_tl } }
+      { \exp_after:wN \@@_put_linked:wnnN #3 {#4} {#1} #2 }
+  }
+\cs_new_protected:Npn \@@_put_linked:wnnN
+    \@@_flatten:w #1 \s_@@ #2#3#4
+  {
+    \exp_after:wN \@@_put_linked:NNnN
+    \cs:w @@ ~ #2 ~ \tl_to_str:n {#4} \cs_end:
+    #1
+  }
+\cs_new_protected:Npn \@@_put_linked:NNnN #1#2#3#4
+  {
+    \if_meaning:w \scan_stop: #1
+      \exp_after:wN \@@_put_linked_new:w #2 #1 #2 #4
+    \else:
+      \exp_after:wN \@@_put_linked_old:w #1 { #3 #4 #1 }
+    \fi:
+  }
+%    \end{macrocode}
+%   To add a new entry, \cs{@@_put_linked_new:w} receives the expansion
+%   of the end-pointer, namely \cs{use_none:n} \meta{last key pointer},
+%   followed by the new key pointer~|#2|, the end pointer~|#3|, and an
+%   assignment function~|#4|.  Set up the doubly-linked list in the
+%   order |#1|, |#2|, |#3|, placing the key--value pair
+%   \cs{l_@@_internal_tl} in~|#2|.  To replace an old entry,
+%   \cs{@@_put_linked_old:w} receives the expansion of that entry, and
+%   it reassigns it (|#5|) using the assignment~|#6|, by simply
+%   replacing the payload |#2| \cs{s_@@} |#3| by \cs{l_@@_internal_tl}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_put_linked_new:w
+    \use_none:n #1#2#3#4
+  {
+    #4 #1
+      {
+        \exp_after:wN \@@_pop_linked_prev:w #1
+        \exp_not:N #2
+      }
+    #4 #2
+      {
+        \exp_not:n { \use_none:n #1 }
+        \l_@@_internal_tl
+        \exp_not:N #3
+      }
+    #4 #3 { \exp_not:n { \use_none:n #2 } }
+  }
+\cs_new_protected:Npn \@@_put_linked_old:w
+    \use_none:n #1#2 \s_@@ #3#4#5
+  {
+    #5
+      {
+        \exp_not:n { \use_none:n #1 }
+        \l_@@_internal_tl
+        \exp_not:N #4
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Property list conditionals}
+%
+% \begin{macro}[pTF, tested = m3prop004]{\prop_if_exist:N, \prop_if_exist:c}
+%   Copies of the \texttt{cs} functions defined in \pkg{l3basics}.
+%    \begin{macrocode}
+\prg_new_eq_conditional:NNn \prop_if_exist:N \cs_if_exist:N
+  { TF , T , F , p }
+\prg_new_eq_conditional:NNn \prop_if_exist:c \cs_if_exist:c
+  { TF , T , F , p }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[pTF, tested = m3prop003]{\prop_if_empty:N, \prop_if_empty:c}
+% \begin{macro}{\@@_if_empty_return:w}
+%   A flat property list is empty if it matches \cs{c_empty_prop}.  A linked
+%   property list is empty if its second token (the end pointer) and last token
+%   (the first key pointer) are equal.  There cannot be false positives because
+%   the end pointer takes the form \cs{use_none:n} \meta{pointer} while the
+%   other pointers have more elaborate structure.  The subtle code branch here
+%   is when a non-empty flat property list is given: then \cs{@@_if_empty:w}
+%   reads the whole property list as~|#1| and |#2|, |#3|, |#4| are |2|, |3|,
+%   |4|, respectively.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \prop_if_empty:N #1 { p , T , F , TF }
+  {
+    \if_meaning:w #1 \c_empty_prop
+      \prg_return_true:
+    \else:
+      \exp_after:wN \@@_if_empty_return:w #1
+        \@@_flatten:w 2 \s_@@ 34 \s_@@_stop
+    \fi:
+  }
+\cs_new:Npn \@@_if_empty_return:w
+    #1 \@@_flatten:w #2 \s_@@ #3#4#5 \s_@@_stop
+  {
+    \if_meaning:w #2 #4
+      \prg_return_true:
+    \else:
+      \prg_return_false:
+    \fi:
+  }
+\prg_generate_conditional_variant:Nnn \prop_if_empty:N
+  { c } { p , T , F , TF }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[pTF, tested = m3prop003]
+%   {
+%     \prop_if_in:Nn, \prop_if_in:NV, \prop_if_in:Ne, \prop_if_in:No,
+%     \prop_if_in:cn, \prop_if_in:cV, \prop_if_in:ce, \prop_if_in:co
+%   }
+% \begin{macro}[EXP]{\@@_if_in_flat:nnn}
+%   For a linked prop, use \cs{@@_get_linked:w} to look up whether the control
+%   sequence constructed from the prefix and the sought-after key exists; this
+%   auxiliary calls \cs{use_none:n} \Arg{value} \cs{prg_return_true:} if the key
+%   is found, and otherwise \cs{prg_return_false:}.  For a flat prop, testing
+%   expandably if a key is there requires to go through the key--value pairs one
+%   by one.  This is rather slow, and a faster test would be
+%   \begin{verbatim}
+%     \prg_new_protected_conditional:Npnn \prop_if_in:Nn #1 #2
+%       {
+%         \@@_split:NnTFn #1 {#2}
+%           { \prg_return_true: }
+%           { \prg_return_false: }
+%           { ... }
+%       }
+%   \end{verbatim}
+%   but \cs{@@_split:NnTFn} is non-expandable.
+%   Instead, we use \cs{prop_map_tokens:Nn} to compare the search key to
+%   each key in turn using \cs{str_if_eq:ee}, which is expandable.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \prop_if_in:Nn #1#2 { p , T , F , TF }
+  {
+    \@@_if_flat:NTF #1
+      {
+        \exp_after:wN \prop_map_tokens:Nn \exp_after:wN #1
+          {
+            \exp_after:wN \@@_if_in_flat:nnn
+            \exp_after:wN { \tl_to_str:n {#2} }
+          }
+        \prg_return_false:
+      }
+      {
+        \exp_after:wN \@@_get_linked:w #1 {#2}
+        \use_none:n \prg_return_true: \prg_return_false:
+      }
+  }
+\cs_new:Npn \@@_if_in_flat:nnn #1#2#3
+  {
+    \str_if_eq:eeT {#1} {#2}
+      { \prop_map_break:n { \use_i:nn \prg_return_true: } }
+  }
+\prg_generate_conditional_variant:Nnn \prop_if_in:Nn
+  { NV , Ne , No , c , cV , ce , co } { p , T , F , TF }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Mapping over property lists}
+%
+% \begin{macro}[tested = m3prop003]
+%   {
+%     \prop_map_function:NN, \prop_map_function:Nc,
+%     \prop_map_function:cN, \prop_map_function:cc
+%   }
+% \begin{macro}{\@@_map_function:Nw}
+%   We first |f|-expand to flatten~|#1| in case it was a linked list.
+%   The \cs{use_i:nnn} removes the leading \cs{s_@@} \cs{@@_chk:w} of
+%   the flattened prop.
+%   The even-numbered arguments of \cs{@@_map_function:Nw} are keys,
+%   hence have string catcodes, except at the end where they are
+%   \cs{fi:} \cs{prop_map_break:}.  The \cs{fi:} ends the \cs{if_false:}
+%   |#|\meta{even} \cs{fi:} construction and we jump out of the loop.
+%   No need for any quark test.
+%    \begin{macrocode}
+\cs_new:Npn \prop_map_function:NN #1#2
+  {
+    \exp_last_unbraced:Nnf
+      \use_i:nnn { \@@_map_function:Nw #2 } #1
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \prg_break_point:Nn \prop_map_break: { }
+  }
+\cs_new:Npn \@@_map_function:Nw #1
+    \@@_pair:wn #2 \s_@@ #3
+    \@@_pair:wn #4 \s_@@ #5
+    \@@_pair:wn #6 \s_@@ #7
+    \@@_pair:wn #8 \s_@@ #9
+  {
+    \if_false: #2 \fi: #1 {#2} {#3}
+    \if_false: #4 \fi: #1 {#4} {#5}
+    \if_false: #6 \fi: #1 {#6} {#7}
+    \if_false: #8 \fi: #1 {#8} {#9}
+    \@@_map_function:Nw #1
+  }
+\cs_generate_variant:Nn \prop_map_function:NN { Nc , c , cc }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[tested = m3prop003]{\prop_map_inline:Nn, \prop_map_inline:cn}
+%   Mapping in line requires a nesting level counter.  Store the current
+%   definition of \cs{@@_pair:wn}, and define it anew.  At the end of
+%   the loop, revert to the earlier definition.  Note that besides pairs
+%   of the form \cs{@@_pair:wn} \meta{key} \cs{s_@@} \Arg{value}, there
+%   are a leading and a trailing tokens, but both are equal to
+%   \cs{scan_stop:}, hence have no effect in such inline mapping.
+%   Such \cs{scan_stop:} could have affected ligatures if they appeared
+%   during the mapping.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_map_inline:Nn #1#2
+  {
+    \cs_gset_eq:cN
+      { @@_map_ \int_use:N \g__kernel_prg_map_int :wn } \@@_pair:wn
+    \int_gincr:N \g__kernel_prg_map_int
+    \cs_gset_protected:Npn \@@_pair:wn ##1 \s_@@ ##2 {#2}
+    \exp_last_unbraced:Nf \use_none:nn #1
+    \prg_break_point:Nn \prop_map_break:
+      {
+        \int_gdecr:N \g__kernel_prg_map_int
+        \cs_gset_eq:Nc \@@_pair:wn
+          { @@_map_ \int_use:N \g__kernel_prg_map_int :wn }
+      }
+  }
+\cs_generate_variant:Nn \prop_map_inline:Nn { c }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[rEXP]{\prop_map_tokens:Nn, \prop_map_tokens:cn}
+% \begin{macro}{\@@_map_tokens:nw}
+%   The mapping is very similar to \cs{prop_map_function:NN}.
+%   The odd construction
+%   |\use:n {#1}| allows |#1| to contain any token without interfering
+%   with \cs{prop_map_break:}.  The loop stops when the \meta{key}
+%   between \cs{@@_pair:wn} and \cs{s_@@} is \cs{fi:}
+%   \cs{prop_map_break:} instead of being a string.
+%    \begin{macrocode}
+\cs_new:Npn \prop_map_tokens:Nn #1#2
+  {
+    \exp_last_unbraced:Nnf
+      \use_i:nnn { \@@_map_tokens:nw {#2} } #1
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \@@_pair:wn \fi: \prop_map_break: \s_@@ { }
+    \prg_break_point:Nn \prop_map_break: { }
+  }
+\cs_new:Npn \@@_map_tokens:nw #1
+    \@@_pair:wn #2 \s_@@ #3
+    \@@_pair:wn #4 \s_@@ #5
+    \@@_pair:wn #6 \s_@@ #7
+    \@@_pair:wn #8 \s_@@ #9
+  {
+    \if_false: #2 \fi: \use:n {#1} {#2} {#3}
+    \if_false: #4 \fi: \use:n {#1} {#4} {#5}
+    \if_false: #6 \fi: \use:n {#1} {#6} {#7}
+    \if_false: #8 \fi: \use:n {#1} {#8} {#9}
+    \@@_map_tokens:nw {#1}
+  }
+\cs_generate_variant:Nn \prop_map_tokens:Nn { c }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%
+% \begin{macro}[tested = m3prop003]{\prop_map_break:}
+% \begin{macro}[tested = m3prop003]{\prop_map_break:n}
+%   The break statements are based on the general \cs{prg_map_break:Nn}.
+%    \begin{macrocode}
+\cs_new:Npn \prop_map_break:
+  { \prg_map_break:Nn \prop_map_break: { } }
+\cs_new:Npn \prop_map_break:n
+  { \prg_map_break:Nn \prop_map_break: }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Uses of mapping over property lists}
+%
+% \begin{macro}[EXP]{\prop_count:N, \prop_count:c}
+% \begin{macro}[EXP]{\@@_count:nn}
+%   Counting the key--value pairs in a property list is done using the
+%   same approach as for other count functions: turn each entry into a
+%   \texttt{+1} then use integer evaluation to actually do the
+%   mathematics.
+%    \begin{macrocode}
+\cs_new:Npn \prop_count:N #1
+  {
+    \int_eval:n
+      {
+        0
+        \prop_map_function:NN #1 \@@_count:nn
+      }
+  }
+\cs_new:Npn \@@_count:nn #1#2 { + 1 }
+\cs_generate_variant:Nn \prop_count:N { c }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[EXP]{\prop_to_keyval:N}
+% \begin{macro}[EXP]
+%   {\@@_to_keyval_exp_after:wN, \@@_to_keyval:nn, \@@_to_keyval:nnw}
+%   Each property name and value pair will be returned in the form
+%   \verb*| |\marg{name}\verb*|= |\marg{value}. As one of the main use cases for
+%   this macro is to pass the \meta{property list} on to a key--value parser, we
+%   have to make sure that the behaviour is as good as possible. Using a space
+%   before the opening brace we get the correct brace stripping behaviour for
+%   most of the key--value parsers available in \LaTeX{}.
+%   Iterate over the
+%   \meta{property list} and remove the leading comma afterwards. Only the value
+%   has to be protected in \cs{__kernel_exp_not:w} as the property name is
+%   always a string. After the loop the leading comma is removed by
+%   \cs{use_none:n} and afterwards \cs{__kernel_exp_not:w} eventually finds the
+%   opening brace of its argument.
+%    \begin{macrocode}
+\cs_new:Npn \prop_to_keyval:N #1
+  {
+    \__kernel_exp_not:w
+      \prop_if_empty:NTF #1
+        { {} }
+        {
+          \exp_after:wN \exp_after:wN \exp_after:wN
+          {
+            \tex_expanded:D
+              {
+                \exp_not:N \use_none:n
+                \prop_map_function:NN #1 \@@_to_keyval:nn
+              }
+          }
+        }
+  }
+\cs_new:Npn \@@_to_keyval:nn #1#2
+  { , ~ {#1} =~ { \__kernel_exp_not:w {#2} } }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Viewing property lists}
+%
+% \begin{macro}[tested = m3show001]
+%   {\prop_show:N, \prop_show:c, \prop_log:N, \prop_log:c}
+% \begin{macro}{\@@_show:NN, \@@_show_finally:NNn, \@@_show_prepare:w, \@@_show_loop:NNw, \@@_show_bad_name:NNN, \@@_show_end:NNN, \@@_show_loop_key:wNNN}
+% \begin{macro}[rEXP]{\@@_show_flat:w, \@@_show_linked:w}
+%   Experience shows one source of problems is very hard to debug: when
+%   a data structure such as a |seq| or~|prop| gets corrupted.  In the
+%   past, \cs{prop_show:N} would in some cases happily show items of
+%   such a |prop|, even though other more demanding \pkg{l3prop}
+%   functions would choke.  It is thus best to make \cs{prop_show:N}
+%   check very thoroughly the structure and flag issues, even though
+%   that is very painful for linked props.  Throughout the code below,
+%   we strive to remain as safe as possible, but in the explanations we
+%   only state what the arguments are when the prop is correctly formed,
+%   rather than saying at every step that various arguments can be
+%   arbitrary junk, made safe by using \cs{tl_to_str:n} generously.
+%
+%   The general \cs{__kernel_chk_tl_type:NnnT} checks that its first
+%   argument is a token list, and if it is, then it \texttt{e}-expands
+%   its second argument and compares with the contents of its first
+%   argument.  Thus, within this \texttt{e}-expansion it is safe to use
+%   \cs{@@_if_flat:NTF} to check if the prop is flat or linked.  In the
+%   flat case we simply reconstruct the expected structure using
+%   \cs{@@_show_flat:w}, which loops through the prop and correctly
+%   turns all keys to strings for instance.  In the linked case, we use
+%   \cs{@@_show_linked:w}, which ensures the form \cs{@@_flatten:w}
+%   \cs[no-index]{@@~\meta{prefix}} \cs{s_@@} \Arg{prefix} \meta{rest},
+%   where \meta{prefix} is made into a string and \meta{rest} cannot be
+%   a brace group or multiple tokens since \cs{@@_show_linked:w} would
+%   in such cases give a different result from the original token list.
+%    \begin{macrocode}
+\cs_new_protected:Npn \prop_show:N { \@@_show:NN \msg_show:nneeee }
+\cs_generate_variant:Nn \prop_show:N { c }
+\cs_new_protected:Npn \prop_log:N { \@@_show:NN \msg_log:nneeee }
+\cs_generate_variant:Nn \prop_log:N { c }
+\cs_new_protected:Npn \@@_show:NN #1#2
+  {
+    \__kernel_chk_tl_type:NnnT #2 { prop }
+      {
+        \@@_if_flat:NTF #2
+          {
+            \s_@@ \@@_chk:w
+            \exp_after:wN \@@_show_flat:w #2
+            \s_@@ { }
+            \@@_pair:wn \q_@@_recursion_tail \s_@@ { }
+            \q_@@_recursion_stop
+          }
+          { \exp_after:wN \@@_show_linked:w #2 \s_@@ ! ? \s_@@_stop }
+      }
+      {
+        \@@_if_flat:NTF #2
+          { \@@_show_finally:NNn #1 #2 { flat } }
+          {
+            \tl_set:Nn \l_@@_internal_tl { #1 #2 }
+            \exp_after:wN \@@_show_prepare:w #2 #2
+          }
+      }
+  }
+\cs_new:Npn \@@_show_flat:w #1 \@@_pair:wn #2 \s_@@ #3
+  {
+    \@@_if_recursion_tail_stop:n {#2}
+    \exp_not:N \@@_pair:wn \tl_to_str:n {#2} \s_@@ \exp_not:n { {#3} }
+    \@@_show_flat:w
+  }
+\cs_new:Npn \@@_show_linked:w #1 \s_@@ #2#3#4 \s_@@_stop
+  {
+    \exp_not:N \@@_flatten:w
+    \exp_not:c { @@ ~ \tl_to_str:n {#2} }
+    \s_@@ { \tl_to_str:n {#2} }
+    \exp_not:n {#3}
+  }
+%    \end{macrocode}
+%   For flat props we are done by using \cs{msg_show:nneeee} or
+%   \cs{msg_log:nneeee}.  The auxiliary \cs{@@_show_finally:NNn} is
+%   eventually also used in the linked case after some more tests.  To
+%   avoid having to bring along the message function and the property
+%   list, we store them into \cs{l_@@_internal_tl}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_finally:NNn #1#2#3
+  {
+    #1 { prop } { show }
+      { \token_to_str:N #2 }
+      { \prop_map_function:NN #2 \msg_show_item:nn }
+      {#3} { }
+  }
+%    \end{macrocode}
+%   For linked props, we now know they have a reasonable form so that we
+%   are calling \cs{@@_show_prepare:w} \cs{@@_flatten:w}
+%   \cs[no-index]{@@~\meta{prefix}} \cs{s_@@} \Arg{prefix} \meta{token}
+%   \meta{property list}, and the task is to loop through the linked
+%   list and check integrity.  We first set things up: the auxiliary
+%   \cs{@@_tmp:w} will be in charge of checking that various tokens
+%   start with \cs[no-index]{@@~\meta{prefix}} (in the sense of string
+%   representations), and calling one of \cs{@@_show_loop_key:wNNN},
+%   \cs{@@_show_end:NNN}, \cs{@@_show_bad_name:NNN}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_prepare:w
+    \@@_flatten:w #1 \s_@@ #2#3#4
+  {
+    \use:e
+      {
+        \cs_set_nopar:Npn \exp_not:N \@@_tmp:w
+            ##1 \token_to_str:N #1 ##2 \s_@@_mark ##3 \s_@@_stop
+          {
+            \exp_not:N \tl_if_empty:nTF {##1}
+              {
+                \exp_not:N \tl_if_head_is_space:nTF {##2}
+                  { \exp_not:N \exp_args:Nf \@@_show_loop_key:wNNN }
+                  { \exp_not:N \tl_if_empty:nTF }
+                {##2}
+              }
+              { \exp_not:N \use_ii:nn }
+            \@@_show_end:NNN
+            \@@_show_bad_name:NNN
+          }
+      }
+    \exp_last_unbraced:NNNo \@@_show_loop:NNw #1 #4 #4
+  }
+%    \end{macrocode}
+%   The loop will consist of calls to \cs{@@_show_loop:NNw}
+%   \cs[no-index]{@@~\meta{prefix}} \meta{token} \meta{expansion}, where
+%   \meta{token} is one of the items in the list, specifically the key
+%   container for \meta{key$_{i-1}$} (starting at $i=1$ with the
+%   property list variable itself), and \meta{expansion} stands for the
+%   expansion of that token, which has already been checked, and takes
+%   the form \meta{junk} \cs{s_@@} \Arg{value}
+%   \cs[no-index]{@@~\meta{prefix}~\meta{key_i}}.  Thus, the loop
+%   auxiliary receives the prefix command as |#1|, and the $(i-1)$-th
+%   and $i$-th key containers as |#2| and~|#5|.  Then \cs{@@_tmp:w}
+%   checks that the name of the $i$-th key container is valid.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_loop:NNw #1#2 #3 \s_@@ #4#5
+  {
+    \exp_last_two_unbraced:Noo \@@_tmp:w
+      { \token_to_str:N #5 \s_@@_mark }
+      { \token_to_str:N #1 \s_@@_mark \s_@@_stop }
+      #1 #2 #5
+  }
+%    \end{macrocode}
+%   If the $i$-th key container has the wrong name we get
+%   \cs{@@_show_bad_name:NNN} \cs[no-index]{@@~\meta{prefix}}
+%   \meta{previous container} \meta{current container with bad name}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_bad_name:NNN #1#2#3
+  {
+    \msg_error:nneeee { prop } { bad-link }
+      { \tl_tail:N \l_@@_internal_tl }
+      { \token_to_str:N #2 }
+      { \token_to_str:N #3 }
+      { \token_to_str:N #1 }
+  }
+%    \end{macrocode}
+%   If the $i$-th key container has the name
+%   \cs[no-index]{@@~\meta{prefix}} (without space), it is the trailing
+%   one.  We check that it is the right kind of macro to be a token
+%   list, and that it has the right contents \cs{use_none:n}
+%   \meta{previous container}.  If so, we are done checking everything,
+%   and we display the property list using the message function and
+%   property list name stored in \cs{l_@@_internal_tl}.  Note that we
+%   also use this \cs{l_@@_internal_tl} in the type argument of
+%   \cs{__kernel_chk_tl_type:NnnT}, to build up the name
+%   \enquote{\meta{property list} prop entry} used in error messages.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_end:NNN #1#2#3
+  {
+    \__kernel_chk_tl_type:NnnT #3
+      { \tl_tail:N \l_@@_internal_tl prop~entry }
+      { \exp_not:n { \use_none:n #2 } }
+      {
+        \exp_after:wN \@@_show_finally:NNn
+        \l_@@_internal_tl { linked }
+      }
+  }
+%    \end{macrocode}
+%   If the $i$-th container has a name \cs[no-index]{@@~\meta{prefix}
+%   \meta{key}} (with a space before the key), then we have a call to
+%   \cs{@@_show_loop_key:wNNN} \Arg{key} \meta{junk_1} \meta{junk_2}
+%   \cs[no-index]{@@~\meta{prefix}} \meta{previous container}
+%   \meta{current container}. (with an \texttt{f}-expansion to eliminate
+%   the space).  The first argument is the \meta{key} without a leading
+%   space, thanks to a judicious \texttt{f}-expansion earlier on.  We
+%   check that the \meta{current container} is a token list with the
+%   expected structure \cs{use_none:n} \meta{previous container}
+%   \cs{@@_pair:wn} \meta{string} \cs{s_@@} \Arg{anything} \meta{single
+%   token}.  The auxiliary \cs{@@_show_flat:w} is reused to produce the
+%   \cs{@@_pair:wn} part, and the last token is produced by
+%   \cs{tl_item:Nn} (we don't waste a specialized auxiliary to speed
+%   that up).  If the check succeed, move on to the next item.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_loop_key:wNNN #1#2#3#4#5#6
+  {
+    \__kernel_chk_tl_type:NnnT #6
+      { \tl_tail:N \l_@@_internal_tl prop~entry }
+      {
+        \exp_not:n { \use_none:n #5 }
+        \exp_after:wN \@@_show_flat:w #6 \s_@@ { }
+        \@@_pair:wn \q_@@_recursion_tail \s_@@ { }
+        \q_@@_recursion_stop
+        \tl_item:Nn #6 { -1 }
+      }
+      { \exp_last_unbraced:NNNo \@@_show_loop:NNw #4 #6 #6 }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

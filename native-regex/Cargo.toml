@@ -1,0 +1,11 @@
+[package]
+name = "retex-native-regex"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[features]
+portable-test = []
+
+[build-dependencies]
+cc = "1"

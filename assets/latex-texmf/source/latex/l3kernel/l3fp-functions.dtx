@@ -1,0 +1,288 @@
+% \iffalse
+%
+%% File l3fp-functions.dtx (C) Copyright 2012-2018,2020,2021,2023 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full]{l3doc}
+\usepackage{amsmath}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3fp-functions} module\\ Floating point functions^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2025-01-18}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3fp-functions} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=fp>
+%    \end{macrocode}
+%
+% \subsection{Declaring functions}
+%
+% \begin{macro}{\fp_new_function:n}
+% \begin{macro}{\@@_new_function:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \fp_new_function:n #1
+  { \exp_args:No \@@_new_function:n { \tl_to_str:n {#1} } }
+\cs_new_protected:Npn \@@_new_function:n #1
+  {
+    \@@_id_if_invalid:nTF {#1}
+      { \msg_error:nnn { fp } { id-invalid } {#1} }
+      {
+        \cs_if_exist:cT { @@_parse_word_#1:N }
+          {
+            \msg_error:nnn
+              { fp } { id-already-defined } {#1}
+            \cs_undefine:c { @@_parse_word_#1:N }
+            \cs_undefine:c { @@_#1_o:w }
+          }
+        \@@_function_set_parsing:Nn \cs_gset_eq:NN {#1}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}
+%   {\@@_function_set_parsing:Nn, \@@_function_set_parsing_aux:NNn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_set_parsing:Nn #1#2
+  {
+    \exp_args:NNc \@@_function_set_parsing_aux:NNn #1
+      { @@_parse_word_#2:N } {#2}
+  }
+\cs_new_protected:Npn \@@_function_set_parsing_aux:NNn #1#2#3
+  {
+    \cs_set:Npe \@@_tmp:w
+      {
+        \exp_not:N \@@_parse_function:NNN
+        \exp_not:N \@@_function_o:w
+        \exp_not:c { @@_#3_o:w }
+      }
+    \cs_if_eq:NNF #2 \@@_tmp:w
+      {
+        \cs_if_exist:NTF #2
+          {
+            \msg_warning:nnnn
+              { fp } { id-used-elsewhere } {#3} { function }
+            #1 #2 \@@_tmp:w
+          }
+          {
+            \cs_new_eq:NN #2 \scan_stop: % to declare the function
+            #1 #2 \@@_tmp:w
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]{\@@_function_o:w}
+%    \begin{macrocode}
+\cs_new:Npn \@@_function_o:w #1#2 @
+  {
+    \cs_if_exist:NTF #1
+      { #1 #2 @ }
+      {
+        \exp_after:wN \s_@@_symbolic
+        \exp_after:wN \@@_symbolic_chk:w
+        \exp_after:wN \@@_function_o:w
+        \exp_after:wN #1
+        \exp_after:wN ,
+        \exp_after:wN {
+          \exp:w \exp_end_continue_f:w
+          \@@_exp_after_array_f:w #2 \s_@@_expr_stop
+          \exp_after:wN
+        }
+        \exp_after:wN \@@_sep:
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Defining functions by their expression}
+%
+% \begin{variable}{\l_@@_function_arg_int}
+%   Labels the arguments of a function being defined.
+%    \begin{macrocode}
+\int_new:N \l_@@_function_arg_int
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\fp_set_function:nnn}
+% \begin{macro}{\@@_set_function:Nnnn}
+%   \begin{syntax}
+%     \cs{fp_set_function:nnn} \Arg{identifier}
+%       \Arg{comma-list of variables} \Arg{expression}
+%   \end{syntax}
+%   Defines the \meta{identifier} to stand for a function which expects
+%   some arguments defined by the \meta{comma-list of variables}, and
+%   evaluates to the \meta{expression}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \fp_set_function:nnn #1
+  {
+    \exp_args:NNo \@@_set_function:Nnnn \cs_set_eq:cN
+      { \tl_to_str:n {#1} }
+  }
+\cs_new_protected:Npn \@@_set_function:Nnnn #1#2#3#4
+  {
+    \@@_id_if_invalid:nTF {#2}
+      { \msg_error:nnn { fp } { id-invalid } {#2} }
+      {
+        \cs_if_exist:cF { @@_parse_word_#2:N }
+          { \@@_function_set_parsing:Nn \cs_set_eq:NN {#2} }
+        \group_begin:
+          \int_zero:N \l_@@_function_arg_int
+          \exp_args:No \clist_map_inline:nn { \tl_to_str:n {#3} }
+            {
+              \int_incr:N \l_@@_function_arg_int
+              \exp_args:Ne \@@_clear_variable_aux:n
+                {
+                  \c_underscore_str \tex_romannumeral:D \l_@@_function_arg_int
+                }
+              \fp_clear_variable:n {##1}
+              \cs_set_nopar:cpe { l_@@_variable_##1_fp }
+                {
+                  \exp_not:N \s__fp_symbolic
+                  \exp_not:N \@@_symbolic_chk:w
+                  \exp_not:N \@@_function_arg_o:w
+                  \int_use:N \l_@@_function_arg_int
+                  ########1 , { } \@@_sep:
+                }
+            }
+          \cs_set:Npn \@@_function_arg_o:w ##1 @
+            {
+              \exp_after:wN \s_@@_symbolic
+              \exp_after:wN \@@_symbolic_chk:w
+              \exp_after:wN \@@_function_arg_o:w
+              \tex_romannumeral:D
+              \@@_exp_after_symbolic_loop:N ##1
+                { , \tex_romannumeral:D \use_none:nn }
+              \exp_after:wN \c_zero_int
+              \exp_after:wN { \exp_after:wN } \exp_after:wN \@@_sep:
+            }
+          \fp_set:Nn \l_@@_symbolic_fp {#4}
+          \use:e
+            {
+              \exp_not:n { \cs_gset:Npn \@@_tmp:w ##1 }
+                { \exp_not:o { \l_@@_symbolic_fp } }
+            }
+          \use:e
+            {
+              \exp_not:n { \cs_gset:Npn \@@_tmp:w ##1 @ }
+                {
+                  \exp_not:N \@@_exp_after_symbolic_f:nw
+                  \exp_not:n { { \exp_after:wN \exp_stop_f: } }
+                  \exp_not:o { \@@_tmp:w { . , {##1} } }
+                }
+            }
+        \group_end:
+        #1 { @@_#2_o:w } \@@_tmp:w
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[EXP]
+%   {
+%     \@@_function_arg_o:w,
+%     \@@_function_arg_few:w,
+%     \@@_function_arg_get:w
+%   }
+%    \begin{macrocode}
+\cs_new:Npn \@@_function_arg_o:w #1. #2
+  {
+    \if_meaning:w @ #2
+      \exp_after:wN \@@_function_arg_few:w
+    \fi:
+    \if_int_compare:w #1 = \c_one_int
+      \exp_after:wN \@@_function_arg_get:w
+    \fi:
+    \@@_use_i_until_s:nw
+      {
+        \exp_after:wN \@@_function_arg_o:w
+        \int_value:w \int_eval:n { #1 - 1 } .
+      }
+      #2
+  }
+\cs_new:Npn \@@_function_arg_few:w #1 @ { \exp_after:wN \c_nan_fp }
+\cs_new:Npn \@@_function_arg_get:w #1#2#3\@@_sep: #4 @
+  {
+    \@@_exp_after_array_f:w #3\@@_sep: \s_@@_expr_stop
+    \exp_after:wN \exp_stop_f:
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\fp_clear_function:n}
+% \begin{macro}{\@@_clear_function:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \fp_clear_function:n #1
+  { \exp_args:No \@@_clear_function:n { \tl_to_str:n {#1} } }
+\cs_new_protected:Npn \@@_clear_function:n #1
+  {
+    \@@_id_if_invalid:nTF {#1}
+      { \msg_error:nnn { fp } { id-invalid } {#1} }
+      {
+        \cs_set_eq:cN { @@_#1_o:w } \tex_undefine:D
+        \@@_function_set_parsing:Nn \cs_set_eq:NN {#1} 
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% ^^A todo: add check for number of args
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

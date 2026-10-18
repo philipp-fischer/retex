@@ -1,0 +1,4 @@
+# Preserve pinned resources and upstream notices byte-for-byte.
+assets/** -text -whitespace
+tests/fixtures/** -text -whitespace
+native-regex/vendor/** -text -whitespace

@@ -1,0 +1,3765 @@
+{
+  "scope": "Frozen immutable macro provenance from the unmodified Python implementation.",
+  "cases": [
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": null,
+      "maximum": 0,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": null,
+      "maximum": 0,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": null,
+      "maximum": 1,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": null,
+      "maximum": 1,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": null,
+      "maximum": 8,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": null,
+      "maximum": 8,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "maximum": 0,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "maximum": 0,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "maximum": 1,
+      "source": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 1,
+          "column": 2,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": 3
+        },
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "maximum": 1,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 1,
+          "column": 2,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": 3
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "maximum": 8,
+      "source": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 1,
+          "column": 2,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": 3
+        },
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      },
+      "maximum": 8,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 1,
+          "column": 2,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": 3
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 1,
+        "column": 2,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": false,
+        "byte_column": 3
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "maximum": 0,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "maximum": 0,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "maximum": 1,
+      "source": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 15
+        },
+        "call_site_truncated": true,
+        "byte_column": 15
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 15
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "maximum": 1,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 15
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 15
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "maximum": 8,
+      "source": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      },
+      "maximum": 8,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 7,
+        "column": 8,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 6,
+          "column": 7,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 5,
+            "column": 6,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 4,
+              "column": 5,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 3,
+                "column": 4,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 2,
+                  "column": 3,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 1,
+                    "column": 2,
+                    "expansion": "macro:parent",
+                    "call_site": null,
+                    "call_site_truncated": false,
+                    "byte_column": 3
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 5
+                },
+                "call_site_truncated": true,
+                "byte_column": 7
+              },
+              "call_site_truncated": false,
+              "byte_column": 9
+            },
+            "call_site_truncated": false,
+            "byte_column": 11
+          },
+          "call_site_truncated": false,
+          "byte_column": 13
+        },
+        "call_site_truncated": false,
+        "byte_column": 15
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "maximum": 0,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "maximum": 0,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "maximum": 1,
+      "source": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 17
+        },
+        "call_site_truncated": true,
+        "byte_column": 17
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 17
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "maximum": 1,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 17
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 17
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "maximum": 8,
+      "source": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      },
+      "maximum": 8,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 8,
+        "column": 9,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 7,
+          "column": 8,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 6,
+            "column": 7,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 5,
+              "column": 6,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 4,
+                "column": 5,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 3,
+                  "column": 4,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 2,
+                    "column": 3,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 1,
+                      "column": 2,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": false,
+                      "byte_column": 3
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 5
+                  },
+                  "call_site_truncated": true,
+                  "byte_column": 7
+                },
+                "call_site_truncated": false,
+                "byte_column": 9
+              },
+              "call_site_truncated": false,
+              "byte_column": 11
+            },
+            "call_site_truncated": false,
+            "byte_column": 13
+          },
+          "call_site_truncated": false,
+          "byte_column": 15
+        },
+        "call_site_truncated": false,
+        "byte_column": 17
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "maximum": 0,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "maximum": 0,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "maximum": 1,
+      "source": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 9,
+          "column": 10,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 19
+        },
+        "call_site_truncated": true,
+        "byte_column": 19
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 19
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "maximum": 1,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 9,
+          "column": 10,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 19
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 19
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "maximum": 8,
+      "source": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 9,
+          "column": 10,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 8,
+            "column": 9,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 7,
+              "column": 8,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 6,
+                "column": 7,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 5,
+                  "column": 6,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 4,
+                    "column": 5,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 3,
+                      "column": 4,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 2,
+                        "column": 3,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": true,
+                        "byte_column": 5
+                      },
+                      "call_site_truncated": true,
+                      "byte_column": 7
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 9
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 11
+                },
+                "call_site_truncated": false,
+                "byte_column": 13
+              },
+              "call_site_truncated": false,
+              "byte_column": 15
+            },
+            "call_site_truncated": false,
+            "byte_column": 17
+          },
+          "call_site_truncated": false,
+          "byte_column": 19
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": true,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 1,
+                        "column": 2,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": false,
+                        "byte_column": 3
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      },
+      "maximum": 8,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 9,
+          "column": 10,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 8,
+            "column": 9,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 7,
+              "column": 8,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 6,
+                "column": 7,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 5,
+                  "column": 6,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 4,
+                    "column": 5,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 3,
+                      "column": 4,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 2,
+                        "column": 3,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": true,
+                        "byte_column": 5
+                      },
+                      "call_site_truncated": true,
+                      "byte_column": 7
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 9
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 11
+                },
+                "call_site_truncated": false,
+                "byte_column": 13
+              },
+              "call_site_truncated": false,
+              "byte_column": 15
+            },
+            "call_site_truncated": false,
+            "byte_column": 17
+          },
+          "call_site_truncated": false,
+          "byte_column": 19
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 9,
+        "column": 10,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 8,
+          "column": 9,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 7,
+            "column": 8,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 6,
+              "column": 7,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 5,
+                "column": 6,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 4,
+                  "column": 5,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 3,
+                    "column": 4,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 2,
+                      "column": 3,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": true,
+                      "byte_column": 5
+                    },
+                    "call_site_truncated": true,
+                    "byte_column": 7
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 9
+                },
+                "call_site_truncated": false,
+                "byte_column": 11
+              },
+              "call_site_truncated": false,
+              "byte_column": 13
+            },
+            "call_site_truncated": false,
+            "byte_column": 15
+          },
+          "call_site_truncated": false,
+          "byte_column": 17
+        },
+        "call_site_truncated": false,
+        "byte_column": 19
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 4,
+                        "column": 5,
+                        "expansion": "macro:parent",
+                        "call_site": {
+                          "file": "called.tex",
+                          "line": 3,
+                          "column": 4,
+                          "expansion": "macro:parent",
+                          "call_site": {
+                            "file": "called.tex",
+                            "line": 2,
+                            "column": 3,
+                            "expansion": "macro:parent",
+                            "call_site": {
+                              "file": "called.tex",
+                              "line": 1,
+                              "column": 2,
+                              "expansion": "macro:parent",
+                              "call_site": null,
+                              "call_site_truncated": false,
+                              "byte_column": 3
+                            },
+                            "call_site_truncated": false,
+                            "byte_column": 5
+                          },
+                          "call_site_truncated": true,
+                          "byte_column": 7
+                        },
+                        "call_site_truncated": false,
+                        "byte_column": 9
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "maximum": 0,
+      "source": null,
+      "bounded_call": null
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 4,
+                        "column": 5,
+                        "expansion": "macro:parent",
+                        "call_site": {
+                          "file": "called.tex",
+                          "line": 3,
+                          "column": 4,
+                          "expansion": "macro:parent",
+                          "call_site": {
+                            "file": "called.tex",
+                            "line": 2,
+                            "column": 3,
+                            "expansion": "macro:parent",
+                            "call_site": {
+                              "file": "called.tex",
+                              "line": 1,
+                              "column": 2,
+                              "expansion": "macro:parent",
+                              "call_site": null,
+                              "call_site_truncated": false,
+                              "byte_column": 3
+                            },
+                            "call_site_truncated": false,
+                            "byte_column": 5
+                          },
+                          "call_site_truncated": true,
+                          "byte_column": 7
+                        },
+                        "call_site_truncated": false,
+                        "byte_column": 9
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "maximum": 0,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": null
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 4,
+                        "column": 5,
+                        "expansion": "macro:parent",
+                        "call_site": {
+                          "file": "called.tex",
+                          "line": 3,
+                          "column": 4,
+                          "expansion": "macro:parent",
+                          "call_site": {
+                            "file": "called.tex",
+                            "line": 2,
+                            "column": 3,
+                            "expansion": "macro:parent",
+                            "call_site": {
+                              "file": "called.tex",
+                              "line": 1,
+                              "column": 2,
+                              "expansion": "macro:parent",
+                              "call_site": null,
+                              "call_site_truncated": false,
+                              "byte_column": 3
+                            },
+                            "call_site_truncated": false,
+                            "byte_column": 5
+                          },
+                          "call_site_truncated": true,
+                          "byte_column": 7
+                        },
+                        "call_site_truncated": false,
+                        "byte_column": 9
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "maximum": 1,
+      "source": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 12,
+          "column": 13,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 25
+        },
+        "call_site_truncated": true,
+        "byte_column": 25
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 25
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 4,
+                        "column": 5,
+                        "expansion": "macro:parent",
+                        "call_site": {
+                          "file": "called.tex",
+                          "line": 3,
+                          "column": 4,
+                          "expansion": "macro:parent",
+                          "call_site": {
+                            "file": "called.tex",
+                            "line": 2,
+                            "column": 3,
+                            "expansion": "macro:parent",
+                            "call_site": {
+                              "file": "called.tex",
+                              "line": 1,
+                              "column": 2,
+                              "expansion": "macro:parent",
+                              "call_site": null,
+                              "call_site_truncated": false,
+                              "byte_column": 3
+                            },
+                            "call_site_truncated": false,
+                            "byte_column": 5
+                          },
+                          "call_site_truncated": true,
+                          "byte_column": 7
+                        },
+                        "call_site_truncated": false,
+                        "byte_column": 9
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "maximum": 1,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 12,
+          "column": 13,
+          "expansion": "macro:parent",
+          "call_site": null,
+          "call_site_truncated": true,
+          "byte_column": 25
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": null,
+        "call_site_truncated": true,
+        "byte_column": 25
+      }
+    },
+    {
+      "definition": null,
+      "name": "<anonymous>",
+      "call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 4,
+                        "column": 5,
+                        "expansion": "macro:parent",
+                        "call_site": {
+                          "file": "called.tex",
+                          "line": 3,
+                          "column": 4,
+                          "expansion": "macro:parent",
+                          "call_site": {
+                            "file": "called.tex",
+                            "line": 2,
+                            "column": 3,
+                            "expansion": "macro:parent",
+                            "call_site": {
+                              "file": "called.tex",
+                              "line": 1,
+                              "column": 2,
+                              "expansion": "macro:parent",
+                              "call_site": null,
+                              "call_site_truncated": false,
+                              "byte_column": 3
+                            },
+                            "call_site_truncated": false,
+                            "byte_column": 5
+                          },
+                          "call_site_truncated": true,
+                          "byte_column": 7
+                        },
+                        "call_site_truncated": false,
+                        "byte_column": 9
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "maximum": 8,
+      "source": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:<anonymous>",
+        "call_site": {
+          "file": "called.tex",
+          "line": 12,
+          "column": 13,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 11,
+            "column": 12,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 10,
+              "column": 11,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 9,
+                "column": 10,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 8,
+                  "column": 9,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 7,
+                    "column": 8,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 6,
+                      "column": 7,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 5,
+                        "column": 6,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": true,
+                        "byte_column": 11
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 13
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 15
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 17
+                },
+                "call_site_truncated": false,
+                "byte_column": 19
+              },
+              "call_site_truncated": false,
+              "byte_column": 21
+            },
+            "call_site_truncated": false,
+            "byte_column": 23
+          },
+          "call_site_truncated": false,
+          "byte_column": 25
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": true,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      }
+    },
+    {
+      "definition": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "old",
+        "call_site": {
+          "file": "origin.tex",
+          "line": 3,
+          "column": 4,
+          "expansion": null,
+          "call_site": null,
+          "call_site_truncated": false,
+          "byte_column": null
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "name": "alias-name",
+      "call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 4,
+                        "column": 5,
+                        "expansion": "macro:parent",
+                        "call_site": {
+                          "file": "called.tex",
+                          "line": 3,
+                          "column": 4,
+                          "expansion": "macro:parent",
+                          "call_site": {
+                            "file": "called.tex",
+                            "line": 2,
+                            "column": 3,
+                            "expansion": "macro:parent",
+                            "call_site": {
+                              "file": "called.tex",
+                              "line": 1,
+                              "column": 2,
+                              "expansion": "macro:parent",
+                              "call_site": null,
+                              "call_site_truncated": false,
+                              "byte_column": 3
+                            },
+                            "call_site_truncated": false,
+                            "byte_column": 5
+                          },
+                          "call_site_truncated": true,
+                          "byte_column": 7
+                        },
+                        "call_site_truncated": false,
+                        "byte_column": 9
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      },
+      "maximum": 8,
+      "source": {
+        "file": "defined.tex",
+        "line": 14,
+        "column": 5,
+        "expansion": "macro:alias-name",
+        "call_site": {
+          "file": "called.tex",
+          "line": 12,
+          "column": 13,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 11,
+            "column": 12,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 10,
+              "column": 11,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 9,
+                "column": 10,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 8,
+                  "column": 9,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 7,
+                    "column": 8,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 6,
+                      "column": 7,
+                      "expansion": "macro:parent",
+                      "call_site": {
+                        "file": "called.tex",
+                        "line": 5,
+                        "column": 6,
+                        "expansion": "macro:parent",
+                        "call_site": null,
+                        "call_site_truncated": true,
+                        "byte_column": 11
+                      },
+                      "call_site_truncated": false,
+                      "byte_column": 13
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 15
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 17
+                },
+                "call_site_truncated": false,
+                "byte_column": 19
+              },
+              "call_site_truncated": false,
+              "byte_column": 21
+            },
+            "call_site_truncated": false,
+            "byte_column": 23
+          },
+          "call_site_truncated": false,
+          "byte_column": 25
+        },
+        "call_site_truncated": true,
+        "byte_column": 9
+      },
+      "bounded_call": {
+        "file": "called.tex",
+        "line": 12,
+        "column": 13,
+        "expansion": "macro:parent",
+        "call_site": {
+          "file": "called.tex",
+          "line": 11,
+          "column": 12,
+          "expansion": "macro:parent",
+          "call_site": {
+            "file": "called.tex",
+            "line": 10,
+            "column": 11,
+            "expansion": "macro:parent",
+            "call_site": {
+              "file": "called.tex",
+              "line": 9,
+              "column": 10,
+              "expansion": "macro:parent",
+              "call_site": {
+                "file": "called.tex",
+                "line": 8,
+                "column": 9,
+                "expansion": "macro:parent",
+                "call_site": {
+                  "file": "called.tex",
+                  "line": 7,
+                  "column": 8,
+                  "expansion": "macro:parent",
+                  "call_site": {
+                    "file": "called.tex",
+                    "line": 6,
+                    "column": 7,
+                    "expansion": "macro:parent",
+                    "call_site": {
+                      "file": "called.tex",
+                      "line": 5,
+                      "column": 6,
+                      "expansion": "macro:parent",
+                      "call_site": null,
+                      "call_site_truncated": true,
+                      "byte_column": 11
+                    },
+                    "call_site_truncated": false,
+                    "byte_column": 13
+                  },
+                  "call_site_truncated": false,
+                  "byte_column": 15
+                },
+                "call_site_truncated": false,
+                "byte_column": 17
+              },
+              "call_site_truncated": false,
+              "byte_column": 19
+            },
+            "call_site_truncated": false,
+            "byte_column": 21
+          },
+          "call_site_truncated": false,
+          "byte_column": 23
+        },
+        "call_site_truncated": false,
+        "byte_column": 25
+      }
+    }
+  ]
+}
