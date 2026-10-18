@@ -11,20 +11,29 @@ including `generated/`, the worker modules and license notices. Do not deploy on
 
 ## GitHub Pages
 
-Once a public repository and site location have been selected:
+The [Pages workflow](../.github/workflows/pages.yml) builds and deploys the app on
+pushes to `main`, or when run manually from the Actions tab. To enable it:
 
-1. Build and validate `dist/workspace/`, including the browser smoke test.
-2. In repository **Settings → Pages**, select **GitHub Actions** as the source.
-3. Have the build workflow upload `dist/workspace/` with
-   `actions/upload-pages-artifact`; a deployment job uses `actions/deploy-pages`.
-4. Give the deployment job `pages: write` and `id-token: write` permissions and
-   the `github-pages` environment. Connect it to the successful build job.
-5. Check the deployed project URL, editing, package loading and PDF download.
+1. In repository **Settings → Pages**, select **GitHub Actions** as the source.
+   No suggested template, custom domain or additional secrets are required.
+2. Push to `main`, or open **Actions → Deploy browser demo → Run workflow** and
+   select `main`.
+3. Once the workflow succeeds, open the URL shown by the `github-pages`
+   deployment. Check editing, package loading and PDF download.
+
+The build job installs the Rust/Wasm toolchain and WASI SDK, builds a matching
+initialized LaTeX format, checks the frontend, packages `dist/workspace/`, and
+runs the browser smoke test under a project subpath. Rust builds, build tools
+and checksum-verified TeX Live archives are cached between runs. Generated formats
+are rebuilt with the current engine. The deployment job has the Pages and OIDC
+permissions it needs; repository-wide workflow write permissions are unnecessary.
+
+If a deployment ran before Pages was enabled, enable the setting and rerun the
+failed deployment job. Forks must enable Pages in their own repository.
 
 See GitHub's [custom workflow instructions](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-for the current action versions and configuration. No public demo URL or automatic
-deployment is assumed by this repository. The packaging script also writes
-`.nojekyll` for hosts that support branch-based static publishing.
+for deployment details. The packaging script also writes `.nojekyll` for hosts
+that support branch-based static publishing.
 
 GitHub Pages has a [1 GB published-site limit](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
 Keep generated binaries in deployment/release artifacts rather than committing

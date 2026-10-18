@@ -1,0 +1,139 @@
+name: Deploy browser demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CARGO_TERM_COLOR: always
+      WASM_BINDGEN_VERSION: 0.2.129
+      RETEX_WASI_SDK: ${{ github.workspace }}/.tools/wasi-sdk-34.0-x86_64-linux
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: dtolnay/rust-toolchain@stable
+        id: rust
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust dependencies and builds
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-pages-rust-${{ steps.rust.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pages-rust-${{ steps.rust.outputs.cachekey }}-
+
+      - name: Cache browser build tools
+        uses: actions/cache@v5
+        with:
+          path: |
+            .tools/wasm-bindgen
+            .tools/wasi-sdk-34.0-x86_64-linux
+          key: ${{ runner.os }}-${{ runner.arch }}-pages-tools-wasi34-bindgen${{ env.WASM_BINDGEN_VERSION }}
+
+      - name: Cache verified TeX Live archives
+        uses: actions/cache@v5
+        with:
+          path: .tools/texlive/archives
+          key: ${{ runner.os }}-pages-texlive2024-${{ hashFiles('tools/texlive_resources.py', 'assets/latex-texmf/manifest.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pages-texlive2024-
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends build-essential zlib1g-dev
+
+      - name: Install WASI SDK
+        run: |
+          if [ ! -x "$RETEX_WASI_SDK/bin/clang" ]; then
+            curl --fail --location --retry 3 \
+              https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-34/wasi-sdk-34.0-x86_64-linux.tar.gz \
+              --output "$RUNNER_TEMP/wasi-sdk.tar.gz"
+            echo "b761e3a0721dbae9c09a0059e5fdb2bf917d1b4a8a7b430fb3b5aafb0984b2c4  $RUNNER_TEMP/wasi-sdk.tar.gz" | sha256sum --check
+            mkdir -p .tools
+            tar -xzf "$RUNNER_TEMP/wasi-sdk.tar.gz" -C .tools
+          fi
+
+      - name: Install matching wasm-bindgen
+        run: |
+          if [ ! -x .tools/wasm-bindgen/bin/wasm-bindgen ]; then
+            cargo install wasm-bindgen-cli --version "$WASM_BINDGEN_VERSION" --locked --root .tools/wasm-bindgen
+          fi
+          echo "$PWD/.tools/wasm-bindgen/bin" >> "$GITHUB_PATH"
+
+      - name: Check frontend
+        run: |
+          npm --prefix web ci
+          npm --prefix web run typecheck
+          npm --prefix web test
+
+      - name: Build native engine and initialize LaTeX
+        run: |
+          cargo build --locked --release --bin retex-rs2
+          python3 tools/build_browser_format.py || {
+            cat .tools/formats/latex.stdout .tools/formats/latex.stderr
+            exit 1
+          }
+
+      - name: Build and package browser app
+        run: |
+          cargo build --locked --release --target wasm32-unknown-unknown --lib
+          python3 tools/build_browser.py --latex --common-papers --format .tools/formats/latex.rsfmt
+          npm --prefix web run package
+
+      - name: Check static app under a project subpath
+        run: |
+          python3 -m pip install playwright==1.64.0
+          python3 -m playwright install --with-deps chromium
+          python3 tools/browser_smoke.py --output "$RUNNER_TEMP/browser-smoke.json"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/workspace
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
