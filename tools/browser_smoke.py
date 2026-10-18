@@ -51,6 +51,17 @@ def transparency_pdf():
     return bytes(result)
 
 
+def scroll_preview_page(page, number):
+    # A page can be replaced between layout passes. Resolve and scroll in the
+    # same browser task, without retaining Playwright's handle to an old node.
+    page.wait_for_function("""number => {
+        const slot = document.querySelector(`#preview > [data-page="${number}"]`);
+        if (!slot) return false;
+        slot.scrollIntoView({block: 'center', inline: 'nearest', behavior: 'instant'});
+        return true;
+    }""", arg=number)
+
+
 def check_page_error(page, work, report):
     """A preview limitation must stay on its page and not prevent PDF export."""
     previous = page.evaluate("editorProbe.revision")
@@ -67,10 +78,13 @@ def check_page_error(page, work, report):
         figure = "\\includegraphics{transparency.pdf}" if include_figure else ""
         page.evaluate("s => editorProbe.editor.replace(s)", source.replace("FIGURE", figure))
         page.wait_for_function("r => editorProbe.revision > r", arg=previous)
+        # Toolbar presentation deliberately retains the previous state briefly
+        # during typing. Wait for this revision's actual engine completion too.
+        page.wait_for_function("editorProbe.settlementMeasurements.some(m => m.revision === editorProbe.revision)", timeout=180000)
         # A valid PDF can coexist with a preview failure on a visible page.
         page.wait_for_function(COMPILED, timeout=180000)
         slot = page.locator('#preview > [data-page="2"]')
-        slot.scroll_into_view_if_needed()
+        scroll_preview_page(page, 2)
         if not include_figure:
             page.locator('#preview > canvas[data-page="2"]').wait_for()
             assert page.locator(".preview-page-error").count() == 0
@@ -97,8 +111,8 @@ def check_page_error(page, work, report):
     event.value.save_as(output)
     assert output.read_bytes().startswith(b"%PDF-")
     assert b"/Group" in output.read_bytes(), "Export lost the PDF transparency group"
-    page.locator('#preview > [data-page="3"]').scroll_into_view_if_needed()
-    page.locator('#preview > canvas[data-page="3"]').wait_for()
+    scroll_preview_page(page, 3)
+    page.wait_for_function("document.querySelector('#preview > canvas[data-page=\"3\"]')?.dataset.revision === String(editorProbe.revision)")
     assert page.locator('#preview > canvas[data-page="1"]').count() == 1
     report["page_error_scoped"] = True
 
