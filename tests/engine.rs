@@ -1307,6 +1307,88 @@ fn retained_jpeg_paints_emitted_samples_and_rejects_inconsistent_pdf_geometry() 
     }
 }
 #[test]
+fn retained_unsupported_pdf_graphics_keep_the_page_and_original_export() {
+    use retex_rs2::{fonts::outlines::OutlineCache, pdf::preview::capture};
+    let job = Job::new();
+    std::fs::write(
+        job.path("painting.pdf"),
+        include_bytes!("fixtures/preview-curves.pdf"),
+    )
+    .unwrap();
+    let mut cfg = config();
+    cfg.font_dir = Some(repo().join("assets/fonts/assets").display().to_string());
+    let mut engine = job.run(
+        r"\pdfinfoomitdate=1 \pdftrailerid{}\pdfmapline{+cmr10 CMR10 <cmr10.pfb}\font\body=cmr10 \body\pdfximage width150bp{painting.pdf}\shipout\hbox{A\pdfrefximage\pdflastximage B}\end",
+        cfg, true,
+    );
+    let number = *engine.core.backend.document.images.keys().next().unwrap();
+    for (feature, resources, extra, data) in [
+        (
+            "Group",
+            "<<>>",
+            "/Group << /S /Transparency /CS /DeviceRGB /I true >>",
+            b"0 .4 .8 rg 10 10 80 40 re f".as_slice(),
+        ),
+        (
+            "font",
+            "<< /Font << /F << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>",
+            "",
+            b"BT /F 10 Tf (Imported text) Tj ET".as_slice(),
+        ),
+        (
+            "gs",
+            "<< /ExtGState << /State << /ca .5 >> >> >>",
+            "",
+            b"q 1 0 0 rg 10 10 80 40 re f /State gs Q".as_slice(),
+        ),
+    ] {
+        let image = engine
+            .core
+            .backend
+            .document
+            .images
+            .get_mut(&number)
+            .unwrap();
+        image.dictionary = format!(
+            "/Type /XObject /Subtype /Form /BBox [0 0 100 60] /Matrix [1 0 0 1 0 0] /Resources {resources} /PTEX.FileName (painting.pdf) {extra}"
+        );
+        image.data = Some(data.into());
+        engine.write_pdf(&job.path("before.pdf")).unwrap();
+        let scene = capture(&engine, &mut OutlineCache::default()).unwrap();
+        assert_eq!(scene.pages.len(), 1);
+        let placeholders: Vec<_> = scene.pages[0]
+            .operators
+            .iter()
+            .filter(|op| op.ends_with("retexPdfPlaceholder"))
+            .collect();
+        assert_eq!(placeholders.len(), 1, "{feature}");
+        assert!(placeholders[0].starts_with("[0 0 100 60] [1 0 0 1 0 0]"));
+        assert!(placeholders[0].contains("painting.pdf"));
+        assert!(placeholders[0].contains(feature));
+        let used: std::collections::BTreeSet<_> = scene
+            .fonts
+            .values()
+            .flat_map(|font| font.paths.keys().copied())
+            .collect();
+        assert!(
+            used.contains(&65) && used.contains(&66),
+            "Surrounding text was lost: {feature}"
+        );
+        engine.write_pdf(&job.path("after.pdf")).unwrap();
+        assert_eq!(
+            std::fs::read(job.path("before.pdf")).unwrap(),
+            std::fs::read(job.path("after.pdf")).unwrap()
+        );
+        assert!(
+            !std::fs::read(job.path("after.pdf"))
+                .unwrap()
+                .windows(b"retexPdfPlaceholder".len())
+                .any(|s| s == b"retexPdfPlaceholder")
+        );
+    }
+}
+
+#[test]
 fn retained_imported_pdf_uses_emitted_graph_and_rejects_cycles() {
     use retex_rs2::{fonts::outlines::OutlineCache, pdf::preview::capture};
     let job = Job::new();

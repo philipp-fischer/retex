@@ -409,6 +409,25 @@ label {
   cursor: grab;
   user-select: none;
 }
+.source-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+#source-wrap {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 6px;
+}
+#source-wrap[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--hover);
+  border-color: var(--accent);
+}
+#viewport[data-glyph-hover="true"] {
+  cursor: text;
+}
 #viewport[data-panning="true"],
 #viewport[data-panning="true"] * {
   cursor: grabbing !important;

@@ -996,6 +996,20 @@ export function mountCompilation({
             data.page,
           );
           renderer.pages.get(data.page).authoritative = false;
+          const placeholders =
+            renderer.pages.get(data.page).pdfPlaceholders || [];
+          if (placeholders.length) {
+            viewerDiagnostics.set(data.page, {
+              severity: "warning",
+              phase: "preview",
+              message: `Page ${data.page}: ${[...new Set(placeholders.map((p) => `${p.label}: ${p.message}`))].join("; ")}. Original graphics are preserved in PDF export.`,
+              details: {
+                code: "viewer.pdf_placeholder",
+                explanation:
+                  "Unsupported embedded PDF graphics keep their original dimensions while the rest of the page remains visible.",
+              },
+            });
+          }
           if (data.authoritative)
             worker.postMessage({
               protocol_version: 2,

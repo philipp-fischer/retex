@@ -157,6 +157,22 @@ function Workspace() {
     [filesOpen, setFilesOpen] = useState(false);
   useEffect(() => {
     const editor = new SourceEditor(document.getElementById("source")!, store);
+    const wrapButton = document.getElementById("source-wrap")!;
+    try {
+      editor.lineWrapping = localStorage.getItem("retex-word-wrap") !== "false";
+    } catch {}
+    const updateWrap = () => {
+      wrapButton.setAttribute("aria-pressed", String(editor.lineWrapping));
+      wrapButton.title = `Word wrap ${editor.lineWrapping ? "on" : "off"}`;
+    };
+    updateWrap();
+    wrapButton.onclick = () => {
+      editor.lineWrapping = !editor.lineWrapping;
+      try {
+        localStorage.setItem("retex-word-wrap", String(editor.lineWrapping));
+      } catch {}
+      updateWrap();
+    };
     controller = mountCompilation({
       store,
       source: editor,
@@ -355,13 +371,35 @@ function Workspace() {
         >
           <div className="pane-heading">
             <h1 id="active-file">document.tex</h1>
-            <label className="encoding">
-              Encoding
-              <select id="source-encoding" disabled>
-                <option value="utf8">UTF-8</option>
-                <option value="latin1">8-bit (Latin-1)</option>
-              </select>
-            </label>
+            <div className="source-tools">
+              <button
+                id="source-wrap"
+                aria-label="Toggle source word wrap"
+                aria-pressed="true"
+                title="Word wrap on"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 6h18M3 12h14a3 3 0 0 1 0 6h-4m0 0 3-3m-3 3 3 3M3 18h4" />
+                </svg>
+              </button>
+              <label className="encoding">
+                Encoding
+                <select id="source-encoding" disabled>
+                  <option value="utf8">UTF-8</option>
+                  <option value="latin1">8-bit (Latin-1)</option>
+                </select>
+              </label>
+            </div>
           </div>
           <div id="source" />
           <div id="binary-info" hidden />

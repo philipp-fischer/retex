@@ -1,6 +1,6 @@
 //! Retained paint input from prepared display lists, without PDF serialization.
-//! Unsupported outline/paint capabilities fail explicitly. This initial scene
-//! supports Type1 and SFNT paths; bitmap/standard-14 and imported graphics remain.
+//! Unsupported imported PDF paint keeps its geometry as a warning placeholder.
+//! Invalid resources, recursion and budget violations still fail explicitly.
 use crate::{
     Engine,
     core::{
@@ -310,6 +310,7 @@ struct PaintCodes<'a> {
     font: Option<String>,
     stack: Vec<Option<String>>,
     codes: BTreeMap<String, BTreeSet<u32>>,
+    imported: bool,
 }
 impl<'a> PaintCodes<'a> {
     fn new(code_widths: &'a BTreeMap<String, u8>) -> Self {
@@ -318,6 +319,7 @@ impl<'a> PaintCodes<'a> {
             font: None,
             stack: Vec::new(),
             codes: BTreeMap::new(),
+            imported: false,
         }
     }
     fn show(&mut self, value: &lopdf::Object) -> Result<()> {
@@ -574,13 +576,19 @@ fn form_operators(
         }
         if matches!(
             operation.operator.as_str(),
-            "retexFormBegin" | "retexFormEnd" | "retexImage"
+            "retexFormBegin" | "retexFormEnd" | "retexImage" | "retexPdfPlaceholder"
         ) {
             return Err(Error::value(
                 "Reserved preview form boundary in source paint",
             ));
         }
         if operation.operator != "Do" {
+            if codes.imported && !supported_imported_operator(&operation.operator) {
+                return Err(Error::value(format!(
+                    "Preview imported PDF operator {} is not implemented",
+                    operation.operator
+                )));
+            }
             codes.observe(&operation)?;
             result.push(
                 bytes[start..span.end]
@@ -848,6 +856,96 @@ fn retain_image(
     Ok(())
 }
 
+fn supported_imported_operator(operator: &str) -> bool {
+    // Keep this aligned with the Canvas painter; unknown PDF operators should
+    // replace their graphic instead of reaching a whole-page paint failure.
+    matches!(
+        operator,
+        "q" | "Q"
+            | "cm"
+            | "BT"
+            | "ET"
+            | "Tf"
+            | "Tm"
+            | "Td"
+            | "TD"
+            | "T*"
+            | "Tc"
+            | "Tw"
+            | "Tz"
+            | "TL"
+            | "Ts"
+            | "Tr"
+            | "Tj"
+            | "TJ"
+            | "'"
+            | "\""
+            | "g"
+            | "G"
+            | "rg"
+            | "RG"
+            | "w"
+            | "J"
+            | "j"
+            | "M"
+            | "d"
+            | "m"
+            | "l"
+            | "c"
+            | "v"
+            | "y"
+            | "h"
+            | "re"
+            | "W"
+            | "W*"
+            | "n"
+            | "f"
+            | "F"
+            | "f*"
+            | "S"
+            | "s"
+            | "B"
+            | "B*"
+            | "b"
+            | "b*"
+            | "BMC"
+            | "BDC"
+            | "EMC"
+    )
+}
+
+fn imported_geometry(dictionary: &super::parsing::PdfValue) -> Result<([f64; 4], [f64; 6])> {
+    use super::parsing::PdfValue;
+    let array = |key, default: Option<&[f64]>| -> Result<Vec<f64>> {
+        match dictionary.get(key) {
+            Some(PdfValue::Array(values)) => values
+                .iter()
+                .map(|value| {
+                    let n = value.number()?;
+                    if !n.is_finite() {
+                        return Err(Error::value("Invalid preview imported geometry"));
+                    }
+                    Ok(n)
+                })
+                .collect(),
+            None => default
+                .map(|v| v.to_vec())
+                .ok_or_else(|| Error::value("Missing preview imported bounding box")),
+            _ => Err(Error::value("Invalid preview imported geometry array")),
+        }
+    };
+    let bbox: [f64; 4] = array("BBox", None)?
+        .try_into()
+        .map_err(|_| Error::value("Invalid preview imported bounding box length"))?;
+    let matrix = array("Matrix", Some(&[1., 0., 0., 1., 0., 0.]))?
+        .try_into()
+        .map_err(|_| Error::value("Invalid preview imported matrix length"))?;
+    if bbox[2] < bbox[0] || bbox[3] < bbox[1] {
+        return Err(Error::value("Invalid preview imported bounding box order"));
+    }
+    Ok((bbox, matrix))
+}
+
 fn imported_form_operators(
     engine: &PreviewContext<'_>,
     dictionary: &super::parsing::PdfValue,
@@ -856,6 +954,86 @@ fn imported_form_operators(
     remaining: &mut usize,
     images: &mut BTreeMap<String, super::preview_images::PreviewImage>,
     codes: &mut PaintCodes<'_>,
+) -> Result<Vec<String>> {
+    use super::parsing::{PdfValue, octet_string};
+    let (bbox, matrix) = imported_geometry(dictionary)?;
+    // A failed import must not leak selected fonts, collected glyphs, resources
+    // or recursion state into the surrounding page. Work still counts against
+    // the byte budget even when the graphic becomes a placeholder.
+    let mut local_codes = PaintCodes::new(codes.code_widths);
+    local_codes.font = codes.font.clone();
+    local_codes.imported = true;
+    let mut local_images = BTreeMap::new();
+    match imported_form_paint(
+        engine,
+        dictionary,
+        data,
+        &mut active.clone(),
+        remaining,
+        &mut local_images,
+        &mut local_codes,
+        bbox,
+        matrix,
+    ) {
+        Ok(operators) => {
+            if !local_codes.stack.is_empty() {
+                return Err(Error::value("Invalid preview imported graphics stack"));
+            }
+            for (name, image) in local_images {
+                retain_image(images, name, image)?;
+            }
+            for (name, used) in local_codes.codes {
+                codes.codes.entry(name).or_default().extend(used);
+            }
+            Ok(operators)
+        }
+        Err(error)
+            if ((error.message.starts_with("Preview ")
+                || error.message.starts_with("Retained "))
+                && error.message.contains("not implemented"))
+                || error.message.starts_with("Unsupported preview") =>
+        {
+            let label = match dictionary.get("PTEX.FileName") {
+                Some(PdfValue::String(bytes)) => String::from_utf8_lossy(bytes).into_owned(),
+                _ => "Embedded PDF graphic".into(),
+            };
+            let label: String = label
+                .rsplit(['/', '\\'])
+                .next()
+                .unwrap_or(&label)
+                .chars()
+                .take(240)
+                .collect();
+            let message: String = error.message.chars().take(512).collect();
+            Ok(vec![format!(
+                "[{}] [{}] {} {} retexPdfPlaceholder",
+                bbox.iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(" "),
+                matrix
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(" "),
+                octet_string(label.as_bytes()),
+                octet_string(message.as_bytes())
+            )])
+        }
+        Err(error) => Err(error),
+    }
+}
+
+fn imported_form_paint(
+    engine: &PreviewContext<'_>,
+    dictionary: &super::parsing::PdfValue,
+    data: &[u8],
+    active: &mut BTreeSet<usize>,
+    remaining: &mut usize,
+    images: &mut BTreeMap<String, super::preview_images::PreviewImage>,
+    codes: &mut PaintCodes<'_>,
+    bbox: [f64; 4],
+    matrix: [f64; 6],
 ) -> Result<Vec<String>> {
     use super::parsing::PdfValue;
     let document = &engine.backend.document;
@@ -891,29 +1069,6 @@ fn imported_form_operators(
             };
             xobjects.insert(name.clone(), *number as usize);
         }
-    }
-    let array = |key, default: Option<&[f64]>| -> Result<Vec<f64>> {
-        match dictionary.get(key) {
-            Some(PdfValue::Array(values)) => values
-                .iter()
-                .map(|value| {
-                    let n = value.number()?;
-                    if !n.is_finite() {
-                        return Err(Error::value("Invalid preview imported geometry"));
-                    }
-                    Ok(n)
-                })
-                .collect(),
-            None => default
-                .map(|v| v.to_vec())
-                .ok_or_else(|| Error::value("Missing preview imported bounding box")),
-            _ => Err(Error::value("Invalid preview imported geometry array")),
-        }
-    };
-    let bbox = array("BBox", None)?;
-    let matrix = array("Matrix", Some(&[1., 0., 0., 1., 0., 0.]))?;
-    if bbox.len() != 4 || matrix.len() != 6 {
-        return Err(Error::value("Invalid preview imported geometry length"));
     }
     codes.save()?;
     let mut operators = vec![

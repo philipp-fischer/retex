@@ -120,6 +120,8 @@ export class SourceEditor extends EventTarget {
   private switching = false;
   private appearance = new Compartment();
   private darkTheme = false;
+  private wrapping = new Compartment();
+  private wrapLines = true;
   private themeObserver: MutationObserver;
   constructor(
     parent: HTMLElement,
@@ -181,6 +183,7 @@ export class SourceEditor extends EventTarget {
         keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
         StreamLanguage.define(stex),
         this.appearance.of(this.editorTheme()),
+        this.wrapping.of(this.wrapLines ? EditorView.lineWrapping : []),
         this.lock.of(EditorState.readOnly.of(this.locked)),
         EditorView.contentAttributes.of({
           "aria-label": "TeX document",
@@ -282,6 +285,15 @@ export class SourceEditor extends EventTarget {
       this.view.dispatch({
         effects: this.appearance.reconfigure(this.editorTheme()),
       });
+    if (
+      (this.wrapping.get(this.view.state) === EditorView.lineWrapping) !==
+      this.wrapLines
+    )
+      this.view.dispatch({
+        effects: this.wrapping.reconfigure(
+          this.wrapLines ? EditorView.lineWrapping : [],
+        ),
+      });
     this.switching = false;
     this.view.dom.hidden = file.kind !== "text";
     this.view.scrollDOM.scrollTop = valid ? saved.top : 0;
@@ -295,6 +307,16 @@ export class SourceEditor extends EventTarget {
   }
   get value() {
     return this.view.state.doc.toString();
+  }
+  get lineWrapping() {
+    return this.wrapLines;
+  }
+  set lineWrapping(value: boolean) {
+    if (value === this.wrapLines) return;
+    this.wrapLines = value;
+    this.view.dispatch({
+      effects: this.wrapping.reconfigure(value ? EditorView.lineWrapping : []),
+    });
   }
   get selectionStart() {
     return this.view.state.selection.main.from;

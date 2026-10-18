@@ -150,6 +150,7 @@ export function* tokens(source) {
 }
 
 import { decodeSourceMap, SourceMapStore } from "./source-map.js";
+import { pdfPlaceholderQuad, paintPdfPlaceholder } from "./pdf-placeholder.js";
 export class PreviewBaseError extends Error {}
 export class PreviewResourceError extends Error {}
 // Typed byte buffers are constrained by their element type. Legacy JSON scenes
@@ -549,7 +550,8 @@ export class RetainedRenderer {
     const forms = [];
     let glyphCount = 0;
     const glyphs = [],
-      imagePaints = [];
+      imagePaints = [],
+      pdfPlaceholders = [];
     function transform(m = state.ctm) {
       ctx.setTransform(...multiply(base, m));
     }
@@ -692,6 +694,49 @@ export class RetainedRenderer {
           drawing = true;
           skipResources = false;
           break;
+        case "retexPdfPlaceholder": {
+          const [bbox, matrix, label, message] = parameters(4);
+          if (skipResources) break;
+          if (
+            text ||
+            !Array.isArray(bbox) ||
+            bbox.length !== 4 ||
+            !Array.isArray(matrix) ||
+            matrix.length !== 6 ||
+            [...bbox, ...matrix].some(
+              (n) => typeof n !== "number" || !Number.isFinite(n),
+            ) ||
+            bbox[2] < bbox[0] ||
+            bbox[3] < bbox[1] ||
+            !label?.bytes ||
+            !message?.bytes ||
+            label.bytes.length > 4096 ||
+            message.bytes.length > 4096
+          )
+            throw Error("Invalid PDF preview placeholder");
+          if (drawing) {
+            if (pdfPlaceholders.length >= 4096)
+              throw Error("PDF preview placeholder budget exceeded");
+            const quad = pdfPlaceholderQuad(bbox, multiply(state.ctm, matrix));
+            if (quad.some((point) => point.some((n) => !Number.isFinite(n))))
+              throw Error("Invalid PDF preview placeholder transform");
+            const decoder = new TextDecoder();
+            const warning = {
+              quad,
+              label: decoder.decode(new Uint8Array(label.bytes)),
+              message: decoder.decode(new Uint8Array(message.bytes)),
+            };
+            paintPdfPlaceholder(
+              ctx,
+              quad,
+              base,
+              warning.label,
+              warning.message,
+            );
+            pdfPlaceholders.push(warning);
+          }
+          break;
+        }
         case "retexImage": {
           const [name] = parameters(1);
           if (skipResources) break;
@@ -1028,6 +1073,7 @@ export class RetainedRenderer {
       canvas,
       glyphs,
       imagePaints,
+      pdfPlaceholders,
       size,
       page,
       fonts,

@@ -21,8 +21,10 @@ content has no useful source target.
 
 Diagnostics appear beside the editor and in the preview when a location is known.
 The workspace supports resizable panes, zoom, light/dark themes and narrow screens.
-Drag the preview with the hand cursor to pan; ordinary clicks still navigate to
-source. Dark-mode source highlighting uses CodeMirror's One Dark palette, and
+Source word wrap is on by default; the icon beside the encoding selector toggles
+it and remembers the choice. Mapped preview glyphs show a text cursor, with a hand
+elsewhere. Both support dragging to pan and ordinary clicks to navigate to source.
+Dark-mode source highlighting uses CodeMirror's One Dark palette, and
 selected source text remains visible above the faint current-line highlight.
 **Cancel** stops the current job. **Download PDF** uses completed output rather
 than capturing the preview canvas.
@@ -67,6 +69,9 @@ kernel or unsupported engine feature can still fail after a successful download.
 
 Rendering supports physical font outlines, rules, transforms, clipping, colors,
 PNG/JPEG images, PDF forms and supported graphics imported from PDF pages.
+Known unsupported features in imported PDF graphics display a warning placeholder
+at the graphic's original size and position. The rest of the page stays visible,
+and PDF export preserves the original graphic.
 The Canvas preview and PDF writer are separate outputs; unsupported preview
 painting can coexist with a valid PDF export.
 

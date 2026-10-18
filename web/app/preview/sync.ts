@@ -10,6 +10,7 @@ import {
   PhysicalSourceIndex,
   SpatialIndex,
   validSourceMap,
+  contains,
   type MapItem,
   type SourceMap,
   type TextRange,
@@ -182,16 +183,51 @@ export class SourceSync {
       );
     window.addEventListener("resize", () => this.schedule());
     preview.addEventListener("click", (event) => this.click(event));
-    preview.addEventListener(
+    viewport.addEventListener(
       "pointermove",
       (event) => {
-        const warning = this.hits(event.clientX, event.clientY).find(
-          (hit) => hit.item.warning,
-        )?.item.warning;
+        const hits = this.hits(event.clientX, event.clientY);
+        let warning = hits.find((hit) => hit.item.warning)?.item.warning;
+        if (!warning) {
+          for (const painted of this.renderer.pages.values()) {
+            if (!painted.pdfPlaceholders?.length) continue;
+            const rect = (
+              painted.presentation?.underlay || painted.canvas
+            ).getBoundingClientRect();
+            if (!(rect.width > 0 && rect.height > 0)) continue;
+            const x =
+              ((event.clientX - rect.left) / rect.width) *
+              painted.page.width_bp;
+            const y =
+              (1 - (event.clientY - rect.top) / rect.height) *
+              painted.page.height_bp;
+            const placeholder = painted.pdfPlaceholders.find(
+              (p: { quad: number[][] }) => contains(p.quad, x, y),
+            );
+            if (placeholder) {
+              warning = `${placeholder.label}: ${placeholder.message}`;
+              break;
+            }
+          }
+        }
         preview.title = warning || "";
+        const glyph = hits.some(({ layer, item }) => {
+          if (item.kind !== "glyph") return false;
+          const navigation = this.navigationRanges(layer, item);
+          const range = clusterBounds(
+            navigation.ranges,
+            navigation.invocation ? 1 : item.origins.length,
+          );
+          return !!range && this.navigable(range.file);
+        });
+        viewport.dataset.glyphHover = String(glyph);
       },
       { passive: true },
     );
+    viewport.addEventListener("pointerleave", () => {
+      delete viewport.dataset.glyphHover;
+      preview.title = "";
+    });
   }
   register(revision: number, reset = false) {
     this.latest = revision;

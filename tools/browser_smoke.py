@@ -63,7 +63,7 @@ def scroll_preview_page(page, number):
 
 
 def check_page_error(page, work, report):
-    """A preview limitation must stay on its page and not prevent PDF export."""
+    """Unsupported PDF graphics keep their bounds and the surrounding page."""
     previous = page.evaluate("editorProbe.revision")
     page.locator("#project-file").set_input_files({
         "name": "transparency.pdf", "mimeType": "application/pdf", "buffer": transparency_pdf(),
@@ -71,8 +71,7 @@ def check_page_error(page, work, report):
     page.wait_for_function("r => editorProbe.revision > r", arg=previous)
     page.wait_for_function(SETTLED, timeout=180000)
     source = "\\documentclass{article}\n\\usepackage{graphicx}\n\\begin{document}\nFirst page.\\newpage\nSecond page. FIGURE\\newpage\nThird page.\\end{document}\n"
-    # Cover both a new empty page slot and a previously painted page that fails
-    # after an edit. HTML appended inside a canvas would not be displayed.
+    # Cover adding, removing and restoring a graphic with unsupported PDF paint.
     for include_figure in [True, False, True]:
         previous = page.evaluate("editorProbe.revision")
         figure = "\\includegraphics{transparency.pdf}" if include_figure else ""
@@ -81,29 +80,30 @@ def check_page_error(page, work, report):
         # Toolbar presentation deliberately retains the previous state briefly
         # during typing. Wait for this revision's actual engine completion too.
         page.wait_for_function("editorProbe.settlementMeasurements.some(m => m.revision === editorProbe.revision)", timeout=180000)
-        # A valid PDF can coexist with a preview failure on a visible page.
+        # Graphic placeholders still allow the surrounding page to settle.
         page.wait_for_function(COMPILED, timeout=180000)
-        slot = page.locator('#preview > [data-page="2"]')
         scroll_preview_page(page, 2)
+        page.wait_for_function("editorProbe.renderer.pages.get(2)?.revision === editorProbe.revision")
+        assert page.locator(".preview-page-error").count() == 0
         if not include_figure:
-            page.locator('#preview > canvas[data-page="2"]').wait_for()
-            assert page.locator(".preview-page-error").count() == 0
+            assert page.evaluate("editorProbe.renderer.pages.get(2).pdfPlaceholders.length") == 0
             continue
-        note = slot.locator(".preview-page-error")
-        note.wait_for()
-        assert "Group" in note.inner_text()
-        assert page.evaluate("editorProbe.renderer.pages.has(2)") is False
+        page.wait_for_function("editorProbe.renderer.pages.get(2)?.pdfPlaceholders.length === 1")
+        warning = page.evaluate("editorProbe.renderer.pages.get(2).pdfPlaceholders[0]")
+        assert "Group" in warning["message"]
+        assert warning["label"] == "transparency.pdf"
+        assert page.evaluate("editorProbe.renderer.pages.get(2).glyphs.length") > 0
         for zoom in [False, True]:
             if zoom:
-                width = slot.evaluate("el => el.getBoundingClientRect().width")
+                width = page.evaluate("editorProbe.renderer.pages.get(2).size.width")
                 page.locator("#zoom-out").click()
-                page.wait_for_function("width => document.querySelector('#preview > [data-page=\"2\"]').getBoundingClientRect().width !== width", arg=width)
-            bounds = note.evaluate("el => { const n = el.getBoundingClientRect(), p = el.parentElement.getBoundingClientRect(); return {inside: n.left >= p.left && n.top >= p.top && n.right <= p.right && n.bottom <= p.bottom, parent: el.offsetParent === el.parentElement}; }")
-            assert bounds == {"inside": True, "parent": True}, bounds
+                page.wait_for_function("width => editorProbe.renderer.pages.get(2).size.width !== width", arg=width)
+            quad = page.evaluate("editorProbe.renderer.pages.get(2).pdfPlaceholders[0].quad")
+            assert abs(max(p[0] for p in quad) - min(p[0] for p in quad) - 100) < .1
+            assert abs(max(p[1] for p in quad) - min(p[1] for p in quad) - 60) < .1
         assert page.locator("#export").is_visible()
         assert page.locator(".cm-content").is_visible()
-    # Export must work while the failed page itself is visible, after the typing
-    # grace period ends, even though its preview cannot become current.
+    # The original PDF graphic remains in exported output.
     page.wait_for_function(COMPILED, timeout=10000)
     with page.expect_download(timeout=30000) as event:
         page.locator("#export").click()
@@ -114,6 +114,11 @@ def check_page_error(page, work, report):
     scroll_preview_page(page, 3)
     page.wait_for_function("document.querySelector('#preview > canvas[data-page=\"3\"]')?.dataset.revision === String(editorProbe.revision)")
     assert page.locator('#preview > canvas[data-page="1"]').count() == 1
+    report["pdf_placeholder"] = True
+    # Keep coverage for whole-page failures unrelated to imported PDF graphics.
+    page.evaluate("editorProbe.renderer.pageError(3, 'Preview unavailable: test renderer limitation')")
+    bounds = page.evaluate("() => { const el = document.querySelector('.preview-page-error'), n = el.getBoundingClientRect(), p = el.parentElement.getBoundingClientRect(); return {inside: n.left >= p.left && n.top >= p.top && n.right <= p.right && n.bottom <= p.bottom, parent: el.offsetParent === el.parentElement}; }")
+    assert bounds == {"inside": True, "parent": True}, bounds
     report["page_error_scoped"] = True
 
 
@@ -157,6 +162,14 @@ def main():
             page.context.route("**/*", route_request)
             page.goto(report["url"])
             page.wait_for_function(SETTLED, timeout=180000)
+            assert page.locator("#source-wrap").get_attribute("aria-pressed") == "true"
+            assert page.evaluate("editorProbe.editor.view.lineWrapping") is True
+            revision = page.evaluate("editorProbe.revision")
+            page.locator("#source-wrap").click()
+            page.wait_for_function("!editorProbe.editor.view.lineWrapping")
+            page.locator("#source-wrap").click()
+            page.wait_for_function("editorProbe.editor.view.lineWrapping")
+            assert page.evaluate("editorProbe.revision") == revision
             # cancel is intentionally outside the base bundle. Pasting a new
             # declaration must discover it on the resident source-edit path.
             source = "\\documentclass{article}\n\\usepackage{amsmath,xcolor,cancel}\n\\begin{document}\n\\section{Browser test}\nLive typesetting: $e^{i\\pi}+1=0$.\n\\textcolor{blue}{Local compilation.} $\\cancel{x}+y$\n\\end{document}\n"
